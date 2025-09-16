@@ -5,32 +5,49 @@ using TMPro;
 public class GrowthRate : MonoBehaviour
 {
     [Header("Radius (nm)")]
-    public TextMeshProUGUI radius;
+    string radius;
+    // public TextMeshProUGUI radius;
 
     [Header("Temperature (C)")]
-    public TextMeshProUGUI temperature;
+    string temperature;
 
     [Header("Required Height (nm)")]
-    public TextMeshProUGUI requied_height;
+    string requied_height;
 
     public GameObject nanoWire;
     Vector3 nanoWireHeight;
 
-    public float simSpeed = 1e5f;
+    public float simSpeed = 1e7f;
 
     private Parameters p;
 
-    private bool growth_enabled = true;
+    private bool growth_enabled = false;
+
+    public GameObject catalyst;
+    public GameObject catalyst_pivot;
+
+    double total_time;
+
+    string nanoWire_radius;
+
+    public Setting_Parameter setting_parameter;
+
 
     void Start()
     {
         p = new Parameters();
         nanoWireHeight = nanoWire.transform.localScale;
+
+        setting_parameter = FindFirstObjectByType<Setting_Parameter>();
     }
 
     void Update()
     {
-        if (radius != null && double.TryParse(radius.text, out double rNm) && growth_enabled)
+        radius = setting_parameter.radius.text;
+        temperature = setting_parameter.temperature.text;
+        requied_height = setting_parameter.requied_height.text;
+
+        if (radius != null && double.TryParse(radius, out double rNm) && growth_enabled)
         {
             double mPerSec = ComputeGrowthRate(p, rNm);
             double nmPerSec = mPerSec * 1e9;
@@ -39,15 +56,20 @@ public class GrowthRate : MonoBehaviour
             nanoWireHeight.y += (float)mPerSec * Time.unscaledDeltaTime * simSpeed;
 
             nanoWire.transform.localScale = nanoWireHeight;
+            double.TryParse(requied_height, out double height);
+            total_time = height / (mPerSec * 3600);
+            Debug.Log(total_time);
         }
 
-        if (requied_height != null && double.TryParse(requied_height.text, out double targetNm))
+        if (requied_height != null && double.TryParse(requied_height, out double targetNm))
         {
             if (nanoWireHeight.y * 1e-9 >= targetNm * 1e-9)
             {
                 growth_enabled = false;
             }
         }
+
+        catalyst.transform.position = catalyst_pivot.transform.position;
     }
 
     public static double GetPrefactor(double N0, double v, double omega, double C0, double QD, double k, double T, double C_C0)
