@@ -5,6 +5,26 @@ TagManager:
   serializedVersion: 3
   tags:
   - Anchor
+  - QDSUISection
+  - QDSUIIcon
+  - QDSUIBackplateGradient
+  - QDSUISharedThemeColor
+  - QDSUITextSecondaryColor
+  - QDSUIPrimaryButton
+  - QDSUIToggleBorderlessButton
+  - QDSUIToggleButton
+  - QDSUITextSecondaryInvertedColor
+  - QDSUIAccentColor
+  - QDSUITextInvertedColor
+  - QDSUITooltip
+  - QDSUIDestructiveButton
+  - QDSUISecondaryButton
+  - QDSUIToggleCheckboxRadio
+  - QDSUIBorderlessButton
+  - QDSUIToggleSwitch
+  - QDSUITextInputField
+  - NanoWire
+  - NanoWireTip
   layers:
   - Default
   - TransparentFX

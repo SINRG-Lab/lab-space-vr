@@ -34,6 +34,12 @@ public class Setting_Parameter : MonoBehaviour
     [Header("NanoWire")]
     public GameObject NanoWire;
 
+    public bool growth_enabled = false;
+
+    [Range(1f, 10f)]
+    public float simSpeedMultiplier = 1f;
+
+    public float simSpeed = 1e7f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -77,7 +83,13 @@ public class Setting_Parameter : MonoBehaviour
         float z = Random.Range(subB.min.z + ext.z, subB.max.z - ext.z);
         float y = subB.max.y;
 
-        go.transform.SetPositionAndRotation(new Vector3(x, y, z), Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
+        go.transform.SetPositionAndRotation(new Vector3(x, y, z), Quaternion.Euler(Random.Range(-15f, 15f), 0f, Random.Range(-15f, 15f)));
         return go;
+    }
+
+    public void ToggleGrowthEnabled()
+    {
+        growth_enabled = !growth_enabled;
+        Debug.Log($"growth_enabled = {growth_enabled}");
     }
 }
