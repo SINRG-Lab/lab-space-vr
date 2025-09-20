@@ -9,9 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1091792031176846232}
+  - component: {fileID: 5802413207195661986}
+  - component: {fileID: 2835591945599629759}
   m_Layer: 0
   m_Name: NanoWire
-  m_TagString: Untagged
+  m_TagString: NanoWire
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -33,6 +35,56 @@ Transform:
   - {fileID: 4023622824056658699}
   m_Father: {fileID: 8012680803105296590}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &5802413207195661986
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473961723196338428}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!136 &2835591945599629759
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473961723196338428}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.00544915
+  m_Height: 0.019830063
+  m_Direction: 0
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3294757992263241530
 GameObject:
   m_ObjectHideFlags: 0
@@ -111,10 +163,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nanoWire: {fileID: 1473961723196338428}
-  simSpeed: 100000
   catalyst: {fileID: 6990005878149016935}
   catalyst_pivot: {fileID: 3294757992263241530}
   setting_parameter: {fileID: 0}
+  curr_nano_growth_enabled: 1
 --- !u!1 &6990005878149016935
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,9 +176,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4154835531314851772}
+  - component: {fileID: 740572736104711411}
+  - component: {fileID: 4890732560798223870}
+  - component: {fileID: 3264693521134791171}
   m_Layer: 0
-  m_Name: NanoWireTipParent
-  m_TagString: Untagged
+  m_Name: NanoWireParentTip
+  m_TagString: NanoWireTip
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -147,6 +202,69 @@ Transform:
   - {fileID: 7749324487929429970}
   m_Father: {fileID: 8012680803105296590}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &740572736104711411
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6990005878149016935}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!136 &4890732560798223870
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6990005878149016935}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.003626287
+  m_Height: 0.007252574
+  m_Direction: 1
+  m_Center: {x: -0.00012540072, y: 0.009548396, z: -0.000039458275}
+--- !u!114 &3264693521134791171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6990005878149016935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beb7f2053010a48a0862ed34cc59e5c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  growthRate: {fileID: 6666351137005497271}
 --- !u!1 &7111325580256789524
 GameObject:
   m_ObjectHideFlags: 0

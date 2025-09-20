@@ -1,4 +1,5 @@
 using UnityEngine;
+using Random = UnityEngine.Random;
 using System;
 using TMPro;
 
@@ -17,11 +18,9 @@ public class GrowthRate : MonoBehaviour
     public GameObject nanoWire;
     Vector3 nanoWireHeight;
 
-    public float simSpeed = 1e7f;
+    float simSpeed;
 
     private Parameters p;
-
-    private bool growth_enabled = false;
 
     public GameObject catalyst;
     public GameObject catalyst_pivot;
@@ -31,6 +30,8 @@ public class GrowthRate : MonoBehaviour
     string nanoWire_radius;
 
     public Setting_Parameter setting_parameter;
+
+    public bool curr_nano_growth_enabled = true;
 
 
     void Start()
@@ -46,8 +47,11 @@ public class GrowthRate : MonoBehaviour
         radius = setting_parameter.radius.text;
         temperature = setting_parameter.temperature.text;
         requied_height = setting_parameter.requied_height.text;
+        simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
 
-        if (radius != null && double.TryParse(radius, out double rNm) && growth_enabled)
+        Debug.Log(curr_nano_growth_enabled);
+
+        if (radius != null && double.TryParse(radius, out double rNm) && setting_parameter.growth_enabled && curr_nano_growth_enabled)
         {
             double mPerSec = ComputeGrowthRate(p, rNm);
             double nmPerSec = mPerSec * 1e9;
@@ -65,7 +69,8 @@ public class GrowthRate : MonoBehaviour
         {
             if (nanoWireHeight.y * 1e-9 >= targetNm * 1e-9)
             {
-                growth_enabled = false;
+                setting_parameter.growth_enabled = false;
+                curr_nano_growth_enabled = false;
             }
         }
 
