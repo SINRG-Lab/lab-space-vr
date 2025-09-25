@@ -81,7 +81,7 @@ public class Setting_Parameter : MonoBehaviour
         float z = Random.Range(subB.min.z + ext.z, subB.max.z - ext.z);
         float y = subB.max.y;
 
-        go.transform.SetPositionAndRotation(new Vector3(x, y, z), Quaternion.Euler(Random.Range(-15f, 15f), 0f, Random.Range(-15f, 15f)));
+        go.transform.SetPositionAndRotation(new Vector3(x, y, z), Quaternion.Euler(Random.Range(-10f, 10f), 0f, Random.Range(-10f, 10f)));
         return go;
     }
 
