@@ -25,6 +25,7 @@ TagManager:
   - QDSUITextInputField
   - NanoWire
   - NanoWireTip
+  - ScreenCamera
   layers:
   - Default
   - TransparentFX
