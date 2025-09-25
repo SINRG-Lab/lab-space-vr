@@ -67,7 +67,7 @@ public class GrowthRate : MonoBehaviour
 
         if (requied_height != null && double.TryParse(requied_height, out double targetNm))
         {
-            if (nanoWireHeight.y * 1e-9 >= targetNm * 1e-9)
+            if (nanoWireHeight.y >= targetNm * 1e-1)
             {
                 setting_parameter.growth_enabled = false;
                 curr_nano_growth_enabled = false;
