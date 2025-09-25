@@ -19,8 +19,6 @@ public class Setting_Parameter : MonoBehaviour
     public GrowthRate growth_rate;
 
     [Header("Substrate")]
-    public float substrate_length = 0.09f;
-    public float substrate_width = 0.09f;
     public GameObject Substrate;
     private Vector3 substrate_scale;
 
@@ -53,7 +51,7 @@ public class Setting_Parameter : MonoBehaviour
     void Update()
     {
         Debug.Log(float.Parse(substrate_dimension.text));
-        Substrate.transform.localScale = new Vector3(float.Parse(substrate_dimension.text), 0.005f, float.Parse(substrate_dimension.text));
+        Substrate.transform.localScale = new Vector3(float.Parse(substrate_dimension.text), 0.005f, 0.14f);
     }
 
     void SpawnCatalyst(){
