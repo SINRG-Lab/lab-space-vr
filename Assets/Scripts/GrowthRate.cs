@@ -122,17 +122,17 @@ public class GrowthRate : MonoBehaviour
 }
 
 public class Parameters
-    {
-        // Default values — replace with yours
-        public double N0_number_of_atomic_sites = 1e19;     // m^-2
-        public double v_vibrational_frequency = 1e13;       // s^-1
-        public double omega_atomic_volume = 2e-29;          // m^3/atom
-        public double QD_activation_energy = 10.0;           // dimensionless "in kT" if that's what you intend
-        public double T_temperature = 900.0 + 273.15;                // Kelvin if that's what you intend
-        public double C_C0_supersaturation = 1.4;           // C/C0 (must be > 1)
-        public double x_edge_energy = 1e-10;                // J m^-1
-        public double a_automic_size = 2.7e-10;             // m
-        public double k_boltzmann_constant = 1.380649e-23;  // J/K
-        public double r_radius = 100 * 1e-8;                      // nm (note: your Python uses this as-is)
-        public double C0 = 1.0/2e-29;                             // baseline concentration (set appropriately)
-    }
+{
+    // Default values — replace with yours
+    public double N0_number_of_atomic_sites = 1e19;     // m^-2
+    public double v_vibrational_frequency = 1e13;       // s^-1
+    public double omega_atomic_volume = 2e-29;          // m^3/atom
+    public double QD_activation_energy = 10.0;           // dimensionless "in kT" if that's what you intend
+    public double T_temperature = 900.0 + 273.15;                // Kelvin if that's what you intend
+    public double C_C0_supersaturation = 1.4;           // C/C0 (must be > 1)
+    public double x_edge_energy = 1e-10;                // J m^-1
+    public double a_automic_size = 2.7e-10;             // m
+    public double k_boltzmann_constant = 1.380649e-23;  // J/K
+    public double r_radius = 100 * 1e-8;                      // nm (note: your Python uses this as-is)
+    public double C0 = 1.0/2e-29;                             // baseline concentration (set appropriately)
+}
