@@ -133,6 +133,6 @@ public class Parameters
     public double x_edge_energy = 1e-10;                // J m^-1
     public double a_automic_size = 2.7e-10;             // m
     public double k_boltzmann_constant = 1.380649e-23;  // J/K
-    public double r_radius = 100 * 1e-8;                      // nm (note: your Python uses this as-is)
-    public double C0 = 1.0/2e-29;                             // baseline concentration (set appropriately)
+    public double r_radius = 100 * 1e-8;                      // m 
+    public double C0 = 1.0/2e-29;                             // baseline concentration 
 }
