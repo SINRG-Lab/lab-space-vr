@@ -36,7 +36,7 @@ public class Parameters_P
     public double K7 = 1.5; // theta = 90
     public double P = 133; // Pa
     public double Css_over_C0 = 1.1;
-    public double P_over_P0 = 1.10;
+    public double P_over_P0 = 1.3;
     public double gamma = 1.5;
     public double R = 5e-8;
     public double Kconst = 1.380649e-23;
