@@ -49,7 +49,7 @@ public class GrowthRate : MonoBehaviour
         requied_height = setting_parameter.requied_height.text;
         simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
 
-        Debug.Log(curr_nano_growth_enabled);
+        // Debug.Log(curr_nano_growth_enabled);
 
         if (radius != null && double.TryParse(radius, out double rNm) && setting_parameter.growth_enabled && curr_nano_growth_enabled)
         {
