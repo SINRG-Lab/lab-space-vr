@@ -20520,17 +20520,17 @@ MonoBehaviour:
   _scaleConstraints:
     ConstraintsAreRelative: 1
     XAxis:
-      ConstrainAxis: 0
+      ConstrainAxis: 1
       AxisRange:
         Min: 1
         Max: 1
     YAxis:
-      ConstrainAxis: 0
+      ConstrainAxis: 1
       AxisRange:
         Min: 1
         Max: 1
     ZAxis:
-      ConstrainAxis: 0
+      ConstrainAxis: 1
       AxisRange:
         Min: 1
         Max: 1
