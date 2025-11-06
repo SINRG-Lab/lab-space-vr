@@ -7545,6 +7545,7 @@ GameObject:
   - component: {fileID: 363593907}
   - component: {fileID: 363593909}
   - component: {fileID: 363593908}
+  - component: {fileID: 363593910}
   m_Layer: 5
   m_Name: Zone2_Temp_Increase_Button
   m_TagString: Untagged
@@ -7615,7 +7616,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 363593910}
+        m_TargetAssemblyTypeName: TempButtonFunction, Assembly-CSharp
+        m_MethodName: ClickOnce
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &363593909
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7624,6 +7637,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 363593906}
   m_CullTransparentMesh: 1
+--- !u!114 &363593910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 363593906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c2af2b509f141e9a39545129a90648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
+  valueText: {fileID: 1300613713}
+  isIncrement: 1
+  step: 5
+  minValue: 0
+  maxValue: 1000
+  longPressDelay: 0.5
+  repeatInterval: 0.07
 --- !u!1 &363959133
 GameObject:
   m_ObjectHideFlags: 0
@@ -10938,6 +10970,7 @@ GameObject:
   - component: {fileID: 543072566}
   - component: {fileID: 543072569}
   - component: {fileID: 543072567}
+  - component: {fileID: 543072570}
   m_Layer: 5
   m_Name: Zone1_Temp_Increase_Button
   m_TagString: Untagged
@@ -11008,7 +11041,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 543072570}
+        m_TargetAssemblyTypeName: TempButtonFunction, Assembly-CSharp
+        m_MethodName: ClickOnce
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &543072569
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -11017,6 +11062,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 543072565}
   m_CullTransparentMesh: 1
+--- !u!114 &543072570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543072565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c2af2b509f141e9a39545129a90648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
+  valueText: {fileID: 939959308}
+  isIncrement: 1
+  step: 5
+  minValue: 0
+  maxValue: 1000
+  longPressDelay: 0.5
+  repeatInterval: 0.07
 --- !u!1 &543502470
 GameObject:
   m_ObjectHideFlags: 0
@@ -15950,15 +16014,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 720784333}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -1.424, y: 1.136, z: 1.775}
+  m_LocalRotation: {x: -0.5, y: -0.5, z: 0.5, w: 0.5}
+  m_LocalPosition: {x: -1.513, y: 0.912, z: 2.356}
   m_LocalScale: {x: 0.015, y: 1.1627891, z: 0.015}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1970431464}
   - {fileID: 2007760279}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 90}
 --- !u!114 &720784341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18195,6 +18259,7 @@ GameObject:
   - component: {fileID: 849039267}
   - component: {fileID: 849039269}
   - component: {fileID: 849039268}
+  - component: {fileID: 849039270}
   m_Layer: 5
   m_Name: 'Zone3_Temp_Increase_Button '
   m_TagString: Untagged
@@ -18265,7 +18330,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 849039270}
+        m_TargetAssemblyTypeName: TempButtonFunction, Assembly-CSharp
+        m_MethodName: ClickOnce
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &849039269
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -18274,6 +18351,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 849039266}
   m_CullTransparentMesh: 1
+--- !u!114 &849039270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849039266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c2af2b509f141e9a39545129a90648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
+  valueText: {fileID: 151276526}
+  isIncrement: 1
+  step: 5
+  minValue: 0
+  maxValue: 1000
+  longPressDelay: 0.5
+  repeatInterval: 0.07
 --- !u!1 &855078049
 GameObject:
   m_ObjectHideFlags: 0
@@ -28630,7 +28726,7 @@ Transform:
   m_GameObject: {fileID: 1164920828}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.746, y: 1.3773, z: 2.061}
+  m_LocalPosition: {x: -1.601, y: 0.908, z: 2.147}
   m_LocalScale: {x: 0.085503004, y: 0.00642392, z: 0.04795266}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -34644,6 +34740,7 @@ GameObject:
   - component: {fileID: 1483838566}
   - component: {fileID: 1483838568}
   - component: {fileID: 1483838567}
+  - component: {fileID: 1483838569}
   m_Layer: 5
   m_Name: 'Zone1_Temp_Decrease_Button '
   m_TagString: Untagged
@@ -34714,7 +34811,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1483838569}
+        m_TargetAssemblyTypeName: TempButtonFunction, Assembly-CSharp
+        m_MethodName: ClickOnce
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &1483838568
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -34723,6 +34832,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1483838565}
   m_CullTransparentMesh: 1
+--- !u!114 &1483838569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483838565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c2af2b509f141e9a39545129a90648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
+  valueText: {fileID: 939959308}
+  isIncrement: 0
+  step: 5
+  minValue: 0
+  maxValue: 1000
+  longPressDelay: 0.5
+  repeatInterval: 0.07
 --- !u!1 &1486894275
 GameObject:
   m_ObjectHideFlags: 0
@@ -37019,6 +37147,7 @@ GameObject:
   - component: {fileID: 1596728774}
   - component: {fileID: 1596728776}
   - component: {fileID: 1596728775}
+  - component: {fileID: 1596728777}
   m_Layer: 5
   m_Name: Zone2_Temp_Decrease_Button
   m_TagString: Untagged
@@ -37089,7 +37218,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 849039270}
+        m_TargetAssemblyTypeName: TempButtonFunction, Assembly-CSharp
+        m_MethodName: ClickOnce
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &1596728776
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -37098,6 +37239,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1596728773}
   m_CullTransparentMesh: 1
+--- !u!114 &1596728777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1596728773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c2af2b509f141e9a39545129a90648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
+  valueText: {fileID: 1300613713}
+  isIncrement: 0
+  step: 5
+  minValue: 0
+  maxValue: 1000
+  longPressDelay: 0.5
+  repeatInterval: 0.07
 --- !u!1 &1600100015
 GameObject:
   m_ObjectHideFlags: 0
@@ -43130,6 +43290,7 @@ GameObject:
   - component: {fileID: 1950863896}
   - component: {fileID: 1950863898}
   - component: {fileID: 1950863897}
+  - component: {fileID: 1950863899}
   m_Layer: 5
   m_Name: Zone3_Temp_Decrease_Button
   m_TagString: Untagged
@@ -43200,7 +43361,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 849039270}
+        m_TargetAssemblyTypeName: TempButtonFunction, Assembly-CSharp
+        m_MethodName: ClickOnce
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &1950863898
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -43209,6 +43382,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1950863895}
   m_CullTransparentMesh: 1
+--- !u!114 &1950863899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950863895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c2af2b509f141e9a39545129a90648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
+  valueText: {fileID: 151276526}
+  isIncrement: 0
+  step: 5
+  minValue: 0
+  maxValue: 1000
+  longPressDelay: 0.5
+  repeatInterval: 0.07
 --- !u!1 &1953426305
 GameObject:
   m_ObjectHideFlags: 0
