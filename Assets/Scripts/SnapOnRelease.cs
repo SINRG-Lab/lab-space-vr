@@ -83,11 +83,24 @@ public class SnapOnRelease : MonoBehaviour
         rb.WakeUp();
 
         pendingSnap = false;
+
+        StartCoroutine(ApplyConstraintsDelayed(frames: 5, seconds:2));
     }
 
-    void LateUpdate()
+    System.Collections.IEnumerator ApplyConstraintsDelayed(int frames = 1, float seconds = 0f)
     {
+        if (seconds > 0f) yield return new WaitForSeconds(seconds);
+        else
+        {
+            for (int i = 0; i < frames; i++)
+                yield return new WaitForFixedUpdate();
+        }
+
         bool isGrabbed = grabbable.SelectingPointsCount > 0;
-        rb.constraints = (isGrabbed && !pendingSnap) ? RigidbodyConstraints.None : (RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation);
+        rb.constraints = isGrabbed
+            ? RigidbodyConstraints.None
+            : (RigidbodyConstraints.FreezePositionY |
+            RigidbodyConstraints.FreezePositionZ |
+            RigidbodyConstraints.FreezeRotation);
     }
 }
