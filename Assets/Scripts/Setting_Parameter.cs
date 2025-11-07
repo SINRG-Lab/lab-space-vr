@@ -7,9 +7,6 @@ public class Setting_Parameter : MonoBehaviour
     [Header("Radius (nm)")]
     public TextMeshProUGUI radius;
 
-    [Header("Temperature (C)")]
-    public TextMeshProUGUI temperature;
-
     [Header("Required Height (nm)")]
     public TextMeshProUGUI requied_height;
 

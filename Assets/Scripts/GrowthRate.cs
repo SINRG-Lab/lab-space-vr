@@ -45,7 +45,6 @@ public class GrowthRate : MonoBehaviour
     void Update()
     {
         radius = setting_parameter.radius.text;
-        temperature = setting_parameter.temperature.text;
         requied_height = setting_parameter.requied_height.text;
         simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
 
