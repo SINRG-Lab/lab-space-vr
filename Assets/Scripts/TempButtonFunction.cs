@@ -53,8 +53,8 @@ public class TempButtonFunction : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         if (!valueText) return;
 
-        if (!int.TryParse(valueText.text, out int val))
-            val = 0;
+        if (!float.TryParse(valueText.text, out float val))
+            val = 0f;
 
         val += isIncrement ? step : -step;
         val = Mathf.Clamp(val, minValue, maxValue);

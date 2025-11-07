@@ -27647,8 +27647,8 @@ GameObject:
   - component: {fileID: 1093210766}
   - component: {fileID: 1093210765}
   - component: {fileID: 1093210764}
+  - component: {fileID: 1093210763}
   - component: {fileID: 1093210767}
-  - component: {fileID: 1093210768}
   m_Layer: 0
   m_Name: MainPowerParent
   m_TagString: Untagged
@@ -27673,6 +27673,41 @@ Transform:
   - {fileID: 7332993113773549219}
   m_Father: {fileID: 543450652193724146}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1093210763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093210761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3253870eeb144463a8ddf0bd1f732c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KnobOnOff
+  grabbable: {fileID: 1093210764}
+  localAxis: {x: 1, y: 0, z: 0}
+  offAngle: 30
+  onAngle: -30
+  actuationAngle: 20
+  holdTime: 0.25
+  snapWhenSet: 1
+  OnStateChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 9014806219902833628}
+        m_TargetAssemblyTypeName: UnityEngine.MeshRenderer, UnityEngine
+        m_MethodName: set_material
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Material, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  clickAudio: {fileID: 0}
 --- !u!114 &1093210764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27690,7 +27725,7 @@ MonoBehaviour:
   _forwardElement: {fileID: 0}
   _oneGrabTransformer: {fileID: 1093210767}
   _twoGrabTransformer: {fileID: 0}
-  _targetTransform: {fileID: 1093210762}
+  _targetTransform: {fileID: 7332993113773549219}
   _maxGrabPoints: -1
   _rigidbody: {fileID: 1093210765}
   _kinematicWhileSelected: 1
@@ -27774,10 +27809,10 @@ MonoBehaviour:
         Max: 0
   _rotationConstraints:
     XAxis:
-      ConstrainAxis: 1
+      ConstrainAxis: 0
       AxisRange:
-        Min: -35
-        Max: 35
+        Min: 0
+        Max: 0
     YAxis:
       ConstrainAxis: 1
       AxisRange:
@@ -27806,53 +27841,6 @@ MonoBehaviour:
         Min: 1
         Max: 1
   _resetScaleResponsivenessOnConstraintOvershoot: 0
---- !u!114 &1093210768
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1093210761}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68c02d608f40548fa84b64801a6dbaa6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AngleTrigger
-  axis: 0
-  positiveTarget: 75
-  negativeTarget: 25
-  tolerance: 2
-  captureNeutralOnAwake: 1
-  OnPositiveHit:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5846725440022664248}
-        m_TargetAssemblyTypeName: UnityEngine.MeshRenderer, UnityEngine
-        m_MethodName: set_material
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 7390553463975553142, guid: 775c378d46f2340cc86e60e6eb08400a, type: 3}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Material, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnNegativeHit:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5846725440022664248}
-        m_TargetAssemblyTypeName: UnityEngine.MeshRenderer, UnityEngine
-        m_MethodName: set_material
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 2100000, guid: e42270a11c28f4744b73a18278e4ef33, type: 2}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Material, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &1098043204
 GameObject:
   m_ObjectHideFlags: 0
