@@ -27819,9 +27819,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AngleTrigger
   axis: 0
-  positiveTarget: 75
-  negativeTarget: 25
+  target: 30
   tolerance: 2
+  flipSign: 0
   captureNeutralOnAwake: 1
   OnPositiveHit:
     m_PersistentCalls:
@@ -27831,7 +27831,7 @@ MonoBehaviour:
         m_MethodName: set_material
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 7390553463975553142, guid: 775c378d46f2340cc86e60e6eb08400a, type: 3}
+          m_ObjectArgument: {fileID: -5081792898505675300, guid: 271d4e94853934f938a0204640c15fb2, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Material, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0

@@ -5,67 +5,67 @@ public class AngleTrigger : MonoBehaviour
 {
     public enum Axis { X, Y, Z }
 
-    [Header("Which local axis to read (matches Inspector)")]
+    [Header("Read this local axis (matches Inspector)")]
     public Axis axis = Axis.Z;
 
-    [Header("Targets (degrees)")]
-    public float positiveTarget = 30f;
-    public float negativeTarget = -30f;
+    [Header("Targets")]
+    [Tooltip("Trigger at +target and -target (degrees)")]
+    public float target = 30f;
+    [Tooltip("How close you must get to count as hit")]
+    public float tolerance = 3f;
 
-    [Tooltip("How close (±deg) the angle must be to count as a hit")]
-    public float tolerance = 2f;
+    [Header("Orientation")]
+    [Tooltip("Invert sign if clockwise reads negative, etc.")]
+    public bool flipSign = false;
 
-    [Header("Reference (neutral)")]
-    [Tooltip("Use current local rotation as zero reference on Awake")]
+    [Header("Neutral")]
+    [Tooltip("Capture current Inspector angle as 0 on Awake")]
     public bool captureNeutralOnAwake = true;
 
     [Header("Events")]
-    public UnityEvent OnPositiveHit;  // fires near +30°
-    public UnityEvent OnNegativeHit;  // fires near -30°
+    public UnityEvent OnPositiveHit;  // near +target
+    public UnityEvent OnNegativeHit;  // near -target
 
-    float _neutral;       // neutral angle (deg) on the chosen axis
-    bool _posLatched;     // prevents spamming while staying near +30
-    bool _negLatched;     // prevents spamming while staying near -30
+    float _neutralDeg;
+    bool _posLatched, _negLatched; // prevent spamming while within band
 
     void Awake()
     {
         if (captureNeutralOnAwake)
-            _neutral = GetInspectorAxisAngle();
+            _neutralDeg = GetAxisInspectorDeg();
     }
 
     void Update()
     {
-        float current = SignedAngleRelativeToNeutral();
+        float a = SignedRelativeDeg();  // [-180..180], relative to neutral
+        if (flipSign) a = -a;
 
-        // +30° hit
-        if (Mathf.Abs(current - positiveTarget) <= tolerance)
+        // +target band
+        if (a >= (target - tolerance))
         {
             if (!_posLatched)
             {
                 OnPositiveHit?.Invoke();
                 _posLatched = true;
-                _negLatched = false; // optional: clear the other latch
+                _negLatched = false; // optional
             }
         }
         else _posLatched = false;
 
-        // -30° hit
-        if (Mathf.Abs(current - negativeTarget) <= tolerance)
+        // -target band
+        if (a <= -(target - tolerance))
         {
             if (!_negLatched)
             {
                 OnNegativeHit?.Invoke();
                 _negLatched = true;
-                _posLatched = false;
+                _posLatched = false; // optional
             }
         }
         else _negLatched = false;
     }
 
-    // === helpers ===
-
-    // Raw local euler on chosen axis (Inspector-like, 0..360)
-    float GetInspectorAxisAngle()
+    float GetAxisInspectorDeg()
     {
         var e = transform.localEulerAngles;
         switch (axis)
@@ -76,15 +76,12 @@ public class AngleTrigger : MonoBehaviour
         }
     }
 
-    // Signed angle in [-180,180] relative to neutral on that axis
-    float SignedAngleRelativeToNeutral()
+    float SignedRelativeDeg()
     {
-        float raw = GetInspectorAxisAngle();
-        return Mathf.DeltaAngle(_neutral, raw);
+        float raw = GetAxisInspectorDeg();       // 0..360 from Inspector
+        return Mathf.DeltaAngle(_neutralDeg, raw); // −180..180 around neutral
     }
 
-    // Optional: call from context menu to set the current pose as neutral (0°)
     [ContextMenu("Set Current As Neutral")]
-    void CalibrateNeutral() => _neutral = GetInspectorAxisAngle();
+    void CalibrateNeutral() => _neutralDeg = GetAxisInspectorDeg();
 }
-
