@@ -1,8 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class RotationToGasFlow : MonoBehaviour
-{
+{[  
+    Header("Target")]
+    public TMP_Text valueText;
+
     [Header("Grabbable / Rotating Object")]
     public Transform target;      // The grabbable object
 
@@ -25,10 +29,18 @@ public class RotationToGasFlow : MonoBehaviour
         if (target == null || progressSlider == null) return;
 
         // 1. Get raw local angle (0–360)
-        float rawAngle = GetLocalAxisAngle(target, axis);
+        // float rawAngle = GetLocalAxisAngle(target, axis);
+        float rawAngle = GetLocalAxisAngle(target, axis);   // 0..360, e.g. 270
+
+        float inspectorAngle = rawAngle;
+        if (inspectorAngle > 180f)
+            inspectorAngle -= 360f;  
+
 
         // 2. Optionally convert to -180..180 (so you can use negative ranges)
         float angle = NormalizeAngle(rawAngle);
+
+        valueText.text = angle.ToString();
 
         // 3. Map angle → 0–1 using Mathf.InverseLerp
         float t = Mathf.InverseLerp(minAngle, maxAngle, angle);
