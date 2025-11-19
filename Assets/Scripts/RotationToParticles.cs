@@ -17,6 +17,10 @@ public class RotationToParticles : MonoBehaviour
     public float maxSpeed = 5000f;      // particles/sec at maxAngle
     public Axis axis = Axis.Z;
 
+    [Header("Emission Mapping")]
+    public float minEmission = 0f;       // speed at minAngle
+    public float maxEmission = 10f;  
+
     public enum Axis { X, Y, Z }
 
     void Update()
@@ -35,10 +39,13 @@ public class RotationToParticles : MonoBehaviour
 
         // 4. 0..1 → minSpeed..maxSpeed (0–5000)
         float speed = Mathf.Lerp(minSpeed, maxSpeed, t);
+        float rate = Mathf.Lerp(minEmission, maxEmission, t);
 
         // 5. Apply to particle start speed
         var main = particleSystem.main;
         main.startSpeed = speed;   // implicit cast to MinMaxCurve
+        var emission = particleSystem.emission;
+        emission.rateOverTime = rate;
     }
 
     float GetLocalAxisAngle(Transform t, Axis axis)
