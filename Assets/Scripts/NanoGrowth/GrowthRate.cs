@@ -18,7 +18,7 @@ public class GrowthRate : MonoBehaviour
     public GameObject nanoWire;
     Vector3 nanoWireHeight;
 
-    float simSpeed;
+    // float simSpeed;
 
     private Parameters p;
 
@@ -46,7 +46,7 @@ public class GrowthRate : MonoBehaviour
     {
         radius = setting_parameter.radius.text;
         requied_height = setting_parameter.requied_height.text;
-        simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
+        // simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
 
         // Debug.Log(curr_nano_growth_enabled);
 
@@ -56,7 +56,7 @@ public class GrowthRate : MonoBehaviour
             double nmPerSec = mPerSec * 1e9;
             Debug.Log($"Growth rate: {mPerSec:E6} m/s ({nmPerSec:F4} nm/s)");
 
-            nanoWireHeight.y += (float)mPerSec * Time.unscaledDeltaTime * simSpeed;
+            nanoWireHeight.y += (float)mPerSec * Time.unscaledDeltaTime * GlobalSimSpeed.GrowthMultiplier;
 
             nanoWire.transform.localScale = nanoWireHeight;
             double.TryParse(requied_height, out double height);
