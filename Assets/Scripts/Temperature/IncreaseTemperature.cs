@@ -34,6 +34,11 @@ public class IncreaseTemperature : MonoBehaviour
 
     public bool isIncreasingTemperature = false;
 
+    public bool Zone1Reached { get; private set; }
+    public bool Zone2Reached { get; private set; }
+    public bool Zone3Reached { get; private set; }
+    [SerializeField] float reachedTolerance = 0.5f;
+
     public void ReadMaxFromTextZones()
     {
         if (maxValueText_zone1 && float.TryParse(maxValueText_zone1.text, out var v1)) maxValue_zone1 = v1;
@@ -44,6 +49,7 @@ public class IncreaseTemperature : MonoBehaviour
     public void StartAllZones()
     {
         ReadMaxFromTextZones();
+        Zone1Reached = Zone2Reached = Zone3Reached = false;
         RestartAll(AnimateAllZones(
             currentValue_zone1, maxValue_zone1,
             currentValue_zone2, maxValue_zone2,
@@ -53,6 +59,8 @@ public class IncreaseTemperature : MonoBehaviour
 
     public void ResetAllZones()
     {
+        Zone1Reached = Zone2Reached = Zone3Reached = false;
+
         RestartAll(AnimateAllZones(
             currentValue_zone1, 0f,
             currentValue_zone2, 0f,
@@ -82,17 +90,18 @@ public class IncreaseTemperature : MonoBehaviour
             ApplyAll(
                 Mathf.Lerp(from1, to1, t),
                 Mathf.Lerp(from2, to2, t),
-                Mathf.Lerp(from3, to3, t)
+                Mathf.Lerp(from3, to3, t),
+                to1, to2, to3
             );
 
             yield return null;
         }
 
-        ApplyAll(to1, to2, to3);
+        ApplyAll(to1, to2, to3, to1, to2, to3);
         routineAll = null;
     }
 
-    void ApplyAll(float v1, float v2, float v3)
+    void ApplyAll(float v1, float v2, float v3, float target1, float target2, float target3)
     {
         currentValue_zone1 = v1;
         currentValue_zone2 = v2;
@@ -108,5 +117,9 @@ public class IncreaseTemperature : MonoBehaviour
             tempMat.SetTemperatureZone2(v2);
             tempMat.SetTemperatureZone3(v3);
         }
+
+        if (!Zone1Reached && Mathf.Abs(v1 - target1) <= reachedTolerance) Zone1Reached = true;
+        if (!Zone2Reached && Mathf.Abs(v2 - target2) <= reachedTolerance) Zone2Reached = true;
+        if (!Zone3Reached && Mathf.Abs(v3 - target3) <= reachedTolerance) Zone3Reached = true;
     }
 }
