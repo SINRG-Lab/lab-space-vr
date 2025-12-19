@@ -1,9 +1,10 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class TemperatureMaterialController : MonoBehaviour
 {
     [Header("Target")]
-    public Renderer targetRenderer;
+    public List<Renderer> targetRenderer = new List<Renderer>();
 
     [Header("Temperature Range")]
     public float minTemperature = 0f;      // e.g. 0°C
@@ -14,15 +15,18 @@ public class TemperatureMaterialController : MonoBehaviour
     public bool useEmission = true;
     public float emissionStrength = 2f;
 
-    Material _mat;
+    private List<Material> _mats = new List<Material>();
     
     void Awake()
     {
-        if (!targetRenderer)
-            targetRenderer = GetComponent<Renderer>();
+        if (targetRenderer == null || targetRenderer.Count == 0)
+            targetRenderer = new List<Renderer> { GetComponent<Renderer>() };
 
         // Get a unique material instance
-        _mat = targetRenderer.material;
+        foreach (var renderer in targetRenderer)
+        {
+            _mats.Add(renderer.material);
+        }
     }
 
     public void SetTemperature(float temperature)
@@ -33,19 +37,17 @@ public class TemperatureMaterialController : MonoBehaviour
         // Get color from gradient
         Color c = temperatureGradient.Evaluate(t);
 
-        // Standard / URP:
-        if (_mat.HasProperty("_BaseColor"))
-            _mat.SetColor("_BaseColor", c);       // URP Lit
-        else if (_mat.HasProperty("_Color"))
-            _mat.SetColor("_Color", c);           // Standard
-
-        if (useEmission)
+        foreach (var m in _mats)
         {
-            if (_mat.HasProperty("_EmissionColor"))
+            if (!m) continue;
+
+            if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c); // URP Lit
+            else if (m.HasProperty("_Color")) m.SetColor("_Color", c);    // Standard
+
+            if (useEmission && m.HasProperty("_EmissionColor"))
             {
-                Color emissionColor = c * emissionStrength;
-                _mat.SetColor("_EmissionColor", emissionColor);
-                _mat.EnableKeyword("_EMISSION");
+                m.SetColor("_EmissionColor", c * emissionStrength);
+                m.EnableKeyword("_EMISSION");
             }
         }
     }

@@ -5234,8 +5234,8 @@ Transform:
   m_GameObject: {fileID: 382891281}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -1.8166674, y: -925.9999, z: -45.571457}
-  m_LocalScale: {x: 35.714283, y: 999.9999, z: 5.555556}
+  m_LocalPosition: {x: 0.0027981107, y: 0.32249972, z: -0.11352325}
+  m_LocalScale: {x: 5.8881416, y: 358.33304, z: 10.761906}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 911424329}
@@ -8391,15 +8391,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 633261840}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.94, y: 0.1, z: 1.7}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -1.855, y: 0.1, z: 2.391}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 850710712}
   - {fileID: 379968154}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &639834987
 GameObject:
   m_ObjectHideFlags: 0
@@ -9091,7 +9091,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f01ab5dde364f4a8ea42904bf9aa41ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperatureMaterialController
-  targetRenderer: {fileID: 1367068124}
+  targetRenderer:
+  - {fileID: 1367068124}
+  - {fileID: 1449170531}
   minTemperature: 0
   maxTemperature: 1000
   temperatureGradient:
@@ -17517,12 +17519,12 @@ Transform:
   m_GameObject: {fileID: 911424325}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.10000021}
-  m_LocalScale: {x: 0.9, y: 0.0050000004, z: 0.14}
+  m_LocalPosition: {x: -0.0013, y: -0.0045, z: -0.0036}
+  m_LocalScale: {x: 0.4646017, y: 0.0139535, z: 0.84916437}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 382891282}
-  m_Father: {fileID: 1518970249}
+  m_Father: {fileID: 1332099675}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &912820611
 GameObject:
@@ -19749,10 +19751,10 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 664395146}
-        m_TargetAssemblyTypeName: IncreaseTemperature, Assembly-CSharp
-        m_MethodName: StartValueIncrease
-        m_Mode: 1
+      - m_Target: {fileID: 7516989853811443993}
+        m_TargetAssemblyTypeName: Oculus.Interaction.PokeInteractable, Oculus.Interaction
+        m_MethodName: set_enabled
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -19839,6 +19841,18 @@ MonoBehaviour:
       - m_Target: {fileID: 8065077609588274666}
         m_TargetAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
         m_MethodName: set_interactable
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 7516989853811443993}
+        m_TargetAssemblyTypeName: Oculus.Interaction.PokeInteractable, Oculus.Interaction
+        m_MethodName: set_enabled
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -20661,7 +20675,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1164920828}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -20741,6 +20755,7 @@ Transform:
   m_LocalScale: {x: 0.085503004, y: 0.00642392, z: 0.04795266}
   m_ConstrainProportionsScale: 1
   m_Children:
+  - {fileID: 1332099675}
   - {fileID: 1636450945}
   - {fileID: 808996159}
   m_Father: {fileID: 1114048318}
@@ -22560,6 +22575,39 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1332099674
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1332099675}
+  m_Layer: 0
+  m_Name: Substrate_Nano
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1332099675
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1332099674}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2.0853903, y: 15.566818, z: 1.1695498}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 383973557}
+  - {fileID: 911424329}
+  m_Father: {fileID: 1164920835}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1339941793
 GameObject:
   m_ObjectHideFlags: 0
@@ -24060,7 +24108,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1518970249}
+    m_TransformParent: {fileID: 1332099675}
     m_Modifications:
     - target: {fileID: 6480676327543331522, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_Name
@@ -24072,15 +24120,15 @@ PrefabInstance:
       objectReference: {fileID: 1953597913}
     - target: {fileID: 8012680803105296590, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.10000001
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 8012680803105296590, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.10000001
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 8012680803105296590, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.099999994
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 8012680803105296590, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_LocalPosition.x
@@ -24092,7 +24140,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8012680803105296590, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.10000021
+      value: -0.1000002
       objectReference: {fileID: 0}
     - target: {fileID: 8012680803105296590, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
       propertyPath: m_LocalRotation.w
@@ -24127,6 +24175,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
+--- !u!23 &1449170531 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 7150b2cbc6b17455f81387d92e1e7989, type: 3}
+  m_PrefabInstance: {fileID: 724556448}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1460112364
 GameObject:
   m_ObjectHideFlags: 0
@@ -24827,8 +24880,6 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2082801810}
-  - {fileID: 383973557}
-  - {fileID: 911424329}
   - {fileID: 543450652979736234}
   - {fileID: 1868502701}
   m_Father: {fileID: 1114048318}
@@ -32388,7 +32439,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
   m_LocalPosition: {x: 0.826, y: -0.37, z: -0.304}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 10, y: 7, z: 10}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1041126922}
@@ -33049,7 +33100,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0.0 c
+  m_text: 0.0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -39066,7 +39117,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0.0 c
+  m_text: 0.0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -41892,7 +41943,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0.0 c
+  m_text: 0.0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -42802,6 +42853,18 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 664395146}
         m_TargetAssemblyTypeName: IncreaseTemperature, Assembly-CSharp
+        m_MethodName: ReadMaxFromText
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 664395146}
+        m_TargetAssemblyTypeName: IncreaseTemperature, Assembly-CSharp
         m_MethodName: StartValueIncrease
         m_Mode: 1
         m_Arguments:
@@ -43254,7 +43317,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 400
   m_WholeNumbers: 0
-  m_Value: 50
+  m_Value: 150
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

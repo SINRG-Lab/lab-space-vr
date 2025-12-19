@@ -47,7 +47,7 @@ public class Setting_Parameter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(float.Parse(substrate_dimension.text));
+        // Debug.Log(float.Parse(substrate_dimension.text));
         Substrate.transform.localScale = new Vector3(float.Parse(substrate_dimension.text), 0.005f, 0.14f);
     }
 
