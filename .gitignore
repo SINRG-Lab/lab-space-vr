@@ -73,6 +73,18 @@ mono_crash.*
 *.unitypackage.meta
 *.app
 
+# macOS Finder metadata
+.DS_Store
+
+# Nested Unity project under HologramReceiver
+/HologramReceiver/[Ll]ibrary/
+/HologramReceiver/[Tt]emp/
+/HologramReceiver/[Oo]bj/
+/HologramReceiver/[Bb]uild/
+/HologramReceiver/[Bb]uilds/
+/HologramReceiver/[Ll]ogs/
+/HologramReceiver/[Uu]ser[Ss]ettings/
+
 # Crashlytics generated file
 crashlytics-build.properties
 
