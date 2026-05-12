@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class HologramFinalOutput : MonoBehaviour
 {
@@ -30,8 +31,26 @@ public class HologramFinalOutput : MonoBehaviour
 
         if (compositorCamera != null)
         {
+            ConfigureCompositorCamera(compositorCamera);
             compositorCamera.targetTexture = OutputTexture;
         }
+    }
+
+    private void ConfigureCompositorCamera(Camera camera)
+    {
+        camera.stereoTargetEye = StereoTargetEyeMask.None;
+        camera.allowHDR = false;
+        camera.allowMSAA = false;
+
+        if (camera.TryGetComponent<AudioListener>(out var listener))
+            listener.enabled = false;
+
+        var cameraData = camera.GetUniversalAdditionalCameraData();
+        cameraData.allowXRRendering = false;
+        cameraData.renderShadows = false;
+        cameraData.requiresColorTexture = false;
+        cameraData.requiresDepthTexture = false;
+        cameraData.renderPostProcessing = false;
     }
 
     private void OnDestroy()

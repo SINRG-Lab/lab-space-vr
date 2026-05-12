@@ -120,8 +120,8 @@ public class HologramSender : MonoBehaviour
 
         for (int i = 0; i < parameters.encodings.Length; i++)
         {
-            parameters.encodings[i].maxBitrate = 4_000_000;
-            parameters.encodings[i].maxFramerate = 24;
+            parameters.encodings[i].maxBitrate = maxBitrate;
+            parameters.encodings[i].maxFramerate = maxFramerate;
             parameters.encodings[i].scaleResolutionDownBy = 1.0;
         }
 

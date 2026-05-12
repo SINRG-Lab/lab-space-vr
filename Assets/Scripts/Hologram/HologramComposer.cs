@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class HologramComposer : MonoBehaviour
 {
@@ -37,6 +38,11 @@ public class HologramComposer : MonoBehaviour
 
     void Start()
     {
+        ConfigureAuxCamera(topCamera);
+        ConfigureAuxCamera(leftCamera);
+        ConfigureAuxCamera(bottomCamera);
+        ConfigureAuxCamera(rightCamera);
+
         topRT = CreateRT("Holo_TopRT");
         leftRT = CreateRT("Holo_LeftRT");
         bottomRT = CreateRT("Holo_BottomRT");
@@ -48,6 +54,25 @@ public class HologramComposer : MonoBehaviour
         if (rightCamera) rightCamera.targetTexture = rightRT;
 
         ApplyToMaterial();
+    }
+
+    void ConfigureAuxCamera(Camera camera)
+    {
+        if (!camera) return;
+
+        camera.stereoTargetEye = StereoTargetEyeMask.None;
+        camera.allowHDR = false;
+        camera.allowMSAA = false;
+
+        if (camera.TryGetComponent<AudioListener>(out var listener))
+            listener.enabled = false;
+
+        var cameraData = camera.GetUniversalAdditionalCameraData();
+        cameraData.allowXRRendering = false;
+        cameraData.renderShadows = false;
+        cameraData.requiresColorTexture = false;
+        cameraData.requiresDepthTexture = false;
+        cameraData.renderPostProcessing = false;
     }
 
     void OnValidate()
