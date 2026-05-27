@@ -33,6 +33,10 @@ public class GrowthRate : MonoBehaviour
 
     public bool curr_nano_growth_enabled = true;
 
+    [SerializeField] bool logDebug = false;
+    [SerializeField] float logInterval = 1f;
+    float nextLogTime;
+
 
     void Start()
     {
@@ -44,6 +48,9 @@ public class GrowthRate : MonoBehaviour
 
     void Update()
     {
+        if (!setting_parameter)
+            return;
+
         radius = setting_parameter.radius.text;
         requied_height = setting_parameter.requied_height.text;
         // simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
@@ -53,15 +60,19 @@ public class GrowthRate : MonoBehaviour
         if (radius != null && double.TryParse(radius, out double rNm) && setting_parameter.growth_enabled && curr_nano_growth_enabled)
         {
             double mPerSec = ComputeGrowthRate(p, rNm);
-            double nmPerSec = mPerSec * 1e9;
-            Debug.Log($"Growth rate: {mPerSec:E6} m/s ({nmPerSec:F4} nm/s)");
 
             nanoWireHeight.y += (float)mPerSec * Time.unscaledDeltaTime * GlobalSimSpeed.GrowthMultiplier;
 
             nanoWire.transform.localScale = nanoWireHeight;
             double.TryParse(requied_height, out double height);
             total_time = height / (mPerSec * 3600);
-            Debug.Log(total_time);
+
+            if (logDebug && Time.unscaledTime >= nextLogTime)
+            {
+                double nmPerSec = mPerSec * 1e9;
+                Debug.Log($"Growth rate: {mPerSec:E6} m/s ({nmPerSec:F4} nm/s), total_time={total_time:F3}");
+                nextLogTime = Time.unscaledTime + logInterval;
+            }
         }
 
         if (requied_height != null && double.TryParse(requied_height, out double targetNm))

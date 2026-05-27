@@ -6,6 +6,9 @@ using TMPro;
 public class GrowthRate_P : MonoBehaviour
 {
     private Parameters_P parameter_p;
+    [SerializeField] bool logDebug = false;
+    [SerializeField] float logInterval = 1f;
+    float nextLogTime;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -16,8 +19,12 @@ public class GrowthRate_P : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!logDebug || Time.unscaledTime < nextLogTime)
+            return;
+
         double rate = Equation(parameter_p);
         Debug.Log("Rate Value: " + rate);
+        nextLogTime = Time.unscaledTime + logInterval;
     }
 
     public static double Equation(Parameters_P p){
