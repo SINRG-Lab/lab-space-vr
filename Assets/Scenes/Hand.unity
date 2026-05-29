@@ -7391,6 +7391,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 141127997}
+  - component: {fileID: 141127998}
   m_Layer: 0
   m_Name: Cameras
   m_TagString: Untagged
@@ -7417,6 +7418,26 @@ Transform:
   - {fileID: 709273618}
   m_Father: {fileID: 1271492639}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &141127998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 141127996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bd4a22c50424a45adf877f8c79a50d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YAxisFollowGroup
+  target: {fileID: 543450653130993808}
+  followers:
+  - {fileID: 401622516}
+  - {fileID: 593436788}
+  - {fileID: 1901222756}
+  - {fileID: 709273618}
+  preserveInitialOffset: 1
+  followSpeed: 0
 --- !u!1 &154074244
 GameObject:
   m_ObjectHideFlags: 0
