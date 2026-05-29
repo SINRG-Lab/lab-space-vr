@@ -13571,6 +13571,20 @@ MonoBehaviour:
         Min: 0.35
         Max: 2.5
   _resetScaleResponsivenessOnConstraintOvershoot: 1
+--- !u!114 &577689475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132148657809962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f889f85ab5f4b5f96f42de7b1d7c86c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IgnoreCollisionsWithRig
+  rigRoot: {fileID: 633261845}
+  rigRootName: '[BuildingBlock] Camera Rig'
 --- !u!1 &587593956
 GameObject:
   m_ObjectHideFlags: 0
@@ -44711,6 +44725,7 @@ GameObject:
   - component: {fileID: 577689471}
   - component: {fileID: 577689473}
   - component: {fileID: 577689474}
+  - component: {fileID: 577689475}
   m_Layer: 0
   m_Name: hand_render
   m_TagString: Untagged
