@@ -13455,8 +13455,8 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
-  _twoGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 577689474}
+  _twoGrabTransformer: {fileID: 577689474}
   _targetTransform: {fileID: 543450653130993808}
   _maxGrabPoints: -1
   _rigidbody: {fileID: 577689472}
@@ -13508,6 +13508,69 @@ MonoBehaviour:
   skinVisible: 1
   muscleVisible: 1
   boneVisible: 1
+--- !u!114 &577689474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132148657809962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb7085c111fcb44493d57d4e336d3fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.GrabFreeTransformer
+  _positionConstraints:
+    ConstraintsAreRelative: 1
+    XAxis:
+      ConstrainAxis: 0
+      AxisRange:
+        Min: 0
+        Max: 0
+    YAxis:
+      ConstrainAxis: 0
+      AxisRange:
+        Min: 0
+        Max: 0
+    ZAxis:
+      ConstrainAxis: 0
+      AxisRange:
+        Min: 0
+        Max: 0
+  _rotationConstraints:
+    XAxis:
+      ConstrainAxis: 0
+      AxisRange:
+        Min: 0
+        Max: 0
+    YAxis:
+      ConstrainAxis: 0
+      AxisRange:
+        Min: 0
+        Max: 0
+    ZAxis:
+      ConstrainAxis: 0
+      AxisRange:
+        Min: 0
+        Max: 0
+  _scaleConstraints:
+    ConstraintsAreRelative: 1
+    XAxis:
+      ConstrainAxis: 1
+      AxisRange:
+        Min: 0.35
+        Max: 2.5
+    YAxis:
+      ConstrainAxis: 1
+      AxisRange:
+        Min: 0.35
+        Max: 2.5
+    ZAxis:
+      ConstrainAxis: 1
+      AxisRange:
+        Min: 0.35
+        Max: 2.5
+  _resetScaleResponsivenessOnConstraintOvershoot: 1
 --- !u!1 &587593956
 GameObject:
   m_ObjectHideFlags: 0
@@ -44647,6 +44710,7 @@ GameObject:
   - component: {fileID: 577689472}
   - component: {fileID: 577689471}
   - component: {fileID: 577689473}
+  - component: {fileID: 577689474}
   m_Layer: 0
   m_Name: hand_render
   m_TagString: Untagged
