@@ -5,6 +5,7 @@ public class YAxisFollowGroup : MonoBehaviour
     [SerializeField] Transform target;
     [SerializeField] Transform[] followers;
     [SerializeField] bool preserveInitialOffset = true;
+    public float additionalYOffset = 0f;
     [SerializeField] float followSpeed = 0f;
 
     float[] yOffsets;
@@ -35,7 +36,7 @@ public class YAxisFollowGroup : MonoBehaviour
             }
 
             Vector3 position = follower.position;
-            float targetY = target.position.y + yOffsets[i];
+            float targetY = target.position.y + yOffsets[i] + additionalYOffset;
             position.y = followSpeed > 0f
                 ? Mathf.Lerp(position.y, targetY, Time.deltaTime * followSpeed)
                 : targetY;

@@ -6,11 +6,13 @@ public class HandLayerController : MonoBehaviour
     [SerializeField] GameObject skinLayer;
     [SerializeField] GameObject muscleLayer;
     [SerializeField] GameObject boneLayer;
+    [SerializeField] GameObject nerveLayer;
 
     [Header("Initial Visibility")]
     [SerializeField] bool skinVisible = true;
     [SerializeField] bool muscleVisible = true;
     [SerializeField] bool boneVisible = true;
+    [SerializeField] bool nerveVisible = true;
 
     void Reset()
     {
@@ -38,6 +40,11 @@ public class HandLayerController : MonoBehaviour
         SetBoneVisible(!IsVisible(boneLayer));
     }
 
+    public void ToggleNerve()
+    {
+        SetNerveVisible(!IsVisible(nerveLayer));
+    }
+
     public void SetSkinVisible(bool visible)
     {
         skinVisible = visible;
@@ -56,36 +63,53 @@ public class HandLayerController : MonoBehaviour
         SetLayerVisible(boneLayer, visible);
     }
 
+    public void SetNerveVisible(bool visible)
+    {
+        nerveVisible = visible;
+        SetLayerVisible(nerveLayer, visible);
+    }
+
     public void SetAllVisible(bool visible)
     {
-        SetLayerVisibility(visible, visible, visible);
+        SetLayerVisibility(visible, visible, visible, visible);
     }
 
     public void ShowSkinOnly()
     {
-        SetLayerVisibility(true, false, false);
+        SetLayerVisibility(true, false, false, false);
     }
 
     public void ShowMuscleOnly()
     {
-        SetLayerVisibility(false, true, false);
+        SetLayerVisibility(false, true, false, false);
     }
 
     public void ShowBoneOnly()
     {
-        SetLayerVisibility(false, false, true);
+        SetLayerVisibility(false, false, true, false);
+    }
+
+    public void ShowNerveOnly()
+    {
+        SetLayerVisibility(false, false, false, true);
     }
 
     public void ShowMuscleAndBone()
     {
-        SetLayerVisibility(false, true, true);
+        SetLayerVisibility(false, true, true, false);
     }
 
     public void SetLayerVisibility(bool showSkin, bool showMuscle, bool showBone)
     {
+        SetLayerVisibility(showSkin, showMuscle, showBone, nerveVisible);
+    }
+
+    public void SetLayerVisibility(bool showSkin, bool showMuscle, bool showBone, bool showNerve)
+    {
         skinVisible = showSkin;
         muscleVisible = showMuscle;
         boneVisible = showBone;
+        nerveVisible = showNerve;
         ApplyVisibility();
     }
 
@@ -94,6 +118,7 @@ public class HandLayerController : MonoBehaviour
         SetLayerVisible(skinLayer, skinVisible);
         SetLayerVisible(muscleLayer, muscleVisible);
         SetLayerVisible(boneLayer, boneVisible);
+        SetLayerVisible(nerveLayer, nerveVisible);
     }
 
     void AutoAssignMissingLayers()
@@ -101,6 +126,7 @@ public class HandLayerController : MonoBehaviour
         skinLayer = skinLayer ? skinLayer : FindChildByName("rand_0_skin");
         muscleLayer = muscleLayer ? muscleLayer : FindChildByName("rand_0_muscle");
         boneLayer = boneLayer ? boneLayer : FindChildByName("rand_0_bone");
+        nerveLayer = nerveLayer ? nerveLayer : FindChildByName("rand_0_nerve");
     }
 
     GameObject FindChildByName(string childName)
