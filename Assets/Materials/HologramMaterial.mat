@@ -118,9 +118,9 @@ Material:
     - _EnvironmentReflections: 1
     - _FlipBottomX: 0
     - _FlipBottomY: 1
-    - _FlipLeftX: 0
+    - _FlipLeftX: 1
     - _FlipLeftY: 0
-    - _FlipRightX: 0
+    - _FlipRightX: 1
     - _FlipRightY: 0
     - _FlipTopX: 0
     - _FlipTopY: 1

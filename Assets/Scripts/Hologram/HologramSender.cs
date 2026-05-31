@@ -1,12 +1,14 @@
 using System.Collections;
 using UnityEngine;
 using Unity.WebRTC;
+using UnityEngine.SceneManagement;
 
 public class HologramSender : MonoBehaviour
 {
     public HologramFinalOutput finalOutput;
     public WebRTCSignalingClient signaling;
     public string stunServer = "stun:stun.l.google.com:19302";
+    public bool waitForManualStart = false;
 
     [Header("Stream Settings")]
     public int streamWidth = 960;
@@ -18,20 +20,42 @@ public class HologramSender : MonoBehaviour
     private VideoStreamTrack videoTrack;
     private RTCRtpSender videoSender;
     private Coroutine webRtcUpdateCoroutine;
+    private bool initialized;
 
     void Start()
     {
-        signaling.role = "sender";
-        signaling.Connected += OnSignalingConnected;
-        signaling.AnswerReceived += OnAnswerReceived;
-        signaling.IceReceived += OnIceReceived;
+        if (!waitForManualStart && SceneManager.GetActiveScene().name != "OTF_Simple")
+            BeginStreaming();
+    }
 
-        webRtcUpdateCoroutine = StartCoroutine(WebRTC.Update());
+    public void BeginStreaming()
+    {
+        if (signaling == null)
+        {
+            Debug.LogError("HologramSender requires a WebRTCSignalingClient.");
+            return;
+        }
+
+        if (!initialized)
+        {
+            initialized = true;
+
+            signaling.role = "sender";
+            signaling.Connected += OnSignalingConnected;
+            signaling.AnswerReceived += OnAnswerReceived;
+            signaling.IceReceived += OnIceReceived;
+
+            webRtcUpdateCoroutine = StartCoroutine(WebRTC.Update());
+        }
+
         signaling.Connect();
     }
 
     void OnSignalingConnected()
     {
+        if (peerConnection != null)
+            return;
+
         StartCoroutine(CreateAndSendOffer());
     }
 
@@ -171,9 +195,12 @@ public class HologramSender : MonoBehaviour
 
     void OnDestroy()
     {
-        signaling.Connected -= OnSignalingConnected;
-        signaling.AnswerReceived -= OnAnswerReceived;
-        signaling.IceReceived -= OnIceReceived;
+        if (signaling != null)
+        {
+            signaling.Connected -= OnSignalingConnected;
+            signaling.AnswerReceived -= OnAnswerReceived;
+            signaling.IceReceived -= OnIceReceived;
+        }
 
         videoTrack?.Dispose();
 

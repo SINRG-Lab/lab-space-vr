@@ -33,11 +33,24 @@ public class WebRTCSignalingClient : MonoBehaviour
 
     private readonly ConcurrentQueue<string> inboundMessages = new ConcurrentQueue<string>();
     private bool connectedEventPending = false;
+    private bool connectInProgress = false;
+
+    public bool IsConnected => websocket != null && websocket.State == WebSocketState.Open;
+    public bool IsConnecting => connectInProgress;
 
     public async void Connect()
     {
+        if (connectInProgress || IsConnected)
+            return;
+
         try
         {
+            connectInProgress = true;
+
+            cts?.Cancel();
+            cts?.Dispose();
+            websocket?.Dispose();
+
             cts = new CancellationTokenSource();
             websocket = new ClientWebSocket();
 
@@ -56,12 +69,16 @@ public class WebRTCSignalingClient : MonoBehaviour
                     role = role
                 });
 
-                _ = ReceiveLoop();
+                _ = ReceiveLoop(websocket, cts.Token);
             }
         }
         catch (Exception ex)
         {
             Debug.LogError("WebSocket connect failed: " + ex);
+        }
+        finally
+        {
+            connectInProgress = false;
         }
     }
 
@@ -96,21 +113,21 @@ public class WebRTCSignalingClient : MonoBehaviour
         }
     }
 
-    private async Task ReceiveLoop()
+    private async Task ReceiveLoop(ClientWebSocket activeSocket, CancellationToken token)
     {
         byte[] buffer = new byte[16384];
 
-        while (websocket != null && websocket.State == WebSocketState.Open)
+        while (activeSocket != null && activeSocket.State == WebSocketState.Open)
         {
             try
             {
                 ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
-                WebSocketReceiveResult result = await websocket.ReceiveAsync(segment, cts.Token);
+                WebSocketReceiveResult result = await activeSocket.ReceiveAsync(segment, token);
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     Debug.Log("WebSocket closed by server");
-                    await websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                    await activeSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                     break;
                 }
 
@@ -125,7 +142,7 @@ public class WebRTCSignalingClient : MonoBehaviour
                     }
 
                     segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
-                    result = await websocket.ReceiveAsync(segment, cts.Token);
+                    result = await activeSocket.ReceiveAsync(segment, token);
                     count += result.Count;
                 }
 
