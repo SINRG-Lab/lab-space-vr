@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/OTF.unity
     guid: 2c23aa36681234c1483823419bae12b9
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Human_Upper_Anatomy.unity
     guid: b3793e4f038804be7be3252be24ecf06
   - enabled: 0

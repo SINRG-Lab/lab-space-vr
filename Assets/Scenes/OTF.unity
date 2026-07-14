@@ -10391,7 +10391,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 401622515}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &401622519
 Camera:
   m_ObjectHideFlags: 0
@@ -13297,7 +13297,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 593436787}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &593436791
 Camera:
   m_ObjectHideFlags: 0
@@ -15309,6 +15309,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b153cd2ac9aff48a4bead21d78a315ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GrowthRate_P
+  logDebug: 0
+  logInterval: 1
 --- !u!4 &705456203
 Transform:
   m_ObjectHideFlags: 0
@@ -15527,7 +15529,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 709273617}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &709273621
 Camera:
   m_ObjectHideFlags: 0
@@ -31668,6 +31670,7 @@ MonoBehaviour:
   finalOutput: {fileID: 593954358}
   signaling: {fileID: 401381198}
   stunServer: stun:stun.l.google.com:19302
+  waitForManualStart: 1
   streamWidth: 920
   streamHeight: 920
   maxBitrate: 5000000
@@ -37893,7 +37896,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1901222755}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1901222759
 Camera:
   m_ObjectHideFlags: 0
@@ -38184,7 +38187,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1928014495}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1928014499
 Camera:
   m_ObjectHideFlags: 0

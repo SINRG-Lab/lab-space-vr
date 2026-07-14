@@ -3,8 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 
 public class RotationToGasFlow : MonoBehaviour
-{[  
-    Header("Target")]
+{
+    [Header("Target")]
     public TMP_Text valueText;
 
     [Header("Grabbable / Rotating Object")]
@@ -22,32 +22,32 @@ public class RotationToGasFlow : MonoBehaviour
     public float minValue = 0f;     // usually 0
     public float maxValue = 5000f;  // your target max
 
+    public float CurrentValue { get; private set; }
+
     public enum Axis { X, Y, Z }
 
     void Update()
     {
-        if (target == null || progressSlider == null) return;
+        if (target == null) return;
 
         // 1. Get raw local angle (0–360)
         // float rawAngle = GetLocalAxisAngle(target, axis);
         float rawAngle = GetLocalAxisAngle(target, axis);   // 0..360, e.g. 270
 
-        float inspectorAngle = rawAngle;
-        if (inspectorAngle > 180f)
-            inspectorAngle -= 360f;  
-
-
         // 2. Optionally convert to -180..180 (so you can use negative ranges)
         float angle = NormalizeAngle(rawAngle);
 
-        valueText.text = angle.ToString();
-
         // 3. Map angle → 0–1 using Mathf.InverseLerp
-        float t = Mathf.InverseLerp(minAngle, maxAngle, angle);
+        float t = Mathf.Clamp01(Mathf.InverseLerp(minAngle, maxAngle, angle));
 
         // 4. Clamp and assign to slider
-        float value = Mathf.Lerp(minValue, maxValue, t);
-        progressSlider.value = value;
+        CurrentValue = Mathf.Lerp(minValue, maxValue, t);
+
+        if (valueText)
+            valueText.text = CurrentValue.ToString("0");
+
+        if (progressSlider)
+            progressSlider.value = CurrentValue;
     }
 
     float GetLocalAxisAngle(Transform t, Axis axis)
