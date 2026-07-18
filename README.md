@@ -45,6 +45,7 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 
 - `ProjectSettings/EditorBuildSettings.asset` now enables `Assets/Scenes/OTF.unity` as the primary scene.
 - `Assets/Scenes/OTF.unity` starts both the hologram `Cameras` group and the `HologramComposer` group inactive, preventing capture cameras, render-texture allocation, composition, and WebRTC work during the furnace demo.
+- The nine active OTF point lights retain their existing illumination but have real-time shadows disabled, removing the over-capacity punctual-light shadow workload during the furnace demo.
 - The furnace flow currently uses several focused scripts, including `SnapOnRelease`, `AutoConnectEnd`, `AngleTrigger`, `RotationToGasFlow`, `IncreaseTemperature`, `Setting_Parameter`, and `GrowthRate`.
 - New work should route procedural progress through `FurnaceProcedureManager` instead of adding more one-off scene-only checks.
 - `FurnaceProcedureManager` separates flow order from completion state: procedure steps are a serialized list, while scene interactions mark stable gates such as `PowerOn`, `SubstrateLoaded`, `GasFlowReady`, and `HeatSoakComplete`.
