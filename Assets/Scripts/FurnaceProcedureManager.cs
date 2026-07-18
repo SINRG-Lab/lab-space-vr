@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,26 +7,41 @@ using UnityEngine.UI;
 
 public class FurnaceProcedureManager : MonoBehaviour
 {
-    public enum Step
+    public enum Gate
     {
         PowerOn,
-        LoadSubstrate,
-        FeedSubstrateIntoTube,
-        SetGasFlow,
-        SetTemperatureZones,
-        HeatAndSoak,
-        StartGrowth,
-        CoolDown,
-        WithdrawSubstrate,
-        Complete
+        SubstrateLoaded,
+        RodConnected,
+        SubstrateFedIntoTube,
+        GasFlowReady,
+        TemperatureZonesSet,
+        HeatSoakComplete,
+        GrowthStarted,
+        CooldownComplete,
+        SubstrateWithdrawn
     }
 
     [Serializable]
-    public class StepEvent
+    public class ProcedureStep
     {
-        public Step step;
-        public UnityEvent onEnter;
-        public UnityEvent onComplete;
+        public string id;
+        public string title;
+        [TextArea(2, 4)] public string instruction;
+        public Gate[] requiredGates;
+        public UnityEvent onEnter = new UnityEvent();
+        public UnityEvent onComplete = new UnityEvent();
+
+        public ProcedureStep()
+        {
+        }
+
+        public ProcedureStep(string id, string title, string instruction, params Gate[] requiredGates)
+        {
+            this.id = id;
+            this.title = title;
+            this.instruction = instruction;
+            this.requiredGates = requiredGates;
+        }
     }
 
     [Header("UI")]
@@ -33,11 +49,77 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private TMP_Text instructionText;
     [SerializeField] private Slider progressSlider;
 
+    [Header("Configurable Procedure")]
+    [SerializeField] private List<ProcedureStep> steps = new List<ProcedureStep>
+    {
+        new ProcedureStep(
+            "power_on",
+            "Power On",
+            "Turn on the main furnace power.",
+            Gate.PowerOn
+        ),
+        new ProcedureStep(
+            "load_substrate",
+            "Load Substrate",
+            "Place the substrate on the feed mechanism.",
+            Gate.SubstrateLoaded
+        ),
+        new ProcedureStep(
+            "connect_rod",
+            "Connect Feed Rod",
+            "Attach the feed rod to the loaded substrate holder.",
+            Gate.RodConnected
+        ),
+        new ProcedureStep(
+            "feed_substrate",
+            "Feed Substrate",
+            "Push the connected substrate into the quartz tube.",
+            Gate.RodConnected,
+            Gate.SubstrateFedIntoTube
+        ),
+        new ProcedureStep(
+            "set_gas_flow",
+            "Set Gas Flow",
+            "Open the gas-flow valve to the required flow.",
+            Gate.GasFlowReady
+        ),
+        new ProcedureStep(
+            "set_temperature_zones",
+            "Set Temperature Zones",
+            "Set the three furnace temperature zones.",
+            Gate.TemperatureZonesSet
+        ),
+        new ProcedureStep(
+            "heat_and_soak",
+            "Heat and Soak",
+            "Start heating and wait until the target soak is complete.",
+            Gate.HeatSoakComplete
+        ),
+        new ProcedureStep(
+            "start_growth",
+            "Start Growth",
+            "Start the nanowire growth sequence.",
+            Gate.GrowthStarted
+        ),
+        new ProcedureStep(
+            "cool_down",
+            "Cool Down",
+            "Cool the furnace to the safe withdrawal state.",
+            Gate.CooldownComplete
+        ),
+        new ProcedureStep(
+            "withdraw_substrate",
+            "Withdraw Substrate",
+            "Withdraw the substrate from the quartz tube.",
+            Gate.SubstrateWithdrawn
+        )
+    };
+
     [Header("Gas Flow")]
     [SerializeField] private float minimumGasFlow = 1f;
 
-    [Header("State")]
-    [SerializeField] private Step currentStep = Step.PowerOn;
+    [Header("Runtime")]
+    [SerializeField] private int currentStepIndex;
     [SerializeField] private bool powerOn;
     [SerializeField] private bool substrateLoaded;
     [SerializeField] private bool rodConnected;
@@ -49,16 +131,19 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private bool cooldownComplete;
     [SerializeField] private bool substrateWithdrawn;
 
-    [Header("Events")]
-    [SerializeField] private StepEvent[] stepEvents;
+    public int CurrentStepIndex => currentStepIndex;
+    public int StepCount => steps != null ? steps.Count : 0;
+    public bool IsComplete => currentStepIndex >= StepCount;
 
-    public Step CurrentStep => currentStep;
-    public bool IsComplete => currentStep == Step.Complete;
+    public string CurrentStepId => GetCurrentStep()?.id ?? string.Empty;
+    public string CurrentStepTitle => IsComplete ? "Procedure Complete" : GetStepTitle(GetCurrentStep());
+    public string CurrentStepInstruction => IsComplete ? "Reset the station or prepare for the next run." : GetStepInstruction(GetCurrentStep());
 
     private void Start()
     {
+        EnsureValidStepIndex();
         RefreshUi();
-        InvokeEnterEvent(currentStep);
+        InvokeEnterEvent(GetCurrentStep());
         EvaluateCurrentStep();
     }
 
@@ -75,170 +160,186 @@ public class FurnaceProcedureManager : MonoBehaviour
         cooldownComplete = false;
         substrateWithdrawn = false;
 
-        SetCurrentStep(Step.PowerOn);
+        currentStepIndex = 0;
+        RefreshUi();
+        InvokeEnterEvent(GetCurrentStep());
+    }
+
+    public void AdvanceCurrentStep()
+    {
+        if (IsComplete)
+            return;
+
+        CompleteCurrentStep();
+        EvaluateCurrentStep();
+    }
+
+    public void SetCurrentStepIndex(int stepIndex)
+    {
+        int clampedIndex = Mathf.Clamp(stepIndex, 0, StepCount);
+        if (currentStepIndex == clampedIndex)
+        {
+            RefreshUi();
+            return;
+        }
+
+        currentStepIndex = clampedIndex;
+        RefreshUi();
+        InvokeEnterEvent(GetCurrentStep());
+        EvaluateCurrentStep();
+    }
+
+    public void EvaluateCurrentStep()
+    {
+        EnsureValidStepIndex();
+        RefreshUi();
+
+        while (!IsComplete && IsStepReady(GetCurrentStep()))
+        {
+            CompleteCurrentStep();
+        }
     }
 
     public void MarkPowerOn() => SetPowerOn(true);
     public void MarkSubstrateLoaded() => SetSubstrateLoaded(true);
     public void MarkRodConnected() => SetRodConnected(true);
     public void MarkSubstrateFedIntoTube() => SetSubstrateFedIntoTube(true);
+    public void MarkGasFlowReady() => SetGasFlowReady(true);
     public void MarkTemperatureZonesSet() => SetTemperatureZonesSet(true);
     public void MarkHeatSoakComplete() => SetHeatSoakComplete(true);
     public void MarkGrowthStarted() => SetGrowthStarted(true);
     public void MarkCooldownComplete() => SetCooldownComplete(true);
     public void MarkSubstrateWithdrawn() => SetSubstrateWithdrawn(true);
 
-    public void SetPowerOn(bool value)
-    {
-        powerOn = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetSubstrateLoaded(bool value)
-    {
-        substrateLoaded = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetRodConnected(bool value)
-    {
-        rodConnected = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetSubstrateFedIntoTube(bool value)
-    {
-        substrateFedIntoTube = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetGasFlowReady(bool value)
-    {
-        gasFlowReady = value;
-        EvaluateCurrentStep();
-    }
+    public void SetPowerOn(bool value) => SetGate(Gate.PowerOn, value);
+    public void SetSubstrateLoaded(bool value) => SetGate(Gate.SubstrateLoaded, value);
+    public void SetRodConnected(bool value) => SetGate(Gate.RodConnected, value);
+    public void SetSubstrateFedIntoTube(bool value) => SetGate(Gate.SubstrateFedIntoTube, value);
+    public void SetGasFlowReady(bool value) => SetGate(Gate.GasFlowReady, value);
+    public void SetTemperatureZonesSet(bool value) => SetGate(Gate.TemperatureZonesSet, value);
+    public void SetHeatSoakComplete(bool value) => SetGate(Gate.HeatSoakComplete, value);
+    public void SetGrowthStarted(bool value) => SetGate(Gate.GrowthStarted, value);
+    public void SetCooldownComplete(bool value) => SetGate(Gate.CooldownComplete, value);
+    public void SetSubstrateWithdrawn(bool value) => SetGate(Gate.SubstrateWithdrawn, value);
 
     public void SetGasFlowValue(float value)
     {
-        gasFlowReady = value >= minimumGasFlow;
-        EvaluateCurrentStep();
+        SetGate(Gate.GasFlowReady, value >= minimumGasFlow);
     }
 
-    public void SetTemperatureZonesSet(bool value)
+    public void SetGate(Gate gate, bool value)
     {
-        temperatureZonesSet = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetHeatSoakComplete(bool value)
-    {
-        heatSoakComplete = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetGrowthStarted(bool value)
-    {
-        growthStarted = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetCooldownComplete(bool value)
-    {
-        cooldownComplete = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetSubstrateWithdrawn(bool value)
-    {
-        substrateWithdrawn = value;
-        EvaluateCurrentStep();
-    }
-
-    public void SetCurrentStep(Step step)
-    {
-        if (currentStep == step)
+        switch (gate)
         {
-            RefreshUi();
-            return;
+            case Gate.PowerOn:
+                powerOn = value;
+                break;
+            case Gate.SubstrateLoaded:
+                substrateLoaded = value;
+                break;
+            case Gate.RodConnected:
+                rodConnected = value;
+                break;
+            case Gate.SubstrateFedIntoTube:
+                substrateFedIntoTube = value;
+                break;
+            case Gate.GasFlowReady:
+                gasFlowReady = value;
+                break;
+            case Gate.TemperatureZonesSet:
+                temperatureZonesSet = value;
+                break;
+            case Gate.HeatSoakComplete:
+                heatSoakComplete = value;
+                break;
+            case Gate.GrowthStarted:
+                growthStarted = value;
+                break;
+            case Gate.CooldownComplete:
+                cooldownComplete = value;
+                break;
+            case Gate.SubstrateWithdrawn:
+                substrateWithdrawn = value;
+                break;
         }
 
-        currentStep = step;
-        RefreshUi();
-        InvokeEnterEvent(currentStep);
         EvaluateCurrentStep();
     }
 
-    public void EvaluateCurrentStep()
+    public bool GetGate(Gate gate)
     {
-        RefreshUi();
-
-        if (currentStep == Step.Complete)
-            return;
-
-        if (!IsCurrentStepReady())
-            return;
-
-        CompleteCurrentStep();
-    }
-
-    private void CompleteCurrentStep()
-    {
-        InvokeCompleteEvent(currentStep);
-
-        Step nextStep = GetNextStep(currentStep);
-        currentStep = nextStep;
-
-        RefreshUi();
-        InvokeEnterEvent(currentStep);
-    }
-
-    private bool IsCurrentStepReady()
-    {
-        switch (currentStep)
+        switch (gate)
         {
-            case Step.PowerOn:
+            case Gate.PowerOn:
                 return powerOn;
-            case Step.LoadSubstrate:
+            case Gate.SubstrateLoaded:
                 return substrateLoaded;
-            case Step.FeedSubstrateIntoTube:
-                return rodConnected && substrateFedIntoTube;
-            case Step.SetGasFlow:
+            case Gate.RodConnected:
+                return rodConnected;
+            case Gate.SubstrateFedIntoTube:
+                return substrateFedIntoTube;
+            case Gate.GasFlowReady:
                 return gasFlowReady;
-            case Step.SetTemperatureZones:
+            case Gate.TemperatureZonesSet:
                 return temperatureZonesSet;
-            case Step.HeatAndSoak:
+            case Gate.HeatSoakComplete:
                 return heatSoakComplete;
-            case Step.StartGrowth:
+            case Gate.GrowthStarted:
                 return growthStarted;
-            case Step.CoolDown:
+            case Gate.CooldownComplete:
                 return cooldownComplete;
-            case Step.WithdrawSubstrate:
+            case Gate.SubstrateWithdrawn:
                 return substrateWithdrawn;
-            case Step.Complete:
-                return true;
             default:
                 return false;
         }
     }
 
-    private Step GetNextStep(Step step)
+    private ProcedureStep GetCurrentStep()
     {
-        int next = (int)step + 1;
-        int last = (int)Step.Complete;
+        if (steps == null || currentStepIndex < 0 || currentStepIndex >= steps.Count)
+            return null;
 
-        if (next > last)
-            next = last;
+        return steps[currentStepIndex];
+    }
 
-        return (Step)next;
+    private bool IsStepReady(ProcedureStep step)
+    {
+        if (step == null || step.requiredGates == null || step.requiredGates.Length == 0)
+            return false;
+
+        for (int i = 0; i < step.requiredGates.Length; i++)
+        {
+            if (!GetGate(step.requiredGates[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    private void CompleteCurrentStep()
+    {
+        ProcedureStep completedStep = GetCurrentStep();
+        InvokeCompleteEvent(completedStep);
+
+        currentStepIndex = Mathf.Clamp(currentStepIndex + 1, 0, StepCount);
+
+        RefreshUi();
+        InvokeEnterEvent(GetCurrentStep());
+    }
+
+    private void EnsureValidStepIndex()
+    {
+        currentStepIndex = Mathf.Clamp(currentStepIndex, 0, StepCount);
     }
 
     private void RefreshUi()
     {
         if (stepTitleText)
-            stepTitleText.text = GetStepTitle(currentStep);
+            stepTitleText.text = CurrentStepTitle;
 
         if (instructionText)
-            instructionText.text = GetStepInstruction(currentStep);
+            instructionText.text = CurrentStepInstruction;
 
         if (progressSlider)
             progressSlider.value = GetProgress01();
@@ -246,97 +347,44 @@ public class FurnaceProcedureManager : MonoBehaviour
 
     private float GetProgress01()
     {
-        int last = (int)Step.Complete;
-        if (last <= 0)
+        int stepCount = StepCount;
+        if (stepCount <= 0)
             return 1f;
 
-        return Mathf.Clamp01((float)currentStep / last);
+        return Mathf.Clamp01((float)currentStepIndex / stepCount);
     }
 
-    private string GetStepTitle(Step step)
+    private string GetStepTitle(ProcedureStep step)
     {
-        switch (step)
-        {
-            case Step.PowerOn:
-                return "Power On";
-            case Step.LoadSubstrate:
-                return "Load Substrate";
-            case Step.FeedSubstrateIntoTube:
-                return "Feed Substrate";
-            case Step.SetGasFlow:
-                return "Set Gas Flow";
-            case Step.SetTemperatureZones:
-                return "Set Temperature Zones";
-            case Step.HeatAndSoak:
-                return "Heat and Soak";
-            case Step.StartGrowth:
-                return "Start Growth";
-            case Step.CoolDown:
-                return "Cool Down";
-            case Step.WithdrawSubstrate:
-                return "Withdraw Substrate";
-            case Step.Complete:
-                return "Procedure Complete";
-            default:
-                return step.ToString();
-        }
+        if (step == null)
+            return "Procedure Complete";
+
+        if (!string.IsNullOrWhiteSpace(step.title))
+            return step.title;
+
+        if (!string.IsNullOrWhiteSpace(step.id))
+            return step.id;
+
+        return "Procedure Step " + (currentStepIndex + 1);
     }
 
-    private string GetStepInstruction(Step step)
+    private string GetStepInstruction(ProcedureStep step)
     {
-        switch (step)
-        {
-            case Step.PowerOn:
-                return "Turn on the main furnace power.";
-            case Step.LoadSubstrate:
-                return "Place the substrate on the feed mechanism.";
-            case Step.FeedSubstrateIntoTube:
-                return "Connect the feed rod and move the substrate into the quartz tube.";
-            case Step.SetGasFlow:
-                return "Open the gas-flow valve to the required flow.";
-            case Step.SetTemperatureZones:
-                return "Set the three furnace temperature zones.";
-            case Step.HeatAndSoak:
-                return "Start heating and wait until the target soak is complete.";
-            case Step.StartGrowth:
-                return "Start the nanowire growth sequence.";
-            case Step.CoolDown:
-                return "Cool the furnace to the safe withdrawal state.";
-            case Step.WithdrawSubstrate:
-                return "Withdraw the substrate from the quartz tube.";
-            case Step.Complete:
-                return "Reset the station or prepare for the next run.";
-            default:
-                return string.Empty;
-        }
+        if (step == null)
+            return "Reset the station or prepare for the next run.";
+
+        return step.instruction ?? string.Empty;
     }
 
-    private void InvokeEnterEvent(Step step)
+    private void InvokeEnterEvent(ProcedureStep step)
     {
-        StepEvent match = FindStepEvent(step);
-        if (match != null)
-            match.onEnter?.Invoke();
+        if (step != null)
+            step.onEnter?.Invoke();
     }
 
-    private void InvokeCompleteEvent(Step step)
+    private void InvokeCompleteEvent(ProcedureStep step)
     {
-        StepEvent match = FindStepEvent(step);
-        if (match != null)
-            match.onComplete?.Invoke();
-    }
-
-    private StepEvent FindStepEvent(Step step)
-    {
-        if (stepEvents == null)
-            return null;
-
-        for (int i = 0; i < stepEvents.Length; i++)
-        {
-            StepEvent candidate = stepEvents[i];
-            if (candidate != null && candidate.step == step)
-                return candidate;
-        }
-
-        return null;
+        if (step != null)
+            step.onComplete?.Invoke();
     }
 }
