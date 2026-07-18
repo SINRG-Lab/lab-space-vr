@@ -14,7 +14,7 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 
 | Phase | Status | Scope | Acceptance criteria |
 | --- | --- | --- | --- |
-| 0. OTF as primary demo | Done | Make `OTF` the active build scene and prevent hologram auto-start. | Build settings launch `OTF`; hologram sender waits for manual start. |
+| 0. OTF as primary demo | Done | Make `OTF` the active build scene and keep deferred hologram systems inactive at startup. | Build settings launch `OTF`; hologram capture cameras, composition, output, and streaming stay inactive. |
 | 1. Configurable procedure manager | Done | Add a central manager with reorderable procedure steps and stable completion gates. | Flow order, titles, instructions, required gates, and per-step events can be edited on the manager without code changes. |
 | 2. Wire first OTF gates and UI | Done | Add/assign procedure UI and connect main power plus first substrate snap gate. | User sees current instruction, power-on advances the flow, and substrate placement advances only after a valid snap. |
 | 3. Load and feed substrate | In Progress | Polish substrate plate snapping, rod connection, and quartz tube feeding. | User sees ghost target/highlight, substrate snaps reliably, and the procedure advances only after the substrate is correctly positioned. |
@@ -44,7 +44,7 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 ## Current Implementation Notes
 
 - `ProjectSettings/EditorBuildSettings.asset` now enables `Assets/Scenes/OTF.unity` as the primary scene.
-- `Assets/Scenes/OTF.unity` keeps `HologramSender.waitForManualStart` enabled so hologram work does not interrupt the furnace flow.
+- `Assets/Scenes/OTF.unity` starts both the hologram `Cameras` group and the `HologramComposer` group inactive, preventing capture cameras, render-texture allocation, composition, and WebRTC work during the furnace demo.
 - The furnace flow currently uses several focused scripts, including `SnapOnRelease`, `AutoConnectEnd`, `AngleTrigger`, `RotationToGasFlow`, `IncreaseTemperature`, `Setting_Parameter`, and `GrowthRate`.
 - New work should route procedural progress through `FurnaceProcedureManager` instead of adding more one-off scene-only checks.
 - `FurnaceProcedureManager` separates flow order from completion state: procedure steps are a serialized list, while scene interactions mark stable gates such as `PowerOn`, `SubstrateLoaded`, `GasFlowReady`, and `HeatSoakComplete`.
