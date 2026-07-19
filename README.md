@@ -23,7 +23,7 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 | 6. Temperature ramp and soak | Pending | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
 | 7. Growth start and visualization | Pending | Start nanowire growth only after furnace prerequisites are satisfied. | Growth controls are unavailable before prerequisites; growth starts with clear feedback and sane defaults. |
 | 8. Cooldown and withdraw | Pending | Add cooldown/withdraw steps and reset behavior. | User can complete the procedure by cooling down and withdrawing the substrate without physics glitches. |
-| 9. Demo polish pass | In Progress | Add audio, haptics, labels, reset button, lighting/performance pass, and final rehearsal checklist. | A first-time viewer can follow the demo without verbal rescue; Quest performance remains stable. |
+| 9. Demo polish pass | In Progress | Add audio, hand-tracking feedback, labels, reset button, lighting/performance pass, and final rehearsal checklist. | A first-time viewer can follow the demo without verbal rescue; Quest performance remains stable. |
 
 ## Visual Polish Tracker
 
@@ -33,8 +33,8 @@ Each stage is validated visually and on Quest before the next stage begins.
 | --- | --- | --- | --- |
 | 1. Lighting baseline | Done | Activate the laboratory, localize the ceiling lights, and establish a user-aligned furnace key light. | The furnace is clearly modeled by light, moving parts remain readable, and the full laboratory remains stable on Quest. |
 | 2. Material pass | Done | Differentiate painted metal, stainless steel, quartz, ceramic, controls, and labels. | Major surfaces read as distinct physical materials without relying on excessive texture resolution. |
-| 3. Color finishing | Ready for Review | Add VR-safe tonemapping, color adjustment, and restrained emissive effects. | Contrast and temperature are coherent without distracting bloom or reduced readability. |
-| 4. Interaction presentation | Pending | Unify current-step guides, status colors, sound, haptics, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
+| 3. Color finishing | Done | Add VR-safe tonemapping, color adjustment, and restrained emissive effects. | Contrast and temperature are coherent without distracting bloom or reduced readability. |
+| 4. Interaction presentation | Ready for Review | Unify current-step guides, status colors, sound, hand-tracking feedback, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
 | 5. Quest finalization | Pending | Profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
 
 ## Target Procedure
@@ -76,6 +76,10 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - `SnapOnRelease` now creates a placement guide while the plate is held, changes feedback inside the valid region, eases the plate into position, and marks `SubstrateLoaded` only after placement completes.
 - `AutoConnectEnd` now matches named plug/socket endpoints, previews the connection while the rod is held, eases the endpoints together on release, and marks `RodConnected` after the joint is created.
 - `FeedRailController` constrains the connected rod to an adjustable insertion path, locks its rotation, visualizes the target depth, and marks `SubstrateFedIntoTube` at the configured completion threshold.
+- The procedure panel now normalizes its progress range, displays the current step number from the reorderable `steps` list, and changes to the accepted completion color when the run finishes.
+- Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
+- `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.
+- Each procedure step also exposes optional `activeObjects` and `activeBehaviours` lists for hiding or disabling step-specific controls without hard-coding scene references.
 
 ## Split Tube Furnace Model Previews
 

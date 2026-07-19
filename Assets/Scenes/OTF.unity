@@ -166,8 +166,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
@@ -15997,6 +15997,9 @@ MonoBehaviour:
   guideColor: {r: 0.15, g: 0.75, b: 1, a: 0.3}
   validGuideColor: {r: 0.2, g: 1, b: 0.4, a: 0.6}
   guideSize: 0.035
+  procedureManager: {fileID: 1071694018}
+  procedureGate: 2
+  restrictInteractionToCurrentStep: 1
   snapDuration: 0.18
   snapCurve:
     serializedVersion: 2
@@ -22578,6 +22581,77 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1424634562}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &910000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000003}
+  - component: {fileID: 910000002}
+  m_Layer: 0
+  m_Name: OTF Color Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &910000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 78a4d390fe3c4ea7b5beebc18e58e2c2, type: 2}
+--- !u!4 &910000003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910000010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071694017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcf5f1b735e4480ab42f4fe4a5840f26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnaceInteractionFeedback
+  audioSource: {fileID: 0}
+  targetAvailableClip: {fileID: 8300000, guid: b319a2e4ff8f5d840b82d8635b645d22, type: 3}
+  actionConfirmedClip: {fileID: 8300000, guid: d14b106713a74b448bcab90869f1706e, type: 3}
+  volume: 0.45
+  targetCueCooldown: 0.08
+  enableHaptics: 1
+  targetAmplitude: 0.18
+  confirmationAmplitude: 0.55
+  targetDuration: 0.035
+  confirmationDuration: 0.09
 --- !u!1 &911424325
 GameObject:
   m_ObjectHideFlags: 0
@@ -24099,6 +24173,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1071694019}
   - component: {fileID: 1071694018}
+  - component: {fileID: 910000010}
   m_Layer: 0
   m_Name: FurnaceProcedureManager
   m_TagString: Untagged
@@ -24118,14 +24193,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f1f6bcd0d6e4cf4a8ed6a81bf6e0c31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FurnaceProcedureManager
-  stepTitleText: {fileID: 1433328260}
-  instructionText: {fileID: 1780751291}
+  stepTitleText: {fileID: 0}
+  instructionText: {fileID: 0}
   progressSlider: {fileID: 1611024994}
+  activeColor: {r: 0.2, g: 0.78, b: 1, a: 1}
+  completeColor: {r: 0.28, g: 0.95, b: 0.5, a: 1}
+  showStepNumber: 1
   steps:
   - id: power_on
     title: Power On
     instruction: Turn on the main furnace power.
     requiredGates: 00000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24136,6 +24216,8 @@ MonoBehaviour:
     title: Load Substrate
     instruction: Place the substrate on the feed mechanism.
     requiredGates: 01000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24146,6 +24228,8 @@ MonoBehaviour:
     title: Connect Feed Rod
     instruction: Attach the feed rod to the loaded substrate holder.
     requiredGates: 02000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24156,6 +24240,8 @@ MonoBehaviour:
     title: Feed Substrate
     instruction: Push the connected substrate into the quartz tube.
     requiredGates: 0200000003000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24166,6 +24252,8 @@ MonoBehaviour:
     title: Set Gas Flow
     instruction: Open the gas-flow valve to the required flow.
     requiredGates: 04000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24176,6 +24264,8 @@ MonoBehaviour:
     title: Set Temperature Zones
     instruction: Set the three furnace temperature zones.
     requiredGates: 05000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24186,6 +24276,8 @@ MonoBehaviour:
     title: Heat and Soak
     instruction: Start heating and wait until the target soak is complete.
     requiredGates: 06000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24196,6 +24288,8 @@ MonoBehaviour:
     title: Start Growth
     instruction: Start the nanowire growth sequence.
     requiredGates: 07000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24206,6 +24300,8 @@ MonoBehaviour:
     title: Cool Down
     instruction: Cool the furnace to the safe withdrawal state.
     requiredGates: 08000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24216,6 +24312,8 @@ MonoBehaviour:
     title: Withdraw Substrate
     instruction: Withdraw the substrate from the quartz tube.
     requiredGates: 09000000
+    activeObjects: []
+    activeBehaviours: []
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -25245,6 +25343,9 @@ MonoBehaviour:
   guideColor: {r: 0.15, g: 0.75, b: 1, a: 0.3}
   validGuideColor: {r: 0.2, g: 1, b: 0.4, a: 0.6}
   guideSize: 0.035
+  procedureManager: {fileID: 1071694018}
+  procedureGate: 2
+  restrictInteractionToCurrentStep: 1
   snapDuration: 0.18
   snapCurve:
     serializedVersion: 2
@@ -25798,6 +25899,9 @@ MonoBehaviour:
   validGuideMaterial: {fileID: 0}
   guideColor: {r: 0.15, g: 0.75, b: 1, a: 0.3}
   validGuideColor: {r: 0.2, g: 1, b: 0.4, a: 0.55}
+  procedureManager: {fileID: 1071694018}
+  procedureGate: 1
+  restrictInteractionToCurrentStep: 1
   snapDuration: 0.2
   snapCurve:
     serializedVersion: 2
@@ -30607,7 +30711,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1433328259
 RectTransform:
   m_ObjectHideFlags: 0
@@ -35800,7 +35904,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1780751290
 RectTransform:
   m_ObjectHideFlags: 0
@@ -41076,6 +41180,9 @@ MonoBehaviour:
   completeGuideColor: {r: 0.2, g: 1, b: 0.4, a: 0.65}
   guideWidth: 0.008
   endMarkerSize: 0.04
+  procedureManager: {fileID: 1071694018}
+  procedureGate: 3
+  restrictInteractionToCurrentStep: 1
   OnRailActivated:
     m_PersistentCalls:
       m_Calls: []
@@ -53657,55 +53764,6 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: 1
   m_LayoutPriority: 1
---- !u!1 &910000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 910000003}
-  - component: {fileID: 910000002}
-  m_Layer: 0
-  m_Name: OTF Color Volume
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &910000002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 910000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  m_IsGlobal: 1
-  m_Priority: 10
-  m_BlendDistance: 0
-  m_Weight: 1
-  sharedProfile: {fileID: 11400000, guid: 78a4d390fe3c4ea7b5beebc18e58e2c2, type: 2}
---- !u!4 &910000003
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 910000001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

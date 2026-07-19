@@ -29,6 +29,12 @@ public class FeedRailController : MonoBehaviour
     [SerializeField, Min(0.001f)] private float guideWidth = 0.008f;
     [SerializeField, Min(0.001f)] private float endMarkerSize = 0.04f;
 
+    [Header("Procedure")]
+    [SerializeField] private FurnaceProcedureManager procedureManager;
+    [SerializeField] private FurnaceProcedureManager.Gate procedureGate =
+        FurnaceProcedureManager.Gate.SubstrateFedIntoTube;
+    [SerializeField] private bool restrictInteractionToCurrentStep = true;
+
     [Header("Events")]
     public UnityEvent OnRailActivated;
     public UnityEvent<float> OnProgressChanged;
@@ -93,6 +99,7 @@ public class FeedRailController : MonoBehaviour
         }
 
         SetupGuide();
+        ResolveProcedureManager();
     }
 
     private void Update()
@@ -109,7 +116,9 @@ public class FeedRailController : MonoBehaviour
         }
 
         bool isGrabbed = grabbable.SelectingPointsCount > 0;
-        SetGuideVisible(railActive && (!showGuideWhileGrabbed || isGrabbed));
+        bool procedureAvailable = IsProcedureAvailable();
+        SetGuideVisible(
+            procedureAvailable && railActive && (!showGuideWhileGrabbed || isGrabbed));
 
         if (guideRoot && guideRoot.activeSelf)
         {
@@ -121,7 +130,10 @@ public class FeedRailController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!railActive || !connectionEnd.IsConnected || grabbable.SelectingPointsCount == 0)
+        if (!IsProcedureAvailable() ||
+            !railActive ||
+            !connectionEnd.IsConnected ||
+            grabbable.SelectingPointsCount == 0)
         {
             return;
         }
@@ -214,6 +226,7 @@ public class FeedRailController : MonoBehaviour
         {
             feedCompleted = true;
             SetGuideState(true);
+            FurnaceInteractionFeedback.PlayActionConfirmed();
             OnFeedCompleted?.Invoke();
         }
         else if (feedCompleted && resetCompletionWhenRetracted && progress < resetThreshold)
@@ -298,6 +311,19 @@ public class FeedRailController : MonoBehaviour
         {
             guideRoot.SetActive(visible);
         }
+    }
+
+    private void ResolveProcedureManager()
+    {
+        if (!procedureManager)
+            procedureManager = FindFirstObjectByType<FurnaceProcedureManager>();
+    }
+
+    private bool IsProcedureAvailable()
+    {
+        return !restrictInteractionToCurrentStep ||
+               !procedureManager ||
+               procedureManager.IsGateRequiredByCurrentStep(procedureGate);
     }
 
     private static Material CreateTransparentMaterial(Material source, Color color)

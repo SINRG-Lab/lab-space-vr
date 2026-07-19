@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class FurnaceProcedureManager : MonoBehaviour
 {
+    public static FurnaceProcedureManager Instance { get; private set; }
+
     public enum Gate
     {
         PowerOn,
@@ -28,6 +30,10 @@ public class FurnaceProcedureManager : MonoBehaviour
         public string title;
         [TextArea(2, 4)] public string instruction;
         public Gate[] requiredGates;
+        [Tooltip("Objects shown only while this is the current procedure step.")]
+        public GameObject[] activeObjects;
+        [Tooltip("Components enabled only while this is the current procedure step.")]
+        public Behaviour[] activeBehaviours;
         public UnityEvent onEnter = new UnityEvent();
         public UnityEvent onComplete = new UnityEvent();
 
@@ -48,6 +54,9 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private TMP_Text stepTitleText;
     [SerializeField] private TMP_Text instructionText;
     [SerializeField] private Slider progressSlider;
+    [SerializeField] private Color activeColor = new(0.2f, 0.78f, 1f, 1f);
+    [SerializeField] private Color completeColor = new(0.28f, 0.95f, 0.5f, 1f);
+    [SerializeField] private bool showStepNumber = true;
 
     [Header("Configurable Procedure")]
     [SerializeField] private List<ProcedureStep> steps = new List<ProcedureStep>
@@ -138,6 +147,25 @@ public class FurnaceProcedureManager : MonoBehaviour
     public string CurrentStepId => GetCurrentStep()?.id ?? string.Empty;
     public string CurrentStepTitle => IsComplete ? "Procedure Complete" : GetStepTitle(GetCurrentStep());
     public string CurrentStepInstruction => IsComplete ? "Reset the station or prepare for the next run." : GetStepInstruction(GetCurrentStep());
+
+    public event Action<int, ProcedureStep> StepEntered;
+    public event Action<int, ProcedureStep> StepCompleted;
+    public event Action ProcedureCompleted;
+
+    private void Awake()
+    {
+        if (Instance && Instance != this)
+        {
+            Debug.LogWarning(
+                $"Only one {nameof(FurnaceProcedureManager)} should be active. Disabling {name}.",
+                this);
+            enabled = false;
+            return;
+        }
+
+        Instance = this;
+        ConfigureProgressSlider();
+    }
 
     private void Start()
     {
@@ -295,6 +323,21 @@ public class FurnaceProcedureManager : MonoBehaviour
         }
     }
 
+    public bool IsGateRequiredByCurrentStep(Gate gate)
+    {
+        ProcedureStep step = GetCurrentStep();
+        if (step?.requiredGates == null)
+            return false;
+
+        for (int i = 0; i < step.requiredGates.Length; i++)
+        {
+            if (step.requiredGates[i] == gate)
+                return true;
+        }
+
+        return false;
+    }
+
     private ProcedureStep GetCurrentStep()
     {
         if (steps == null || currentStepIndex < 0 || currentStepIndex >= steps.Count)
@@ -320,12 +363,22 @@ public class FurnaceProcedureManager : MonoBehaviour
     private void CompleteCurrentStep()
     {
         ProcedureStep completedStep = GetCurrentStep();
+        int completedStepIndex = currentStepIndex;
         InvokeCompleteEvent(completedStep);
+        StepCompleted?.Invoke(completedStepIndex, completedStep);
 
         currentStepIndex = Mathf.Clamp(currentStepIndex + 1, 0, StepCount);
 
         RefreshUi();
-        InvokeEnterEvent(GetCurrentStep());
+        if (IsComplete)
+        {
+            ProcedureCompleted?.Invoke();
+            FurnaceInteractionFeedback.PlayProcedureComplete();
+        }
+        else
+        {
+            InvokeEnterEvent(GetCurrentStep());
+        }
     }
 
     private void EnsureValidStepIndex()
@@ -336,13 +389,111 @@ public class FurnaceProcedureManager : MonoBehaviour
     private void RefreshUi()
     {
         if (stepTitleText)
-            stepTitleText.text = CurrentStepTitle;
+        {
+            stepTitleText.color = Color.white;
+            stepTitleText.text = GetPresentedStepTitle();
+        }
 
         if (instructionText)
+        {
+            instructionText.color = IsComplete ? completeColor : Color.white;
             instructionText.text = CurrentStepInstruction;
+        }
 
         if (progressSlider)
+        {
             progressSlider.value = GetProgress01();
+            if (progressSlider.fillRect &&
+                progressSlider.fillRect.TryGetComponent(out Image fillImage))
+            {
+                fillImage.color = IsComplete ? completeColor : activeColor;
+            }
+        }
+
+        ApplyStepPresentation();
+    }
+
+    private void ConfigureProgressSlider()
+    {
+        if (!progressSlider)
+            return;
+
+        progressSlider.minValue = 0f;
+        progressSlider.maxValue = 1f;
+        progressSlider.wholeNumbers = false;
+        progressSlider.interactable = false;
+    }
+
+    private string GetPresentedStepTitle()
+    {
+        string color = ColorUtility.ToHtmlStringRGB(IsComplete ? completeColor : activeColor);
+        if (IsComplete)
+            return $"<size=16><color=#{color}>PROCEDURE</color></size>\nComplete";
+
+        if (!showStepNumber)
+            return CurrentStepTitle;
+
+        return $"<size=16><color=#{color}>STEP {currentStepIndex + 1} OF {StepCount}</color></size>\n{CurrentStepTitle}";
+    }
+
+    private void ApplyStepPresentation()
+    {
+        if (steps == null)
+            return;
+
+        ProcedureStep currentStep = GetCurrentStep();
+        HashSet<GameObject> configuredObjects = new();
+        HashSet<Behaviour> configuredBehaviours = new();
+
+        for (int i = 0; i < steps.Count; i++)
+        {
+            ProcedureStep step = steps[i];
+            if (step == null)
+                continue;
+
+            AddConfiguredItems(step.activeObjects, configuredObjects);
+            AddConfiguredItems(step.activeBehaviours, configuredBehaviours);
+        }
+
+        foreach (GameObject configuredObject in configuredObjects)
+        {
+            bool shouldBeActive = currentStep != null && Contains(currentStep.activeObjects, configuredObject);
+            if (configuredObject.activeSelf != shouldBeActive)
+                configuredObject.SetActive(shouldBeActive);
+        }
+
+        foreach (Behaviour configuredBehaviour in configuredBehaviours)
+        {
+            bool shouldBeEnabled = currentStep != null && Contains(currentStep.activeBehaviours, configuredBehaviour);
+            if (configuredBehaviour.enabled != shouldBeEnabled)
+                configuredBehaviour.enabled = shouldBeEnabled;
+        }
+    }
+
+    private static void AddConfiguredItems<T>(T[] items, HashSet<T> destination) where T : UnityEngine.Object
+    {
+        if (items == null)
+            return;
+
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] != null)
+                destination.Add(items[i]);
+        }
+    }
+
+    private static bool Contains<T>(T[] items, T item) where T : UnityEngine.Object
+    {
+        if (items == null || item == null)
+            return false;
+
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == item)
+                return true;
+        }
+
+        return false;
     }
 
     private float GetProgress01()
@@ -379,12 +530,21 @@ public class FurnaceProcedureManager : MonoBehaviour
     private void InvokeEnterEvent(ProcedureStep step)
     {
         if (step != null)
+        {
             step.onEnter?.Invoke();
+            StepEntered?.Invoke(currentStepIndex, step);
+        }
     }
 
     private void InvokeCompleteEvent(ProcedureStep step)
     {
         if (step != null)
             step.onComplete?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }

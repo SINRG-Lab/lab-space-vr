@@ -38,6 +38,12 @@ public class AutoConnectEnd : MonoBehaviour
     [SerializeField] private Color validGuideColor = new(0.2f, 1f, 0.4f, 0.6f);
     [SerializeField, Min(0.001f)] private float guideSize = 0.035f;
 
+    [Header("Procedure")]
+    [SerializeField] private FurnaceProcedureManager procedureManager;
+    [SerializeField] private FurnaceProcedureManager.Gate procedureGate =
+        FurnaceProcedureManager.Gate.RodConnected;
+    [SerializeField] private bool restrictInteractionToCurrentStep = true;
+
     [Header("Snap Motion")]
     [SerializeField, Min(0f)] private float snapDuration = 0.18f;
     [SerializeField] private AnimationCurve snapCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -122,6 +128,7 @@ public class AutoConnectEnd : MonoBehaviour
         }
 
         SetupGuide();
+        ResolveProcedureManager();
     }
 
     private void OnEnable()
@@ -149,6 +156,13 @@ public class AutoConnectEnd : MonoBehaviour
         if (connectedEnd)
         {
             MonitorConnectionSeparation();
+            wasGrabbed = IsOwnerGrabbed();
+            return;
+        }
+
+        if (!IsProcedureAvailable())
+        {
+            ClearCandidate();
             wasGrabbed = IsOwnerGrabbed();
             return;
         }
@@ -333,6 +347,7 @@ public class AutoConnectEnd : MonoBehaviour
 
         OnConnected?.Invoke();
         other.OnConnected?.Invoke();
+        FurnaceInteractionFeedback.PlayActionConfirmed();
     }
 
     private void CalculateTargetPose(
@@ -475,6 +490,7 @@ public class AutoConnectEnd : MonoBehaviour
             candidateWasValid = isValid;
             if (isValid)
             {
+                FurnaceInteractionFeedback.PlayTargetAvailable();
                 OnValidTargetEntered?.Invoke();
             }
             else
@@ -630,6 +646,19 @@ public class AutoConnectEnd : MonoBehaviour
 
         connectingTarget = null;
         isConnecting = false;
+    }
+
+    private void ResolveProcedureManager()
+    {
+        if (!procedureManager)
+            procedureManager = FindFirstObjectByType<FurnaceProcedureManager>();
+    }
+
+    private bool IsProcedureAvailable()
+    {
+        return !restrictInteractionToCurrentStep ||
+               !procedureManager ||
+               procedureManager.IsGateRequiredByCurrentStep(procedureGate);
     }
 
     private void OnDestroy()

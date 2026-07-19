@@ -23,6 +23,12 @@ public class SnapOnRelease : MonoBehaviour
     [SerializeField] private Color guideColor = new(0.15f, 0.75f, 1f, 0.3f);
     [SerializeField] private Color validGuideColor = new(0.2f, 1f, 0.4f, 0.55f);
 
+    [Header("Procedure")]
+    [SerializeField] private FurnaceProcedureManager procedureManager;
+    [SerializeField] private FurnaceProcedureManager.Gate procedureGate =
+        FurnaceProcedureManager.Gate.SubstrateLoaded;
+    [SerializeField] private bool restrictInteractionToCurrentStep = true;
+
     [Header("Snap Motion")]
     [SerializeField, Min(0f)] private float snapDuration = 0.2f;
     [SerializeField] private AnimationCurve snapCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -52,6 +58,7 @@ public class SnapOnRelease : MonoBehaviour
     private bool wasGrabbed;
     private bool pendingSnap;
     private bool isSnapping;
+    private bool wasProcedureAvailable;
     private bool previousKinematicState;
     private Vector3 queuedPosition;
     private Quaternion queuedRotation;
@@ -87,6 +94,7 @@ public class SnapOnRelease : MonoBehaviour
 
         CacheObjectRenderers();
         SetupGuide();
+        ResolveProcedureManager();
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
     }
 
@@ -98,8 +106,14 @@ public class SnapOnRelease : MonoBehaviour
         }
 
         inside = true;
+        if (!IsProcedureAvailable())
+        {
+            return;
+        }
+
         SetObjectHighlight(true);
         SetGuideState(true);
+        FurnaceInteractionFeedback.PlayTargetAvailable();
         OnSnapZoneEntered?.Invoke();
     }
 
@@ -111,6 +125,11 @@ public class SnapOnRelease : MonoBehaviour
         }
 
         inside = false;
+        if (!IsProcedureAvailable())
+        {
+            return;
+        }
+
         SetObjectHighlight(false);
         SetGuideState(false);
         OnSnapZoneExited?.Invoke();
@@ -119,8 +138,18 @@ public class SnapOnRelease : MonoBehaviour
     private void Update()
     {
         bool isGrabbed = grabbable.SelectingPointsCount > 0;
+        bool procedureAvailable = IsProcedureAvailable();
 
-        if (isGrabbed && !wasGrabbed)
+        if (!procedureAvailable)
+        {
+            SetObjectHighlight(false);
+            SetGuideVisible(false);
+            wasGrabbed = isGrabbed;
+            wasProcedureAvailable = false;
+            return;
+        }
+
+        if (isGrabbed && (!wasGrabbed || !wasProcedureAvailable))
         {
             SetGuideVisible(true);
             SetGuideState(inside);
@@ -140,6 +169,7 @@ public class SnapOnRelease : MonoBehaviour
         }
 
         wasGrabbed = isGrabbed;
+        wasProcedureAvailable = true;
     }
 
     private void FixedUpdate()
@@ -192,6 +222,7 @@ public class SnapOnRelease : MonoBehaviour
         }
 
         isSnapping = false;
+        FurnaceInteractionFeedback.PlayActionConfirmed();
         OnSnapped?.Invoke();
 
         if (applyConstraintsAfterSnap)
@@ -426,6 +457,19 @@ public class SnapOnRelease : MonoBehaviour
         return materials;
     }
 
+    private void ResolveProcedureManager()
+    {
+        if (!procedureManager)
+            procedureManager = FindFirstObjectByType<FurnaceProcedureManager>();
+    }
+
+    private bool IsProcedureAvailable()
+    {
+        return !restrictInteractionToCurrentStep ||
+               !procedureManager ||
+               procedureManager.IsGateRequiredByCurrentStep(procedureGate);
+    }
+
     private void OnDisable()
     {
         StopAllCoroutines();
@@ -437,6 +481,7 @@ public class SnapOnRelease : MonoBehaviour
 
         pendingSnap = false;
         isSnapping = false;
+        wasProcedureAvailable = false;
         SetObjectHighlight(false);
         SetGuideVisible(false);
     }
