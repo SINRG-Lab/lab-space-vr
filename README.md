@@ -23,7 +23,19 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 | 6. Temperature ramp and soak | Pending | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
 | 7. Growth start and visualization | Pending | Start nanowire growth only after furnace prerequisites are satisfied. | Growth controls are unavailable before prerequisites; growth starts with clear feedback and sane defaults. |
 | 8. Cooldown and withdraw | Pending | Add cooldown/withdraw steps and reset behavior. | User can complete the procedure by cooling down and withdrawing the substrate without physics glitches. |
-| 9. Demo polish pass | Pending | Add audio, haptics, labels, reset button, lighting/performance pass, and final rehearsal checklist. | A first-time viewer can follow the demo without verbal rescue; Quest performance remains stable. |
+| 9. Demo polish pass | In Progress | Add audio, haptics, labels, reset button, lighting/performance pass, and final rehearsal checklist. | A first-time viewer can follow the demo without verbal rescue; Quest performance remains stable. |
+
+## Visual Polish Tracker
+
+Each stage is validated visually and on Quest before the next stage begins.
+
+| Stage | Status | Scope | Acceptance criteria |
+| --- | --- | --- | --- |
+| 1. Lighting baseline | In Progress | Localize the ceiling lights, establish baked room lighting, and add targeted probes and a furnace key light. | The furnace is clearly modeled by light, static surfaces feel grounded, moving parts remain readable, and Quest performance is stable. |
+| 2. Material pass | Pending | Differentiate painted metal, stainless steel, quartz, ceramic, controls, and labels. | Major surfaces read as distinct physical materials without relying on excessive texture resolution. |
+| 3. Color finishing | Pending | Add VR-safe tonemapping, color adjustment, and restrained emissive effects. | Contrast and temperature are coherent without distracting bloom or reduced readability. |
+| 4. Interaction presentation | Pending | Unify current-step guides, status colors, sound, haptics, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
+| 5. Quest finalization | Pending | Profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
 
 ## Target Procedure
 
@@ -45,7 +57,9 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 
 - `ProjectSettings/EditorBuildSettings.asset` now enables `Assets/Scenes/OTF.unity` as the primary scene.
 - `Assets/Scenes/OTF.unity` starts both the hologram `Cameras` group and the `HologramComposer` group inactive, preventing capture cameras, render-texture allocation, composition, and WebRTC work during the furnace demo.
-- The nine active OTF point lights retain their existing illumination but have real-time shadows disabled, removing the over-capacity punctual-light shadow workload during the furnace demo.
+- OTF now uses six shadowless point lights for room illumination, removing the previous over-capacity punctual-light shadow workload.
+- The remaining ceiling-light ranges are `5.5 m`, preserving floor coverage while preventing every light from flooding the entire laboratory.
+- The user-aligned `Furnace Key Light` at `(-0.8, 3.1, 2.2)` is a downward-facing spotlight with hard, medium-tier shadows.
 - The furnace flow currently uses several focused scripts, including `SnapOnRelease`, `AutoConnectEnd`, `AngleTrigger`, `RotationToGasFlow`, `IncreaseTemperature`, `Setting_Parameter`, and `GrowthRate`.
 - New work should route procedural progress through `FurnaceProcedureManager` instead of adding more one-off scene-only checks.
 - `FurnaceProcedureManager` separates flow order from completion state: procedure steps are a serialized list, while scene interactions mark stable gates such as `PowerOn`, `SubstrateLoaded`, `GasFlowReady`, and `HeatSoakComplete`.
