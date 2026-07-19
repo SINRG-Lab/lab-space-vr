@@ -34,6 +34,10 @@ public class FurnaceProcedureManager : MonoBehaviour
         public GameObject[] activeObjects;
         [Tooltip("Components enabled only while this is the current procedure step.")]
         public Behaviour[] activeBehaviours;
+        [Tooltip("Optional scene component highlighted by the world-space step indicator.")]
+        public Transform indicatorTarget;
+        [Tooltip("World-space offset from the indicator target.")]
+        public Vector3 indicatorOffset = new(0f, 0.16f, 0f);
         public UnityEvent onEnter = new UnityEvent();
         public UnityEvent onComplete = new UnityEvent();
 
@@ -147,6 +151,8 @@ public class FurnaceProcedureManager : MonoBehaviour
     public string CurrentStepId => GetCurrentStep()?.id ?? string.Empty;
     public string CurrentStepTitle => IsComplete ? "Procedure Complete" : GetStepTitle(GetCurrentStep());
     public string CurrentStepInstruction => IsComplete ? "Reset the station or prepare for the next run." : GetStepInstruction(GetCurrentStep());
+    public Transform CurrentIndicatorTarget => GetCurrentStep()?.indicatorTarget;
+    public Vector3 CurrentIndicatorOffset => GetCurrentStep()?.indicatorOffset ?? Vector3.zero;
 
     public event Action<int, ProcedureStep> StepEntered;
     public event Action<int, ProcedureStep> StepCompleted;

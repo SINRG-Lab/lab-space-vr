@@ -80,6 +80,7 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
 - `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.
 - Each procedure step also exposes optional `activeObjects` and `activeBehaviours` lists for hiding or disabling step-specific controls without hard-coding scene references.
+- `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first four entries point to main power, the substrate plate, the pulling rod, and the feed endpoint.
 
 ## Split Tube Furnace Model Previews
 
