@@ -13263,6 +13263,7 @@ GameObject:
   - component: {fileID: 633261843}
   - component: {fileID: 633261842}
   - component: {fileID: 633261841}
+  - component: {fileID: 910000020}
   m_Layer: 0
   m_Name: '[BuildingBlock] Camera Rig'
   m_TagString: Untagged
@@ -22647,11 +22648,21 @@ MonoBehaviour:
   actionConfirmedClip: {fileID: 8300000, guid: d14b106713a74b448bcab90869f1706e, type: 3}
   volume: 0.45
   targetCueCooldown: 0.08
-  enableHaptics: 1
-  targetAmplitude: 0.18
-  confirmationAmplitude: 0.55
-  targetDuration: 0.035
-  confirmationDuration: 0.09
+--- !u!114 &910000020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633261840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be6f8de4d044535bc5c50cb6622bb83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuestPerformanceBootstrap
+  targetRefreshRate: 72
+  maxWaitFrames: 180
+  logResult: 1
 --- !u!1 &911424325
 GameObject:
   m_ObjectHideFlags: 0
@@ -30711,7 +30722,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1433328259
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30778,15 +30789,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -35904,7 +35915,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1780751290
 RectTransform:
   m_ObjectHideFlags: 0
@@ -35978,8 +35989,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1

@@ -34,8 +34,8 @@ Each stage is validated visually and on Quest before the next stage begins.
 | 1. Lighting baseline | Done | Activate the laboratory, localize the ceiling lights, and establish a user-aligned furnace key light. | The furnace is clearly modeled by light, moving parts remain readable, and the full laboratory remains stable on Quest. |
 | 2. Material pass | Done | Differentiate painted metal, stainless steel, quartz, ceramic, controls, and labels. | Major surfaces read as distinct physical materials without relying on excessive texture resolution. |
 | 3. Color finishing | Done | Add VR-safe tonemapping, color adjustment, and restrained emissive effects. | Contrast and temperature are coherent without distracting bloom or reduced readability. |
-| 4. Interaction presentation | Ready for Review | Unify current-step guides, status colors, sound, hand-tracking feedback, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
-| 5. Quest finalization | Pending | Profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
+| 4. Interaction presentation | Done | Unify current-step guides, status colors, sound, hand-tracking feedback, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
+| 5. Quest finalization | In Progress | Profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
 
 ## Target Procedure
 
@@ -80,6 +80,7 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
 - `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.
 - Each procedure step also exposes optional `activeObjects` and `activeBehaviours` lists for hiding or disabling step-specific controls without hard-coding scene references.
+- Quest 3 performance testing starts from a deterministic `72 Hz` baseline set by `QuestPerformanceBootstrap`; render scale, MSAA, foveation, and lighting remain unchanged until the on-device baseline is recorded.
 
 ## Split Tube Furnace Model Previews
 
