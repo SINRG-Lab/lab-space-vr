@@ -13263,7 +13263,6 @@ GameObject:
   - component: {fileID: 633261843}
   - component: {fileID: 633261842}
   - component: {fileID: 633261841}
-  - component: {fileID: 910000020}
   m_Layer: 0
   m_Name: '[BuildingBlock] Camera Rig'
   m_TagString: Untagged
@@ -22648,21 +22647,6 @@ MonoBehaviour:
   actionConfirmedClip: {fileID: 8300000, guid: d14b106713a74b448bcab90869f1706e, type: 3}
   volume: 0.45
   targetCueCooldown: 0.08
---- !u!114 &910000020
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633261840}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6be6f8de4d044535bc5c50cb6622bb83, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::QuestPerformanceBootstrap
-  targetRefreshRate: 72
-  maxWaitFrames: 180
-  logResult: 1
 --- !u!1 &911424325
 GameObject:
   m_ObjectHideFlags: 0

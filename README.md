@@ -17,8 +17,8 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 | 0. OTF as primary demo | Done | Make `OTF` the active build scene and keep deferred hologram systems inactive at startup. | Build settings launch `OTF`; hologram capture cameras, composition, output, and streaming stay inactive. |
 | 1. Configurable procedure manager | Done | Add a central manager with reorderable procedure steps and stable completion gates. | Flow order, titles, instructions, required gates, and per-step events can be edited on the manager without code changes. |
 | 2. Wire first OTF gates and UI | Done | Add/assign procedure UI and connect main power plus first substrate snap gate. | User sees current instruction, power-on advances the flow, and substrate placement advances only after a valid snap. |
-| 3. Load and feed substrate | In Progress | Polish substrate plate snapping, rod connection, and quartz tube feeding. | User sees ghost target/highlight, substrate snaps reliably, and the procedure advances only after the substrate is correctly positioned. |
-| 4. Power and furnace controls | Pending | Gate main power, lid/handle state, heating ready/off controls, and UI visibility. | Controls unlock in sequence; irrelevant controls are hidden or visually demoted until they are needed. |
+| 3. Load and feed substrate | Done | Polish substrate plate snapping, rod connection, and quartz tube feeding. | User sees ghost target/highlight, substrate snaps reliably, and the procedure advances only after the substrate is correctly positioned. |
+| 4. Power and furnace controls | Next | Gate main power, lid/handle state, heating ready/off controls, and UI visibility. | Controls unlock in sequence; irrelevant controls are hidden or visually demoted until they are needed. |
 | 5. Gas flow | Pending | Make the valve readout deterministic and use a minimum gas-flow gate. | Readout is stable, displays useful units, and the procedure blocks heating until flow is ready. |
 | 6. Temperature ramp and soak | Pending | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
 | 7. Growth start and visualization | Pending | Start nanowire growth only after furnace prerequisites are satisfied. | Growth controls are unavailable before prerequisites; growth starts with clear feedback and sane defaults. |
@@ -35,7 +35,7 @@ Each stage is validated visually and on Quest before the next stage begins.
 | 2. Material pass | Done | Differentiate painted metal, stainless steel, quartz, ceramic, controls, and labels. | Major surfaces read as distinct physical materials without relying on excessive texture resolution. |
 | 3. Color finishing | Done | Add VR-safe tonemapping, color adjustment, and restrained emissive effects. | Contrast and temperature are coherent without distracting bloom or reduced readability. |
 | 4. Interaction presentation | Done | Unify current-step guides, status colors, sound, hand-tracking feedback, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
-| 5. Quest finalization | In Progress | Profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
+| 5. Quest finalization | Pending | After the remaining furnace flow is implemented, profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
 
 ## Target Procedure
 
@@ -80,7 +80,6 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
 - `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.
 - Each procedure step also exposes optional `activeObjects` and `activeBehaviours` lists for hiding or disabling step-specific controls without hard-coding scene references.
-- Quest 3 performance testing starts from a deterministic `72 Hz` baseline set by `QuestPerformanceBootstrap`; render scale, MSAA, foveation, and lighting remain unchanged until the on-device baseline is recorded.
 
 ## Split Tube Furnace Model Previews
 
