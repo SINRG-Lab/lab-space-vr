@@ -73,9 +73,9 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - The furnace flow currently uses several focused scripts, including `SnapOnRelease`, `AutoConnectEnd`, `AngleTrigger`, `RotationToGasFlow`, `IncreaseTemperature`, `Setting_Parameter`, and `GrowthRate`.
 - New work should route procedural progress through `FurnaceProcedureManager` instead of adding more one-off scene-only checks.
 - `FurnaceProcedureManager` separates flow order from completion state: procedure steps are a serialized list, while scene interactions mark stable gates such as `PowerOn`, `SubstrateLoaded`, `GasFlowReady`, and `HeatSoakComplete`.
-- `SnapOnRelease` now creates a placement guide while the plate is held, changes feedback inside the valid region, eases the plate into position, and marks `SubstrateLoaded` only after placement completes.
-- `AutoConnectEnd` now matches named plug/socket endpoints, previews the connection while the rod is held, eases the endpoints together on release, and marks `RodConnected` after the joint is created.
-- `FeedRailController` constrains the connected rod to an adjustable insertion path, locks its rotation, visualizes the target depth, and marks `SubstrateFedIntoTube` at the configured completion threshold.
+- `SnapOnRelease` now creates a placement guide while the plate is held, accepts near-boundary releases, eases to one exact target pose, applies its rail constraints immediately, and marks `SubstrateLoaded` only after placement completes.
+- `AutoConnectEnd` now matches named plug/socket endpoints, previews the connection while the rod is held, and asks `FeedRailController` for a rail-aligned connection pose so model endpoint rotations cannot leave the rod vertical.
+- `FeedRailController` drives the rod and plate from one smoothed rail distance, settles at the exact endpoint, marks `SubstrateFedIntoTube`, disconnects the rod, and locks the delivered plate in place.
 - The procedure panel now normalizes its progress range, displays the current step number from the reorderable `steps` list, and changes to the accepted completion color when the run finishes.
 - Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
 - `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.

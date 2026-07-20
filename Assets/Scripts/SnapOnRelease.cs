@@ -32,10 +32,11 @@ public class SnapOnRelease : MonoBehaviour
     [Header("Snap Motion")]
     [SerializeField, Min(0f)] private float snapDuration = 0.2f;
     [SerializeField] private AnimationCurve snapCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [Tooltip("Extra distance outside the trigger that still accepts a release.")]
+    [SerializeField, Min(0f)] private float releaseTolerance = 0.03f;
 
     [Header("Post-Snap Constraints")]
     [SerializeField] private bool applyConstraintsAfterSnap = true;
-    [SerializeField, Min(0f)] private float constraintDelay = 2f;
     [SerializeField] private RigidbodyConstraints releasedConstraints =
         RigidbodyConstraints.FreezePositionY |
         RigidbodyConstraints.FreezePositionZ |
@@ -60,6 +61,7 @@ public class SnapOnRelease : MonoBehaviour
     private bool isSnapping;
     private bool wasProcedureAvailable;
     private bool previousKinematicState;
+    private RigidbodyConstraints previousConstraints;
     private Vector3 queuedPosition;
     private Quaternion queuedRotation;
 
@@ -155,7 +157,7 @@ public class SnapOnRelease : MonoBehaviour
             SetGuideState(inside);
         }
 
-        if (inside && wasGrabbed && !isGrabbed && !isSnapping)
+        if (wasGrabbed && !isGrabbed && !isSnapping && IsWithinSnapZone())
         {
             queuedPosition = snapTarget.position;
             queuedRotation = snapTarget.rotation;
@@ -189,6 +191,7 @@ public class SnapOnRelease : MonoBehaviour
         OnSnapStarted?.Invoke();
 
         previousKinematicState = rb.isKinematic;
+        previousConstraints = rb.constraints;
         Vector3 startPosition = rb.position;
         Quaternion startRotation = rb.rotation;
 
@@ -213,7 +216,9 @@ public class SnapOnRelease : MonoBehaviour
 
         rb.position = targetPosition;
         rb.rotation = targetRotation;
-        Physics.SyncTransforms();
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.constraints = applyConstraintsAfterSnap ? releasedConstraints : previousConstraints;
 
         rb.isKinematic = previousKinematicState;
         if (!previousKinematicState)
@@ -221,25 +226,22 @@ public class SnapOnRelease : MonoBehaviour
             rb.WakeUp();
         }
 
+        Physics.SyncTransforms();
+
         isSnapping = false;
+        inside = false;
         FurnaceInteractionFeedback.PlayActionConfirmed();
         OnSnapped?.Invoke();
-
-        if (applyConstraintsAfterSnap)
-        {
-            StartCoroutine(ApplyConstraintsDelayed());
-        }
     }
 
-    private IEnumerator ApplyConstraintsDelayed()
+    private bool IsWithinSnapZone()
     {
-        if (constraintDelay > 0f)
-        {
-            yield return new WaitForSeconds(constraintDelay);
-        }
+        if (inside)
+            return true;
 
-        bool isGrabbed = grabbable.SelectingPointsCount > 0;
-        rb.constraints = isGrabbed ? RigidbodyConstraints.None : releasedConstraints;
+        Vector3 closestPoint = targetTrigger.ClosestPoint(rb.worldCenterOfMass);
+        return (closestPoint - rb.worldCenterOfMass).sqrMagnitude <=
+               releaseTolerance * releaseTolerance;
     }
 
     private void CacheObjectRenderers()
@@ -477,6 +479,7 @@ public class SnapOnRelease : MonoBehaviour
         if (isSnapping && rb)
         {
             rb.isKinematic = previousKinematicState;
+            rb.constraints = previousConstraints;
         }
 
         pendingSnap = false;

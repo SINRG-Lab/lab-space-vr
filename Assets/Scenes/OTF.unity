@@ -6434,7 +6434,7 @@ Transform:
   m_GameObject: {fileID: 87906102}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.2449, y: 0.5593, z: -0.24831533}
+  m_LocalPosition: {x: -0.1003, y: 0.5593, z: -0.24831533}
   m_LocalScale: {x: 0.18985254, y: 0.4508335, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26109,8 +26109,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  releaseTolerance: 0.03
   applyConstraintsAfterSnap: 1
-  constraintDelay: 2
   releasedConstraints: 124
   OnSnapZoneEntered:
     m_PersistentCalls:
@@ -30910,7 +30910,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.307, y: 1.589}
+  m_AnchoredPosition: {x: 0.013, y: 1.589}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1433328260
@@ -36103,7 +36103,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.306, y: 1.087}
+  m_AnchoredPosition: {x: 0.014, y: 1.087}
   m_SizeDelta: {x: 310.5216, y: 116.9363}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1780751291
@@ -36687,7 +36687,7 @@ Transform:
   m_GameObject: {fileID: 1873444951}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.8, y: 3.224, z: 2.2}
+  m_LocalPosition: {x: -0.8, y: 3.224, z: 1.43}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -41351,11 +41351,17 @@ MonoBehaviour:
   connectionEnd: {fileID: 1114375436}
   railStart: {fileID: 577166883}
   railEnd: {fileID: 991000000000000002}
+  alignConnectionToRail: 1
+  reverseConnectionAxis: 0
   lockRotation: 1
+  movementSmoothTime: 0.045
+  endpointTolerance: 0.0015
   completionThreshold: 0.96
   resetThreshold: 0.9
   resetCompletionWhenRetracted: 1
   lockAtCompletion: 1
+  disconnectAtCompletion: 1
+  lockDeliveredBody: 1
   showGuideWhileGrabbed: 1
   guideBaseMaterial: {fileID: 2100000, guid: 36ac9c4a4816e433dbb929bf41ec995f, type: 2}
   guideColor: {r: 0.15, g: 0.75, b: 1, a: 0.35}

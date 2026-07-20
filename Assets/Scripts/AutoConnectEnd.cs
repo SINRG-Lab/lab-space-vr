@@ -77,6 +77,7 @@ public class AutoConnectEnd : MonoBehaviour
     private bool candidateWasValid;
     private bool isConnecting;
     private bool previousKinematicState;
+    private FeedRailController feedRailController;
 
     public bool IsConnected => connectedEnd;
     public AutoConnectEnd ConnectedEnd => connectedEnd;
@@ -108,6 +109,11 @@ public class AutoConnectEnd : MonoBehaviour
         if (!ownerGrabbable && ownerRb)
         {
             ownerGrabbable = ownerRb.GetComponent<Grabbable>();
+        }
+
+        if (ownerRb)
+        {
+            feedRailController = ownerRb.GetComponent<FeedRailController>();
         }
 
         if (!ownerRb || !snapPoint)
@@ -355,6 +361,15 @@ public class AutoConnectEnd : MonoBehaviour
         out Vector3 targetPosition,
         out Quaternion targetRotation)
     {
+        if (feedRailController &&
+            feedRailController.TryCalculateConnectionPose(
+                other.snapPoint.position,
+                out targetPosition,
+                out targetRotation))
+        {
+            return;
+        }
+
         targetRotation = ownerRb.rotation;
 
         if (alignRotationOnConnect)
