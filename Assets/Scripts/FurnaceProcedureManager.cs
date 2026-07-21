@@ -20,7 +20,8 @@ public class FurnaceProcedureManager : MonoBehaviour
         HeatSoakComplete,
         GrowthStarted,
         CooldownComplete,
-        SubstrateWithdrawn
+        SubstrateWithdrawn,
+        FurnaceClosed
     }
 
     [Serializable]
@@ -29,11 +30,15 @@ public class FurnaceProcedureManager : MonoBehaviour
         public string id;
         public string title;
         [TextArea(2, 4)] public string instruction;
+        [Tooltip("Stable conditions that must remain true before this step's controls are enabled or the step can complete.")]
+        public Gate[] prerequisiteGates;
         public Gate[] requiredGates;
         [Tooltip("Objects shown only while this is the current procedure step.")]
         public GameObject[] activeObjects;
         [Tooltip("Components enabled only while this is the current procedure step.")]
         public Behaviour[] activeBehaviours;
+        [Tooltip("UI controls made interactable only while this is the current procedure step.")]
+        public Selectable[] activeSelectables;
         [Tooltip("Optional scene component highlighted by the world-space step indicator.")]
         public Transform indicatorTarget;
         [Tooltip("World-space offset from the indicator target.")]
@@ -91,6 +96,12 @@ public class FurnaceProcedureManager : MonoBehaviour
             Gate.SubstrateFedIntoTube
         ),
         new ProcedureStep(
+            "close_furnace",
+            "Close Furnace",
+            "Lower the furnace lid fully before continuing.",
+            Gate.FurnaceClosed
+        ),
+        new ProcedureStep(
             "set_gas_flow",
             "Set Gas Flow",
             "Open the gas-flow valve to the required flow.",
@@ -107,7 +118,10 @@ public class FurnaceProcedureManager : MonoBehaviour
             "Heat and Soak",
             "Start heating and wait until the target soak is complete.",
             Gate.HeatSoakComplete
-        ),
+        )
+        {
+            prerequisiteGates = new[] { Gate.FurnaceClosed, Gate.GasFlowReady }
+        },
         new ProcedureStep(
             "start_growth",
             "Start Growth",
@@ -129,7 +143,8 @@ public class FurnaceProcedureManager : MonoBehaviour
     };
 
     [Header("Gas Flow")]
-    [SerializeField] private float minimumGasFlow = 1f;
+    [SerializeField, Min(0f)] private float minimumGasFlow = 1000f;
+    [SerializeField, Min(0f)] private float gasFlowHysteresis = 100f;
 
     [Header("Runtime")]
     [SerializeField] private int currentStepIndex;
@@ -143,10 +158,12 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private bool growthStarted;
     [SerializeField] private bool cooldownComplete;
     [SerializeField] private bool substrateWithdrawn;
+    [SerializeField] private bool furnaceClosed;
 
     public int CurrentStepIndex => currentStepIndex;
     public int StepCount => steps != null ? steps.Count : 0;
     public bool IsComplete => currentStepIndex >= StepCount;
+    public float MinimumGasFlow => minimumGasFlow;
 
     public string CurrentStepId => GetCurrentStep()?.id ?? string.Empty;
     public string CurrentStepTitle => IsComplete ? "Procedure Complete" : GetStepTitle(GetCurrentStep());
@@ -193,6 +210,7 @@ public class FurnaceProcedureManager : MonoBehaviour
         growthStarted = false;
         cooldownComplete = false;
         substrateWithdrawn = false;
+        furnaceClosed = false;
 
         currentStepIndex = 0;
         RefreshUi();
@@ -244,6 +262,7 @@ public class FurnaceProcedureManager : MonoBehaviour
     public void MarkGrowthStarted() => SetGrowthStarted(true);
     public void MarkCooldownComplete() => SetCooldownComplete(true);
     public void MarkSubstrateWithdrawn() => SetSubstrateWithdrawn(true);
+    public void MarkFurnaceClosed() => SetFurnaceClosed(true);
 
     public void SetPowerOn(bool value) => SetGate(Gate.PowerOn, value);
     public void SetSubstrateLoaded(bool value) => SetGate(Gate.SubstrateLoaded, value);
@@ -255,10 +274,18 @@ public class FurnaceProcedureManager : MonoBehaviour
     public void SetGrowthStarted(bool value) => SetGate(Gate.GrowthStarted, value);
     public void SetCooldownComplete(bool value) => SetGate(Gate.CooldownComplete, value);
     public void SetSubstrateWithdrawn(bool value) => SetGate(Gate.SubstrateWithdrawn, value);
+    public void SetFurnaceClosed(bool value) => SetGate(Gate.FurnaceClosed, value);
 
     public void SetGasFlowValue(float value)
     {
-        SetGate(Gate.GasFlowReady, value >= minimumGasFlow);
+        float threshold = gasFlowReady
+            ? Mathf.Max(0f, minimumGasFlow - gasFlowHysteresis)
+            : minimumGasFlow;
+        bool isReady = value >= threshold;
+        if (isReady != gasFlowReady)
+        {
+            SetGate(Gate.GasFlowReady, isReady);
+        }
     }
 
     public void SetGate(Gate gate, bool value)
@@ -295,6 +322,9 @@ public class FurnaceProcedureManager : MonoBehaviour
             case Gate.SubstrateWithdrawn:
                 substrateWithdrawn = value;
                 break;
+            case Gate.FurnaceClosed:
+                furnaceClosed = value;
+                break;
         }
 
         EvaluateCurrentStep();
@@ -324,6 +354,8 @@ public class FurnaceProcedureManager : MonoBehaviour
                 return cooldownComplete;
             case Gate.SubstrateWithdrawn:
                 return substrateWithdrawn;
+            case Gate.FurnaceClosed:
+                return furnaceClosed;
             default:
                 return false;
         }
@@ -357,9 +389,17 @@ public class FurnaceProcedureManager : MonoBehaviour
         if (step == null || step.requiredGates == null || step.requiredGates.Length == 0)
             return false;
 
-        for (int i = 0; i < step.requiredGates.Length; i++)
+        return AreGatesSatisfied(step.prerequisiteGates) && AreGatesSatisfied(step.requiredGates);
+    }
+
+    private bool AreGatesSatisfied(Gate[] gates)
+    {
+        if (gates == null)
+            return true;
+
+        for (int i = 0; i < gates.Length; i++)
         {
-            if (!GetGate(step.requiredGates[i]))
+            if (!GetGate(gates[i]))
                 return false;
         }
 
@@ -448,8 +488,11 @@ public class FurnaceProcedureManager : MonoBehaviour
             return;
 
         ProcedureStep currentStep = GetCurrentStep();
+        bool prerequisitesSatisfied = currentStep != null &&
+                                      AreGatesSatisfied(currentStep.prerequisiteGates);
         HashSet<GameObject> configuredObjects = new();
         HashSet<Behaviour> configuredBehaviours = new();
+        HashSet<Selectable> configuredSelectables = new();
 
         for (int i = 0; i < steps.Count; i++)
         {
@@ -459,6 +502,7 @@ public class FurnaceProcedureManager : MonoBehaviour
 
             AddConfiguredItems(step.activeObjects, configuredObjects);
             AddConfiguredItems(step.activeBehaviours, configuredBehaviours);
+            AddConfiguredItems(step.activeSelectables, configuredSelectables);
         }
 
         foreach (GameObject configuredObject in configuredObjects)
@@ -470,9 +514,22 @@ public class FurnaceProcedureManager : MonoBehaviour
 
         foreach (Behaviour configuredBehaviour in configuredBehaviours)
         {
-            bool shouldBeEnabled = currentStep != null && Contains(currentStep.activeBehaviours, configuredBehaviour);
+            bool shouldBeEnabled = powerOn &&
+                                   prerequisitesSatisfied &&
+                                   currentStep != null &&
+                                   Contains(currentStep.activeBehaviours, configuredBehaviour);
             if (configuredBehaviour.enabled != shouldBeEnabled)
                 configuredBehaviour.enabled = shouldBeEnabled;
+        }
+
+        foreach (Selectable configuredSelectable in configuredSelectables)
+        {
+            bool shouldBeInteractable = powerOn &&
+                                        prerequisitesSatisfied &&
+                                        currentStep != null &&
+                                        Contains(currentStep.activeSelectables, configuredSelectable);
+            if (configuredSelectable.interactable != shouldBeInteractable)
+                configuredSelectable.interactable = shouldBeInteractable;
         }
     }
 

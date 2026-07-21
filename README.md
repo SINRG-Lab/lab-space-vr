@@ -18,8 +18,8 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 | 1. Configurable procedure manager | Done | Add a central manager with reorderable procedure steps and stable completion gates. | Flow order, titles, instructions, required gates, and per-step events can be edited on the manager without code changes. |
 | 2. Wire first OTF gates and UI | Done | Add/assign procedure UI and connect main power plus first substrate snap gate. | User sees current instruction, power-on advances the flow, and substrate placement advances only after a valid snap. |
 | 3. Load and feed substrate | Done | Polish substrate plate snapping, rod connection, and quartz tube feeding. | User sees ghost target/highlight, substrate snaps reliably, and the procedure advances only after the substrate is correctly positioned. |
-| 4. Power and furnace controls | Next | Gate main power, lid/handle state, heating ready/off controls, and UI visibility. | Controls unlock in sequence; irrelevant controls are hidden or visually demoted until they are needed. |
-| 5. Gas flow | Pending | Make the valve readout deterministic and use a minimum gas-flow gate. | Readout is stable, displays useful units, and the procedure blocks heating until flow is ready. |
+| 4. Power and furnace controls | Done | Gate main power, lid/handle state, heating ready/off controls, and UI visibility. | Controls unlock in sequence; irrelevant controls are hidden or visually demoted until they are needed. |
+| 5. Gas flow | In Progress | Make the valve readout deterministic and use a minimum gas-flow gate. | Readout is stable, displays useful units, and the procedure blocks heating until flow is ready. |
 | 6. Temperature ramp and soak | Pending | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
 | 7. Growth start and visualization | Pending | Start nanowire growth only after furnace prerequisites are satisfied. | Growth controls are unavailable before prerequisites; growth starts with clear feedback and sane defaults. |
 | 8. Cooldown and withdraw | Pending | Add cooldown/withdraw steps and reset behavior. | User can complete the procedure by cooling down and withdrawing the substrate without physics glitches. |
@@ -46,12 +46,13 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 3. Load the substrate onto the feed mechanism.
 4. Connect the feed rod to the substrate holder.
 5. Align and feed the substrate into the quartz tube.
-6. Set gas flow.
-7. Set the three furnace temperature zones.
-8. Heat to target and complete the soak.
-9. Start nanowire growth.
-10. Cool down.
-11. Withdraw the substrate and reset for the next run.
+6. Close the furnace lid.
+7. Set gas flow.
+8. Set the three furnace temperature zones.
+9. Heat to target and complete the soak.
+10. Start nanowire growth.
+11. Cool down.
+12. Withdraw the substrate and reset for the next run.
 
 ## Current Implementation Notes
 
@@ -79,8 +80,12 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - The procedure panel now normalizes its progress range, displays the current step number from the reorderable `steps` list, and changes to the accepted completion color when the run finishes.
 - Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
 - `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.
-- Each procedure step also exposes optional `activeObjects` and `activeBehaviours` lists for hiding or disabling step-specific controls without hard-coding scene references.
-- `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first four entries point to main power, the substrate plate, the pulling rod, and the feed endpoint.
+- Each procedure step exposes optional `prerequisiteGates`, `activeObjects`, `activeBehaviours`, and `activeSelectables` lists. Prerequisites keep controls unavailable until stable safety conditions are true without coupling that behavior to a fixed step index.
+- Main power now reports both on and off states to the procedure manager. The six temperature buttons are interactable only during `Set Temperature Zones`, and the physical heating-ready poke control is enabled only during `Heat and Soak` while power remains on.
+- `FurnaceLidState` watches the existing hand-driven lid hinge and publishes the flow-independent `FurnaceClosed` gate. OTF uses it for a reorderable `Close Furnace` step and as a heating prerequisite, so reopening the lid disables the heating-ready poke control.
+- `RotationToGasFlow` measures quaternion distance from the valve's configured minimum pose, quantizes the readout to `50 sccm`, and publishes `GasFlowReady` at `1000 sccm` with `100 sccm` release hysteresis. The readout and particle visualization use the same normalized source.
+- `Heat and Soak` requires both `FurnaceClosed` and `GasFlowReady`, so either reopening the lid or reducing flow below the safe band disables its physical poke control.
+- `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first six implemented interactions now include the gas-flow valve.
 
 ## Split Tube Furnace Model Previews
 

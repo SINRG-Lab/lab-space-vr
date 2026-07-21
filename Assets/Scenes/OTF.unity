@@ -15876,7 +15876,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &800149812
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15886,14 +15886,14 @@ RectTransform:
   m_GameObject: {fileID: 800149811}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1232853168}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 4.4}
+  m_AnchoredPosition: {x: 0, y: 10}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &800149813
@@ -15910,13 +15910,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 0 sccm
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -16636,7 +16636,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &859834747
 Transform:
   m_ObjectHideFlags: 0
@@ -24365,9 +24365,11 @@ MonoBehaviour:
   - id: power_on
     title: Power On
     instruction: Turn on the main furnace power.
+    prerequisiteGates: 
     requiredGates: 00000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 1093210762}
     indicatorOffset: {x: 0.05, y: 0.08, z: -0.05}
     onEnter:
@@ -24379,9 +24381,11 @@ MonoBehaviour:
   - id: load_substrate
     title: Load Substrate
     instruction: Place the substrate on the feed mechanism.
+    prerequisiteGates: 
     requiredGates: 01000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 1164920835}
     indicatorOffset: {x: 0, y: 0.18, z: 0}
     onEnter:
@@ -24393,9 +24397,11 @@ MonoBehaviour:
   - id: connect_rod
     title: Connect Feed Rod
     instruction: Attach the feed rod to the loaded substrate holder.
+    prerequisiteGates: 
     requiredGates: 02000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 543450652597906247}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
     onEnter:
@@ -24407,9 +24413,11 @@ MonoBehaviour:
   - id: feed_substrate
     title: Feed Substrate
     instruction: Push the connected substrate into the quartz tube.
+    prerequisiteGates: 
     requiredGates: 0200000003000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 991000000000000002}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
     onEnter:
@@ -24421,11 +24429,13 @@ MonoBehaviour:
   - id: set_gas_flow
     title: Set Gas Flow
     instruction: Open the gas-flow valve to the required flow.
+    prerequisiteGates: 
     requiredGates: 04000000
     activeObjects: []
     activeBehaviours: []
-    indicatorTarget: {fileID: 0}
-    indicatorOffset: {x: 0, y: 0.16, z: 0}
+    activeSelectables: []
+    indicatorTarget: {fileID: 8670761336569193909}
+    indicatorOffset: {x: 0, y: 0.12, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24435,9 +24445,17 @@ MonoBehaviour:
   - id: set_temperature_zones
     title: Set Temperature Zones
     instruction: Set the three furnace temperature zones.
+    prerequisiteGates: 
     requiredGates: 05000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables:
+    - {fileID: 5636698823644586436}
+    - {fileID: 8377270530529231732}
+    - {fileID: 5345548892323436421}
+    - {fileID: 608385230900356018}
+    - {fileID: 8189436421626268183}
+    - {fileID: 8065077609588274666}
     indicatorTarget: {fileID: 0}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
     onEnter:
@@ -24449,9 +24467,12 @@ MonoBehaviour:
   - id: heat_and_soak
     title: Heat and Soak
     instruction: Start heating and wait until the target soak is complete.
+    prerequisiteGates: 0a00000004000000
     requiredGates: 06000000
     activeObjects: []
-    activeBehaviours: []
+    activeBehaviours:
+    - {fileID: 7516989853811443993}
+    activeSelectables: []
     indicatorTarget: {fileID: 0}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
     onEnter:
@@ -24463,9 +24484,11 @@ MonoBehaviour:
   - id: start_growth
     title: Start Growth
     instruction: Start the nanowire growth sequence.
+    prerequisiteGates: 
     requiredGates: 07000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 0}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
     onEnter:
@@ -24477,9 +24500,11 @@ MonoBehaviour:
   - id: cool_down
     title: Cool Down
     instruction: Cool the furnace to the safe withdrawal state.
+    prerequisiteGates: 
     requiredGates: 08000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 0}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
     onEnter:
@@ -24491,9 +24516,11 @@ MonoBehaviour:
   - id: withdraw_substrate
     title: Withdraw Substrate
     instruction: Withdraw the substrate from the quartz tube.
+    prerequisiteGates: 
     requiredGates: 09000000
     activeObjects: []
     activeBehaviours: []
+    activeSelectables: []
     indicatorTarget: {fileID: 0}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
     onEnter:
@@ -24502,7 +24529,24 @@ MonoBehaviour:
     onComplete:
       m_PersistentCalls:
         m_Calls: []
-  minimumGasFlow: 1
+  - id: close_furnace
+    title: Close Furnace
+    instruction: Lower the furnace lid fully before continuing.
+    prerequisiteGates: 
+    requiredGates: 0a000000
+    activeObjects: []
+    activeBehaviours: []
+    activeSelectables: []
+    indicatorTarget: {fileID: 7100324511552852820}
+    indicatorOffset: {x: 0, y: 0.14, z: 0}
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onComplete:
+      m_PersistentCalls:
+        m_Calls: []
+  minimumGasFlow: 1000
+  gasFlowHysteresis: 100
   currentStepIndex: 0
   powerOn: 0
   substrateLoaded: 0
@@ -24514,6 +24558,7 @@ MonoBehaviour:
   growthStarted: 0
   cooldownComplete: 0
   substrateWithdrawn: 0
+  furnaceClosed: 0
 --- !u!4 &1071694019
 Transform:
   m_ObjectHideFlags: 0
@@ -25068,6 +25113,18 @@ MonoBehaviour:
       - m_Target: {fileID: 9035842188134228433}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1071694018}
+        m_TargetAssemblyTypeName: FurnaceProcedureManager, Assembly-CSharp
+        m_MethodName: SetPowerOn
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -41175,6 +41232,29 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7189490125533042304}
   m_Mesh: {fileID: 5683874306228573479, guid: 616af31c09e6649558878d248aff293c, type: 3}
+--- !u!114 &930415827604193865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4182286099518119973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e70bf92eb206420f9b1b822c986b971d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnaceLidState
+  lidTransform: {fileID: 7100324511552852820}
+  procedureManager: {fileID: 1071694018}
+  closedLocalEuler: {x: 0, y: 90, z: -90}
+  closeToleranceDegrees: 3
+  reopenToleranceDegrees: 7
+  onClosed:
+    m_PersistentCalls:
+      m_Calls: []
+  onOpened:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &937804376955842087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46551,6 +46631,7 @@ GameObject:
   - component: {fileID: 6314960406798539746}
   - component: {fileID: 7100324511552852822}
   - component: {fileID: 7100324511552852821}
+  - component: {fileID: 930415827604193865}
   m_Layer: 0
   m_Name: Handle
   m_TagString: Untagged
@@ -53205,11 +53286,19 @@ MonoBehaviour:
   valueText: {fileID: 800149813}
   target: {fileID: 8670761336569193909}
   progressSlider: {fileID: 1068563743}
+  procedureManager: {fileID: 1071694018}
   minAngle: 0
   maxAngle: 180
   axis: 2
+  captureMinimumFromInitialPose: 0
+  configuredMinimumLocalEuler: {x: 0, y: 90, z: 0}
   minValue: 0
   maxValue: 5000
+  valueIncrement: 50
+  valueFormat: 0
+  unit: sccm
+  adjustingColor: {r: 0.2, g: 0.78, b: 1, a: 1}
+  readyColor: {r: 0.28, g: 0.95, b: 0.5, a: 1}
 --- !u!114 &8670761336569193912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53222,6 +53311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e8b60430f64d423a9991797fa667d6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RotationToParticles
+  gasFlow: {fileID: 8670761336569193911}
   target: {fileID: 8670761336569193909}
   particleSystem: {fileID: 859834749}
   minAngle: 0

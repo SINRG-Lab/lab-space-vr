@@ -2,11 +2,14 @@ using UnityEngine;
 
 public class RotationToParticles : MonoBehaviour
 {
+    [Header("Flow Source")]
+    public RotationToGasFlow gasFlow;
+
     [Header("Grabbable / Rotating Object")]
     public Transform target;
 
     [Header("Particle System")]
-    public ParticleSystem particleSystem;
+    public new ParticleSystem particleSystem;
 
     [Header("Rotation → Value Mapping")]
     public float minAngle = 0f;       // angle where flow is 0
@@ -25,17 +28,11 @@ public class RotationToParticles : MonoBehaviour
 
     void Update()
     {
-        if (target == null || particleSystem == null) return;
+        if (particleSystem == null) return;
 
-        // 1. Read angle on chosen axis
-        float rawAngle = GetLocalAxisAngle(target, axis);
-
-        // 2. Normalize to -180..180 so negatives work nicely
-        float angle = NormalizeAngle(rawAngle);
-
-        // 3. Angle → 0..1
-        float t = Mathf.InverseLerp(minAngle, maxAngle, angle);
-        t = Mathf.Clamp01(t);
+        float t = gasFlow
+            ? gasFlow.NormalizedValue
+            : GetLegacyNormalizedValue();
 
         // 4. 0..1 → minSpeed..maxSpeed (0–5000)
         float speed = Mathf.Lerp(minSpeed, maxSpeed, t);
@@ -46,6 +43,15 @@ public class RotationToParticles : MonoBehaviour
         main.startSpeed = speed;   // implicit cast to MinMaxCurve
         var emission = particleSystem.emission;
         emission.rateOverTime = rate;
+    }
+
+    private float GetLegacyNormalizedValue()
+    {
+        if (!target) return 0f;
+
+        float rawAngle = GetLocalAxisAngle(target, axis);
+        float angle = NormalizeAngle(rawAngle);
+        return Mathf.Clamp01(Mathf.InverseLerp(minAngle, maxAngle, angle));
     }
 
     float GetLocalAxisAngle(Transform t, Axis axis)

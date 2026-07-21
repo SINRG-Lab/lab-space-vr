@@ -1,71 +1,193 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-public class RotationToGasFlow : MonoBehaviour
+[DisallowMultipleComponent]
+public sealed class RotationToGasFlow : MonoBehaviour
 {
-    [Header("Target")]
+    [Header("References")]
     public TMP_Text valueText;
-
-    [Header("Grabbable / Rotating Object")]
-    public Transform target;      // The grabbable object
-
-    [Header("UI")]
-    public Slider progressSlider; // Your progress bar (0–1)
+    public Transform target;
+    public Slider progressSlider;
+    [SerializeField] private FurnaceProcedureManager procedureManager;
 
     [Header("Rotation Mapping")]
-    public float minAngle = -90f;    // angle at which progress = 0
-    public float maxAngle = 90f;   // angle at which progress = 1
+    public float minAngle = 0f;
+    public float maxAngle = 180f;
     public Axis axis = Axis.Z;
+    [SerializeField] private bool captureMinimumFromInitialPose = true;
+    [SerializeField] private Vector3 configuredMinimumLocalEuler;
 
-    [Header("Output Range")]
-    public float minValue = 0f;     // usually 0
-    public float maxValue = 5000f;  // your target max
+    [Header("Output")]
+    public float minValue;
+    public float maxValue = 5000f;
+    [SerializeField, Min(0f)] private float valueIncrement = 50f;
+    [SerializeField] private string valueFormat = "0";
+    [SerializeField] private string unit = "sccm";
+
+    [Header("Feedback")]
+    [SerializeField] private Color adjustingColor = new(0.2f, 0.78f, 1f, 1f);
+    [SerializeField] private Color readyColor = new(0.28f, 0.95f, 0.5f, 1f);
+
+    private Quaternion minimumLocalRotation;
+    private Image sliderFillImage;
+    private bool initialized;
 
     public float CurrentValue { get; private set; }
+    public float NormalizedValue { get; private set; }
+    public bool IsReady { get; private set; }
 
-    public enum Axis { X, Y, Z }
-
-    void Update()
+    public enum Axis
     {
-        if (target == null) return;
+        X,
+        Y,
+        Z
+    }
 
-        // 1. Get raw local angle (0–360)
-        // float rawAngle = GetLocalAxisAngle(target, axis);
-        float rawAngle = GetLocalAxisAngle(target, axis);   // 0..360, e.g. 270
+    private void Start()
+    {
+        if (!target)
+        {
+            target = transform;
+        }
 
-        // 2. Optionally convert to -180..180 (so you can use negative ranges)
-        float angle = NormalizeAngle(rawAngle);
+        if (!procedureManager)
+        {
+            procedureManager = FurnaceProcedureManager.Instance;
+        }
 
-        // 3. Map angle → 0–1 using Mathf.InverseLerp
-        float t = Mathf.Clamp01(Mathf.InverseLerp(minAngle, maxAngle, angle));
+        minimumLocalRotation = captureMinimumFromInitialPose
+            ? target.localRotation
+            : Quaternion.Euler(configuredMinimumLocalEuler);
 
-        // 4. Clamp and assign to slider
-        CurrentValue = Mathf.Lerp(minValue, maxValue, t);
+        ConfigureSlider();
+        RefreshFromRotation(playFeedback: false);
+    }
 
-        if (valueText)
-            valueText.text = CurrentValue.ToString("0");
+    private void Update()
+    {
+        if (target)
+        {
+            RefreshFromRotation(playFeedback: true);
+        }
+    }
+
+    private void RefreshFromRotation(bool playFeedback)
+    {
+        float rotationRange = Mathf.Abs(maxAngle - minAngle);
+        float rotationFromMinimum = Quaternion.Angle(minimumLocalRotation, target.localRotation);
+        NormalizedValue = rotationRange > Mathf.Epsilon
+            ? Mathf.Clamp01(rotationFromMinimum / rotationRange)
+            : 0f;
+
+        float rawValue = Mathf.Lerp(minValue, maxValue, NormalizedValue);
+        float nextValue = QuantizeValue(rawValue);
+        bool valueChanged = !initialized || !Mathf.Approximately(CurrentValue, nextValue);
+        bool wasReady = IsReady;
+        CurrentValue = nextValue;
 
         if (progressSlider)
-            progressSlider.value = CurrentValue;
-    }
-
-    float GetLocalAxisAngle(Transform t, Axis axis)
-    {
-        Vector3 e = t.localEulerAngles;
-        switch (axis)
         {
-            case Axis.X: return e.x;
-            case Axis.Y: return e.y;
-            case Axis.Z: return e.z;
+            progressSlider.SetValueWithoutNotify(CurrentValue);
         }
-        return 0f;
+
+        if (valueChanged)
+        {
+            UpdateReadout();
+        }
+
+        PublishProcedureState(valueChanged);
+
+        bool readinessChanged = !initialized || wasReady != IsReady;
+        if (valueChanged || readinessChanged)
+        {
+            UpdateColors();
+        }
+
+        if (initialized && !wasReady && IsReady && playFeedback)
+        {
+            FurnaceInteractionFeedback.PlayActionConfirmed();
+        }
+
+        initialized = true;
     }
 
-    float NormalizeAngle(float angle)
+    private float QuantizeValue(float value)
     {
-        // convert 0–360 → -180..180
-        if (angle > 180f) angle -= 360f;
-        return angle;
+        if (valueIncrement <= Mathf.Epsilon)
+        {
+            return Mathf.Clamp(value, minValue, maxValue);
+        }
+
+        float quantized = Mathf.Round(value / valueIncrement) * valueIncrement;
+        return Mathf.Clamp(quantized, minValue, maxValue);
+    }
+
+    private void ConfigureSlider()
+    {
+        if (!progressSlider)
+        {
+            return;
+        }
+
+        progressSlider.minValue = minValue;
+        progressSlider.maxValue = maxValue;
+        progressSlider.wholeNumbers = false;
+        progressSlider.interactable = false;
+
+        if (progressSlider.fillRect)
+        {
+            progressSlider.fillRect.TryGetComponent(out sliderFillImage);
+        }
+    }
+
+    private void UpdateReadout()
+    {
+        if (!valueText)
+        {
+            return;
+        }
+
+        string formattedValue = CurrentValue.ToString(valueFormat);
+        valueText.text = string.IsNullOrWhiteSpace(unit)
+            ? formattedValue
+            : $"{formattedValue} {unit}";
+    }
+
+    private void PublishProcedureState(bool valueChanged)
+    {
+        if (!procedureManager)
+        {
+            IsReady = CurrentValue > minValue;
+            return;
+        }
+
+        bool managerState = procedureManager.GetGate(FurnaceProcedureManager.Gate.GasFlowReady);
+        if (valueChanged || managerState != IsReady)
+        {
+            procedureManager.SetGasFlowValue(CurrentValue);
+        }
+
+        IsReady = procedureManager.GetGate(FurnaceProcedureManager.Gate.GasFlowReady);
+    }
+
+    private void UpdateColors()
+    {
+        Color color = IsReady ? readyColor : adjustingColor;
+        if (valueText)
+        {
+            valueText.color = color;
+        }
+
+        if (sliderFillImage)
+        {
+            sliderFillImage.color = color;
+        }
+    }
+
+    private void OnValidate()
+    {
+        maxValue = Mathf.Max(maxValue, minValue);
+        valueIncrement = Mathf.Max(0f, valueIncrement);
     }
 }
