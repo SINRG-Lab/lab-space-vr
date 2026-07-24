@@ -2,11 +2,14 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections;
+using System.Globalization;
+using UnityEngine.UI;
 
 public class TempButtonFunction : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
     [Header("Target")]
     public TMP_Text valueText;
+    public IncreaseTemperature temperatureController;
 
     [Header("Behavior")]
     public bool isIncrement = true;
@@ -20,13 +23,21 @@ public class TempButtonFunction : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     bool holding;
     Coroutine repeatCo;
+    Selectable selectable;
+
+    void Awake()
+    {
+        selectable = GetComponent<Selectable>();
+    }
 
     public void ClickOnce() => ApplyDelta();
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (selectable && !selectable.interactable)
+            return;
+
         holding = true;
-        ApplyDelta();
         repeatCo = StartCoroutine(HoldRepeat());
     }
 
@@ -42,22 +53,35 @@ public class TempButtonFunction : MonoBehaviour, IPointerDownHandler, IPointerUp
     IEnumerator HoldRepeat()
     {
         yield return new WaitForSeconds(longPressDelay);
-        while (holding)
+        while (holding && (!selectable || selectable.interactable))
         {
             ApplyDelta();
             yield return new WaitForSeconds(repeatInterval);
         }
+
+        holding = false;
+        repeatCo = null;
     }
 
     void ApplyDelta()
     {
         if (!valueText) return;
 
-        if (!float.TryParse(valueText.text, out float val))
+        if (!float.TryParse(
+                valueText.text,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out float val))
             val = 0f;
 
         val += isIncrement ? step : -step;
         val = Mathf.Clamp(val, minValue, maxValue);
-        valueText.text = val.ToString();
+        valueText.text = val.ToString("0", CultureInfo.InvariantCulture);
+        temperatureController?.NotifySetpointsChanged();
+    }
+
+    void OnDisable()
+    {
+        StopHold();
     }
 }

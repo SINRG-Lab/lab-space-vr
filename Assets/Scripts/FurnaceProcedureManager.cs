@@ -120,7 +120,12 @@ public class FurnaceProcedureManager : MonoBehaviour
             Gate.HeatSoakComplete
         )
         {
-            prerequisiteGates = new[] { Gate.FurnaceClosed, Gate.GasFlowReady }
+            prerequisiteGates = new[]
+            {
+                Gate.FurnaceClosed,
+                Gate.GasFlowReady,
+                Gate.TemperatureZonesSet
+            }
         },
         new ProcedureStep(
             "start_growth",

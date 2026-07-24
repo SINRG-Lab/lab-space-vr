@@ -14336,6 +14336,11 @@ MonoBehaviour:
   maxValue_zone2: 870
   maxValue_zone3: 870
   duration: 20
+  procedureManager: {fileID: 1071694018}
+  minimumSetpoint: 500
+  soakDuration: 5
+  pauseWhenSafetyGateDrops: 1
+  state: 0
   isIncreasingTemperature: 0
   reachedTolerance: 0.5
 --- !u!114 &664395147
@@ -24444,7 +24449,7 @@ MonoBehaviour:
         m_Calls: []
   - id: set_temperature_zones
     title: Set Temperature Zones
-    instruction: Set the three furnace temperature zones.
+    instruction: Set all three furnace zones to at least 500 C.
     prerequisiteGates: 
     requiredGates: 05000000
     activeObjects: []
@@ -24456,8 +24461,8 @@ MonoBehaviour:
     - {fileID: 608385230900356018}
     - {fileID: 8189436421626268183}
     - {fileID: 8065077609588274666}
-    indicatorTarget: {fileID: 0}
-    indicatorOffset: {x: 0, y: 0.16, z: 0}
+    indicatorTarget: {fileID: 6561995450135514289}
+    indicatorOffset: {x: 0, y: 0.12, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24466,15 +24471,15 @@ MonoBehaviour:
         m_Calls: []
   - id: heat_and_soak
     title: Heat and Soak
-    instruction: Start heating and wait until the target soak is complete.
-    prerequisiteGates: 0a00000004000000
+    instruction: Press HEATING READY, then wait for the ramp and soak to complete.
+    prerequisiteGates: 0a0000000400000005000000
     requiredGates: 06000000
     activeObjects: []
     activeBehaviours:
     - {fileID: 7516989853811443993}
     activeSelectables: []
-    indicatorTarget: {fileID: 0}
-    indicatorOffset: {x: 0, y: 0.16, z: 0}
+    indicatorTarget: {fileID: 7516989854590809177}
+    indicatorOffset: {x: 0, y: 0.12, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -39731,8 +39736,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
   valueText: {fileID: 4723259833263217929}
+  temperatureController: {fileID: 664395146}
   isIncrement: 0
-  step: 5
+  step: 50
   minValue: 0
   maxValue: 1000
   longPressDelay: 0.5
@@ -43466,8 +43472,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
   valueText: {fileID: 937804376955842087}
+  temperatureController: {fileID: 664395146}
   isIncrement: 1
-  step: 5
+  step: 50
   minValue: 0
   maxValue: 1000
   longPressDelay: 0.5
@@ -44395,8 +44402,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
   valueText: {fileID: 7054925316270977135}
+  temperatureController: {fileID: 664395146}
   isIncrement: 0
-  step: 5
+  step: 50
   minValue: 0
   maxValue: 1000
   longPressDelay: 0.5
@@ -45350,8 +45358,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
   valueText: {fileID: 937804376955842087}
+  temperatureController: {fileID: 664395146}
   isIncrement: 0
-  step: 5
+  step: 50
   minValue: 0
   maxValue: 1000
   longPressDelay: 0.5
@@ -50523,8 +50532,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
   valueText: {fileID: 7054925316270977135}
+  temperatureController: {fileID: 664395146}
   isIncrement: 1
-  step: 5
+  step: 50
   minValue: 0
   maxValue: 1000
   longPressDelay: 0.5
@@ -53658,8 +53668,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TempButtonFunction
   valueText: {fileID: 4723259833263217929}
+  temperatureController: {fileID: 664395146}
   isIncrement: 1
-  step: 5
+  step: 50
   minValue: 0
   maxValue: 1000
   longPressDelay: 0.5

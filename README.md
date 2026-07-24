@@ -19,8 +19,8 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 | 2. Wire first OTF gates and UI | Done | Add/assign procedure UI and connect main power plus first substrate snap gate. | User sees current instruction, power-on advances the flow, and substrate placement advances only after a valid snap. |
 | 3. Load and feed substrate | Done | Polish substrate plate snapping, rod connection, and quartz tube feeding. | User sees ghost target/highlight, substrate snaps reliably, and the procedure advances only after the substrate is correctly positioned. |
 | 4. Power and furnace controls | Done | Gate main power, lid/handle state, heating ready/off controls, and UI visibility. | Controls unlock in sequence; irrelevant controls are hidden or visually demoted until they are needed. |
-| 5. Gas flow | In Progress | Make the valve readout deterministic and use a minimum gas-flow gate. | Readout is stable, displays useful units, and the procedure blocks heating until flow is ready. |
-| 6. Temperature ramp and soak | Pending | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
+| 5. Gas flow | Done | Make the valve readout deterministic and use a minimum gas-flow gate. | Readout is stable, displays useful units, and the procedure blocks heating until flow is ready. |
+| 6. Temperature ramp and soak | In Progress | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
 | 7. Growth start and visualization | Pending | Start nanowire growth only after furnace prerequisites are satisfied. | Growth controls are unavailable before prerequisites; growth starts with clear feedback and sane defaults. |
 | 8. Cooldown and withdraw | Pending | Add cooldown/withdraw steps and reset behavior. | User can complete the procedure by cooling down and withdrawing the substrate without physics glitches. |
 | 9. Demo polish pass | In Progress | Add audio, hand-tracking feedback, labels, reset button, lighting/performance pass, and final rehearsal checklist. | A first-time viewer can follow the demo without verbal rescue; Quest performance remains stable. |
@@ -84,7 +84,11 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - Main power now reports both on and off states to the procedure manager. The six temperature buttons are interactable only during `Set Temperature Zones`, and the physical heating-ready poke control is enabled only during `Heat and Soak` while power remains on.
 - `FurnaceLidState` watches the existing hand-driven lid hinge and publishes the flow-independent `FurnaceClosed` gate. OTF uses it for a reorderable `Close Furnace` step and as a heating prerequisite, so reopening the lid disables the heating-ready poke control.
 - `RotationToGasFlow` measures quaternion distance from the valve's configured minimum pose, quantizes the readout to `50 sccm`, and publishes `GasFlowReady` at `1000 sccm` with `100 sccm` release hysteresis. The readout and particle visualization use the same normalized source.
-- `Heat and Soak` requires both `FurnaceClosed` and `GasFlowReady`, so either reopening the lid or reducing flow below the safe band disables its physical poke control.
+- Gas-flow particles are active in OTF and were validated with the physical valve interaction.
+- The three temperature controls use `50 C` steps for demo-speed entry and publish `TemperatureZonesSet` only after every zone reaches the configurable `500 C` minimum.
+- `IncreaseTemperature` now owns one deterministic three-zone ramp and timed soak. It follows `GlobalSimSpeed`, pauses when power, lid, gas flow, or setpoint safety becomes invalid, and publishes `HeatSoakComplete` only after the soak finishes.
+- `Heat and Soak` requires `FurnaceClosed`, `GasFlowReady`, and `TemperatureZonesSet`, so invalidating any safety condition disables its physical poke control and pauses an active heat cycle.
+- The current-step indicator now points to the middle setpoint display during temperature setup and to the physical `HEATING READY` control during ramp start.
 - `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first six implemented interactions now include the gas-flow valve.
 
 ## Split Tube Furnace Model Previews
