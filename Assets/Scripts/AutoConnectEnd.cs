@@ -78,9 +78,14 @@ public class AutoConnectEnd : MonoBehaviour
     private bool isConnecting;
     private bool previousKinematicState;
     private FeedRailController feedRailController;
+    private Vector3 initialOwnerPosition;
+    private Quaternion initialOwnerRotation;
+    private bool initialOwnerKinematicState;
+    private RigidbodyConstraints initialOwnerConstraints;
 
     public bool IsConnected => connectedEnd;
     public AutoConnectEnd ConnectedEnd => connectedEnd;
+    public bool CanInitiateConnection => canInitiateConnection;
 
     private void Reset()
     {
@@ -135,6 +140,10 @@ public class AutoConnectEnd : MonoBehaviour
 
         SetupGuide();
         ResolveProcedureManager();
+        initialOwnerPosition = ownerRb.position;
+        initialOwnerRotation = ownerRb.rotation;
+        initialOwnerKinematicState = ownerRb.isKinematic;
+        initialOwnerConstraints = ownerRb.constraints;
     }
 
     private void OnEnable()
@@ -194,7 +203,7 @@ public class AutoConnectEnd : MonoBehaviour
 
             if (canConnect)
             {
-                StartCoroutine(ConnectTo(releasedCandidate));
+                StartCoroutine(ConnectTo(releasedCandidate, false, snapDuration));
             }
         }
         else if (!isGrabbed)
@@ -278,9 +287,47 @@ public class AutoConnectEnd : MonoBehaviour
         return Vector3.Angle(snapPoint.forward, targetForward) <= maxAlignmentAngle;
     }
 
-    private IEnumerator ConnectTo(AutoConnectEnd other)
+    public void ConnectForDevelopment(AutoConnectEnd other, bool instant)
     {
-        if (!IsConnectionPoseValid(other))
+        if (!other || connectedEnd == other)
+            return;
+
+        CancelConnectionAnimation();
+        if (connectedEnd)
+            Disconnect();
+
+        StartCoroutine(ConnectTo(other, true, instant ? 0f : snapDuration));
+    }
+
+    public void ResetForDevelopment()
+    {
+        CancelConnectionAnimation();
+        Disconnect();
+        if (!ownerRb)
+            return;
+
+        ownerRb.isKinematic = true;
+        ownerRb.constraints = initialOwnerConstraints;
+        ownerRb.position = initialOwnerPosition;
+        ownerRb.rotation = initialOwnerRotation;
+        ownerRb.linearVelocity = Vector3.zero;
+        ownerRb.angularVelocity = Vector3.zero;
+        ownerRb.isKinematic = initialOwnerKinematicState;
+        Physics.SyncTransforms();
+
+        ResolveProcedureManager();
+        procedureManager?.SetGate(procedureGate, false);
+    }
+
+    private IEnumerator ConnectTo(
+        AutoConnectEnd other,
+        bool bypassPoseValidation,
+        float motionDuration)
+    {
+        bool canConnect = bypassPoseValidation
+            ? IsCompatibleWith(other)
+            : IsConnectionPoseValid(other);
+        if (!canConnect)
         {
             yield break;
         }
@@ -300,10 +347,10 @@ public class AutoConnectEnd : MonoBehaviour
         ownerRb.linearVelocity = Vector3.zero;
         ownerRb.angularVelocity = Vector3.zero;
 
-        if (snapDuration > 0f)
+        if (motionDuration > 0f)
         {
             float elapsed = 0f;
-            while (elapsed < snapDuration)
+            while (elapsed < motionDuration)
             {
                 if (!other || !other.isActiveAndEnabled)
                 {
@@ -315,7 +362,7 @@ public class AutoConnectEnd : MonoBehaviour
                 elapsed += Time.fixedDeltaTime;
 
                 CalculateTargetPose(other, out Vector3 targetPosition, out Quaternion targetRotation);
-                float normalizedTime = Mathf.Clamp01(elapsed / snapDuration);
+                float normalizedTime = Mathf.Clamp01(elapsed / motionDuration);
                 float curvedTime = snapCurve != null
                     ? snapCurve.Evaluate(normalizedTime)
                     : normalizedTime;

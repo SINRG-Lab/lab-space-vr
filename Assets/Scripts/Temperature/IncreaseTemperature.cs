@@ -144,7 +144,105 @@ public class IncreaseTemperature : MonoBehaviour
         RestartAll(CoolAllZones(
             currentValue_zone1,
             currentValue_zone2,
-            currentValue_zone3));
+            currentValue_zone3,
+            false));
+    }
+
+    public void SetAllSetpointsForDevelopment(float value)
+    {
+        string formattedValue = value.ToString("0", CultureInfo.InvariantCulture);
+        if (maxValueText_zone1)
+            maxValueText_zone1.text = formattedValue;
+        if (maxValueText_zone2)
+            maxValueText_zone2.text = formattedValue;
+        if (maxValueText_zone3)
+            maxValueText_zone3.text = formattedValue;
+
+        maxValue_zone1 = value;
+        maxValue_zone2 = value;
+        maxValue_zone3 = value;
+        PublishSetpointGate();
+    }
+
+    public bool CompleteHeatSoakForDevelopment()
+    {
+        TryReadSetpoints();
+        PublishSetpointGate();
+        if (!AreSetpointsValid() || !CanHeat())
+            return false;
+
+        if (routineAll != null)
+        {
+            StopCoroutine(routineAll);
+            routineAll = null;
+        }
+
+        ApplyAll(
+            maxValue_zone1,
+            maxValue_zone2,
+            maxValue_zone3,
+            maxValue_zone1,
+            maxValue_zone2,
+            maxValue_zone3,
+            true);
+        Zone1Reached = Zone2Reached = Zone3Reached = true;
+        SoakProgress01 = 1f;
+        isIncreasingTemperature = false;
+        state = HeatingState.Complete;
+
+        ResolveProcedureManager();
+        procedureManager?.MarkHeatSoakComplete();
+        return true;
+    }
+
+    public void StartCooldownForDevelopment(bool instant)
+    {
+        ResolveProcedureManager();
+        procedureManager?.SetHeatSoakComplete(false);
+        procedureManager?.SetCooldownComplete(false);
+
+        if (instant)
+        {
+            if (routineAll != null)
+            {
+                StopCoroutine(routineAll);
+                routineAll = null;
+            }
+
+            ApplyAll(0f, 0f, 0f, 0f, 0f, 0f, false);
+            Zone1Reached = Zone2Reached = Zone3Reached = false;
+            SoakProgress01 = 0f;
+            isIncreasingTemperature = false;
+            state = HeatingState.Idle;
+            procedureManager?.MarkCooldownComplete();
+            return;
+        }
+
+        RestartAll(CoolAllZones(
+            currentValue_zone1,
+            currentValue_zone2,
+            currentValue_zone3,
+            true));
+    }
+
+    public void ResetForDevelopment()
+    {
+        if (routineAll != null)
+        {
+            StopCoroutine(routineAll);
+            routineAll = null;
+        }
+
+        SetAllSetpointsForDevelopment(0f);
+        ApplyAll(0f, 0f, 0f, 0f, 0f, 0f, false);
+        Zone1Reached = Zone2Reached = Zone3Reached = false;
+        SoakProgress01 = 0f;
+        isIncreasingTemperature = false;
+        state = HeatingState.Idle;
+
+        ResolveProcedureManager();
+        procedureManager?.SetHeatSoakComplete(false);
+        procedureManager?.SetCooldownComplete(false);
     }
 
     private void RestartAll(IEnumerator routine)
@@ -220,7 +318,11 @@ public class IncreaseTemperature : MonoBehaviour
         procedureManager?.MarkHeatSoakComplete();
     }
 
-    private IEnumerator CoolAllZones(float from1, float from2, float from3)
+    private IEnumerator CoolAllZones(
+        float from1,
+        float from2,
+        float from3,
+        bool publishCooldownCompletion)
     {
         state = HeatingState.Cooling;
         float elapsed = 0f;
@@ -242,6 +344,12 @@ public class IncreaseTemperature : MonoBehaviour
         ApplyAll(0f, 0f, 0f, 0f, 0f, 0f, false);
         state = HeatingState.Idle;
         routineAll = null;
+
+        if (publishCooldownCompletion)
+        {
+            ResolveProcedureManager();
+            procedureManager?.MarkCooldownComplete();
+        }
     }
 
     private void ApplyAll(

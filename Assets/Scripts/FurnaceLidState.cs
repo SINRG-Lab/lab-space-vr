@@ -8,8 +8,9 @@ public sealed class FurnaceLidState : MonoBehaviour
     [SerializeField] private Transform lidTransform;
     [SerializeField] private FurnaceProcedureManager procedureManager;
 
-    [Header("Closed Pose")]
-    [SerializeField] private Vector3 closedLocalEuler = new(0f, 90f, -90f);
+    [Header("Lid Poses")]
+    [SerializeField] private Vector3 openLocalEuler = new(-40f, 90f, -90f);
+    [SerializeField] private Vector3 closedLocalEuler = new(-90f, 90f, -90f);
     [SerializeField, Min(0.1f)] private float closeToleranceDegrees = 3f;
     [SerializeField, Min(0.1f)] private float reopenToleranceDegrees = 7f;
 
@@ -28,6 +29,7 @@ public sealed class FurnaceLidState : MonoBehaviour
         {
             lidTransform = transform;
         }
+
     }
 
     private void Start()
@@ -88,6 +90,22 @@ public sealed class FurnaceLidState : MonoBehaviour
         {
             procedureManager.SetFurnaceClosed(isClosed);
         }
+    }
+
+    public void SetClosedForDevelopment(bool closed)
+    {
+        lidTransform.localRotation = closed
+            ? Quaternion.Euler(closedLocalEuler)
+            : Quaternion.Euler(openLocalEuler);
+        Physics.SyncTransforms();
+        RefreshState(playFeedback: false);
+    }
+
+    public void ResetForDevelopment()
+    {
+        lidTransform.localRotation = Quaternion.Euler(openLocalEuler);
+        Physics.SyncTransforms();
+        RefreshState(playFeedback: false);
     }
 
     private void RepublishAfterProcedureReset()

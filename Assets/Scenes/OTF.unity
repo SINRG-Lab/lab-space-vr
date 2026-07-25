@@ -14397,6 +14397,7 @@ MonoBehaviour:
     m_NumColorKeys: 3
     m_NumAlphaKeys: 3
   useEmission: 1
+  emissionStartTemperature: 200
   emissionStrength: 10
 --- !u!114 &664395148
 MonoBehaviour:
@@ -22995,6 +22996,33 @@ MonoBehaviour:
   pulseHeight: 0.012
   pulseScale: 0.06
   pulseFrequency: 1.4
+--- !u!114 &920000020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071694017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7d2b6c9a4e41c4a8d17f3b2e6c9012, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::FurnaceDevHarness
+  procedureManager: {fileID: 1071694018}
+  temperatureSetpoint: 500
+  gasFlowSetpoint: 1000
+  stepDelay: 0.25
+  showPanelOnPlay: 1
+  powerControl: {fileID: 1093210768}
+  substrateSnap: {fileID: 1164920836}
+  rodConnector: {fileID: 1114375436}
+  substrateConnector: {fileID: 808996160}
+  feedRail: {fileID: 991000000000000003}
+  lidState: {fileID: 930415827604193865}
+  gasFlow: {fileID: 8670761336569193911}
+  heater: {fileID: 664395146}
+  growthSettings: {fileID: 1953597913}
+  simulationSpeed: {fileID: 1464285239}
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24341,6 +24369,7 @@ GameObject:
   - component: {fileID: 1071694019}
   - component: {fileID: 1071694018}
   - component: {fileID: 910000010}
+  - component: {fileID: 920000020}
   m_Layer: 0
   m_Name: FurnaceProcedureManager
   m_TagString: Untagged
@@ -41252,7 +41281,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FurnaceLidState
   lidTransform: {fileID: 7100324511552852820}
   procedureManager: {fileID: 1071694018}
-  closedLocalEuler: {x: 0, y: 90, z: -90}
+  openLocalEuler: {x: -40, y: 90, z: -90}
+  closedLocalEuler: {x: -90, y: 90, z: -90}
   closeToleranceDegrees: 3
   reopenToleranceDegrees: 7
   onClosed:
@@ -41437,6 +41467,7 @@ MonoBehaviour:
   connectionEnd: {fileID: 1114375436}
   railStart: {fileID: 577166883}
   railEnd: {fileID: 991000000000000002}
+  deliveredBodyEndTarget: {fileID: 991000000000000002}
   alignConnectionToRail: 1
   reverseConnectionAxis: 0
   lockRotation: 1

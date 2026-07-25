@@ -84,7 +84,12 @@ public class Setting_Parameter : MonoBehaviour
 
     public void ToggleGrowthEnabled()
     {
-        growth_enabled = !growth_enabled;
+        SetGrowthEnabled(!growth_enabled);
+    }
+
+    public void SetGrowthEnabled(bool enabled)
+    {
+        growth_enabled = enabled;
         Debug.Log($"growth_enabled = {growth_enabled}");
     }
 }

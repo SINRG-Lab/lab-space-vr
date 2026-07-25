@@ -76,7 +76,7 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - `FurnaceProcedureManager` separates flow order from completion state: procedure steps are a serialized list, while scene interactions mark stable gates such as `PowerOn`, `SubstrateLoaded`, `GasFlowReady`, and `HeatSoakComplete`.
 - `SnapOnRelease` now creates a placement guide while the plate is held, accepts near-boundary releases, eases to one exact target pose, applies its rail constraints immediately, and marks `SubstrateLoaded` only after placement completes.
 - `AutoConnectEnd` now matches named plug/socket endpoints, previews the connection while the rod is held, and asks `FeedRailController` for a rail-aligned connection pose so model endpoint rotations cannot leave the rod vertical.
-- `FeedRailController` drives the rod and plate from one smoothed rail distance, settles at the exact endpoint, marks `SubstrateFedIntoTube`, disconnects the rod, and locks the delivered plate in place.
+- `FeedRailController` drives the rod and plate from one smoothed rail distance, interpolates the plate toward the explicit `Feed Rail End` center target, enforces that exact final pose before detaching the rod, marks `SubstrateFedIntoTube`, and locks the delivered plate in place.
 - The procedure panel now normalizes its progress range, displays the current step number from the reorderable `steps` list, and changes to the accepted completion color when the run finishes.
 - Substrate snapping, rod connection, and feed-rail guidance are enabled by their stable procedure gates rather than fixed step numbers, so the same interactions follow any reordered procedure.
 - `FurnaceInteractionFeedback` centralizes target and confirmation audio for the hand-tracking flow; visual guides provide the corresponding spatial feedback without requiring controllers.
@@ -87,9 +87,39 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - Gas-flow particles are active in OTF and were validated with the physical valve interaction.
 - The three temperature controls use `50 C` steps for demo-speed entry and publish `TemperatureZonesSet` only after every zone reaches the configurable `500 C` minimum.
 - `IncreaseTemperature` now owns one deterministic three-zone ramp and timed soak. It follows `GlobalSimSpeed`, pauses when power, lid, gas flow, or setpoint safety becomes invalid, and publishes `HeatSoakComplete` only after the soak finishes.
+- `Interior_Split` and `Interior_Split_Lower` now heat independently by zone. Every ceramic material slot preserves its cold appearance, shifts through the configured temperature gradient, and begins emissive glow above `200 C`.
 - `Heat and Soak` requires `FurnaceClosed`, `GasFlowReady`, and `TemperatureZonesSet`, so invalidating any safety condition disables its physical poke control and pauses an active heat cycle.
 - The current-step indicator now points to the middle setpoint display during temperature setup and to the physical `HEATING READY` control during ramp start.
 - `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first six implemented interactions now include the gas-flow valve.
+- `FurnaceDevHarness` provides an Editor-only desktop driver for the complete configurable procedure. It changes the actual furnace component state for implemented phases and disables itself in Quest builds, so it does not replace or alter hand tracking.
+
+## Editor Testing Without Quest
+
+Open `Assets/Scenes/OTF.unity` and enter Play mode. The **Furnace Development Driver** appears in the Game view and follows the current serialized `steps` order, so reordering the procedure does not require changing the harness.
+
+- `Simulate Current` runs the current interaction with its normal motion or timing.
+- `Complete Instant` moves the real component to its completed state immediately.
+- For the Development Driver only, `Feed Substrate` translates the substrate plate directly to the center target while leaving the rod stationary; the Quest hand-driven rail behavior is unchanged.
+- `Auto Run` resets and simulates the full procedure; `Instant Run` prepares every implemented state immediately.
+- Select any listed step and use `Jump To Selected` to rebuild all earlier state and stop there. A step whose stable gate is already satisfied may be skipped automatically by the procedure manager.
+- The safety-fault buttons toggle main power, lid state, and gas flow so heat pause/resume behavior can be checked without a headset.
+- The gate list shows the same stable state used by the Quest procedure. A timeout indicates a missing reference or a component that did not reach its expected state.
+
+Keyboard shortcuts while the Game view is focused:
+
+| Shortcut | Action |
+| --- | --- |
+| `` ` `` | Show or hide the development panel |
+| `Shift+R` | Reset the furnace flow |
+| `Shift+Enter` | Simulate the current step |
+| `Shift+N` | Complete the current step instantly |
+| `Shift+J` | Jump to the selected step |
+| `Shift+A` | Start a full auto-run |
+| `Shift+P` | Pause or resume auto-run dispatch |
+| `Shift+[` / `Shift+]` | Decrease or increase simulation speed |
+| `Shift+1` / `Shift+2` / `Shift+3` | Toggle power, lid, or gas fault |
+
+Growth start and substrate withdrawal are explicitly shown as temporary development drivers until Phases 7 and 8 replace them with final user-facing interactions. Quest testing is still required for hand pose reach, pinch/grab comfort, occlusion, depth perception, and final device performance.
 
 ## Split Tube Furnace Model Previews
 

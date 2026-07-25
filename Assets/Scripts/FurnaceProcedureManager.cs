@@ -175,6 +175,7 @@ public class FurnaceProcedureManager : MonoBehaviour
     public string CurrentStepInstruction => IsComplete ? "Reset the station or prepare for the next run." : GetStepInstruction(GetCurrentStep());
     public Transform CurrentIndicatorTarget => GetCurrentStep()?.indicatorTarget;
     public Vector3 CurrentIndicatorOffset => GetCurrentStep()?.indicatorOffset ?? Vector3.zero;
+    public ProcedureStep CurrentStep => GetCurrentStep();
 
     public event Action<int, ProcedureStep> StepEntered;
     public event Action<int, ProcedureStep> StepCompleted;
@@ -379,6 +380,24 @@ public class FurnaceProcedureManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    public ProcedureStep GetStepAt(int stepIndex)
+    {
+        if (steps == null || stepIndex < 0 || stepIndex >= steps.Count)
+            return null;
+
+        return steps[stepIndex];
+    }
+
+    public int FindStepIndex(string stepId)
+    {
+        if (steps == null || string.IsNullOrWhiteSpace(stepId))
+            return -1;
+
+        return steps.FindIndex(step =>
+            step != null &&
+            string.Equals(step.id, stepId, StringComparison.Ordinal));
     }
 
     private ProcedureStep GetCurrentStep()

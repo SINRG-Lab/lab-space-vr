@@ -64,6 +64,11 @@ public class SnapOnRelease : MonoBehaviour
     private RigidbodyConstraints previousConstraints;
     private Vector3 queuedPosition;
     private Quaternion queuedRotation;
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+    private bool initialKinematicState;
+    private RigidbodyConstraints initialConstraints;
+    private Coroutine snapRoutine;
 
     private sealed class RendererState
     {
@@ -98,6 +103,10 @@ public class SnapOnRelease : MonoBehaviour
         SetupGuide();
         ResolveProcedureManager();
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        initialPosition = rb.position;
+        initialRotation = rb.rotation;
+        initialKinematicState = rb.isKinematic;
+        initialConstraints = rb.constraints;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -182,10 +191,60 @@ public class SnapOnRelease : MonoBehaviour
         }
 
         pendingSnap = false;
-        StartCoroutine(SnapToTarget(queuedPosition, queuedRotation));
+        snapRoutine = StartCoroutine(
+            SnapToTarget(queuedPosition, queuedRotation, snapDuration));
     }
 
-    private IEnumerator SnapToTarget(Vector3 targetPosition, Quaternion targetRotation)
+    public void CompleteForDevelopment(bool instant)
+    {
+        if (!rb || !snapTarget)
+            return;
+
+        if (snapRoutine != null)
+            StopCoroutine(snapRoutine);
+
+        pendingSnap = false;
+        snapRoutine = StartCoroutine(
+            SnapToTarget(
+                snapTarget.position,
+                snapTarget.rotation,
+                instant ? 0f : snapDuration));
+    }
+
+    public void ResetForDevelopment()
+    {
+        if (!rb)
+            return;
+
+        if (snapRoutine != null)
+        {
+            StopCoroutine(snapRoutine);
+            snapRoutine = null;
+        }
+
+        pendingSnap = false;
+        isSnapping = false;
+        inside = false;
+        wasGrabbed = false;
+        rb.isKinematic = true;
+        rb.constraints = initialConstraints;
+        rb.position = initialPosition;
+        rb.rotation = initialRotation;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = initialKinematicState;
+        SetObjectHighlight(false);
+        SetGuideVisible(false);
+        Physics.SyncTransforms();
+
+        ResolveProcedureManager();
+        procedureManager?.SetGate(procedureGate, false);
+    }
+
+    private IEnumerator SnapToTarget(
+        Vector3 targetPosition,
+        Quaternion targetRotation,
+        float motionDuration)
     {
         isSnapping = true;
         OnSnapStarted?.Invoke();
@@ -199,14 +258,14 @@ public class SnapOnRelease : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        if (snapDuration > 0f)
+        if (motionDuration > 0f)
         {
             float elapsed = 0f;
-            while (elapsed < snapDuration)
+            while (elapsed < motionDuration)
             {
                 yield return new WaitForFixedUpdate();
                 elapsed += Time.fixedDeltaTime;
-                float normalizedTime = Mathf.Clamp01(elapsed / snapDuration);
+                float normalizedTime = Mathf.Clamp01(elapsed / motionDuration);
                 float curvedTime = snapCurve.Evaluate(normalizedTime);
 
                 rb.MovePosition(Vector3.LerpUnclamped(startPosition, targetPosition, curvedTime));
@@ -229,6 +288,7 @@ public class SnapOnRelease : MonoBehaviour
         Physics.SyncTransforms();
 
         isSnapping = false;
+        snapRoutine = null;
         inside = false;
         FurnaceInteractionFeedback.PlayActionConfirmed();
         OnSnapped?.Invoke();

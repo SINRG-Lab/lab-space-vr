@@ -1,3 +1,4 @@
+using System.Collections;
 using Oculus.Interaction;
 using UnityEngine;
 using UnityEngine.Events;
@@ -13,6 +14,8 @@ public class FeedRailController : MonoBehaviour
     [SerializeField] private AutoConnectEnd connectionEnd;
     [SerializeField] private Transform railStart;
     [SerializeField] private Transform railEnd;
+    [Tooltip("Exact final position for the delivered substrate plate. Defaults to Rail End.")]
+    [SerializeField] private Transform deliveredBodyEndTarget;
 
     [Header("Rail Behavior")]
     [Tooltip("Aligns the rod's connector axis with the insertion rail during connection.")]
@@ -71,9 +74,23 @@ public class FeedRailController : MonoBehaviour
     private bool deliveredBodyKinematicState;
     private Vector3 deliveredBodyStartPosition;
     private Quaternion deliveredBodyStartRotation;
+    private Vector3 initialOwnerPosition;
+    private Quaternion initialOwnerRotation;
+    private bool initialOwnerKinematicState;
+    private RigidbodyConstraints initialOwnerConstraints;
+    private bool hasDeliveredBodyPose;
+    private Coroutine developmentFeedRoutine;
+    private Coroutine developmentWithdrawalRoutine;
 
     public float Progress => progress;
     public bool FeedCompleted => feedCompleted;
+    public float DeliveredBodyEndpointError =>
+        deliveredBody && DeliveredBodyTarget
+            ? Vector3.Distance(deliveredBody.position, DeliveredBodyTarget.position)
+            : 0f;
+
+    private Transform DeliveredBodyTarget =>
+        deliveredBodyEndTarget ? deliveredBodyEndTarget : railEnd;
 
     private void Reset()
     {
@@ -99,6 +116,11 @@ public class FeedRailController : MonoBehaviour
             connectionEnd = GetComponentInChildren<AutoConnectEnd>();
         }
 
+        if (!deliveredBodyEndTarget)
+        {
+            deliveredBodyEndTarget = railEnd;
+        }
+
         if (!ownerRb || !grabbable || !connectionEnd || !railStart || !railEnd)
         {
             Debug.LogError(
@@ -117,6 +139,10 @@ public class FeedRailController : MonoBehaviour
 
         SetupGuide();
         ResolveProcedureManager();
+        initialOwnerPosition = ownerRb.position;
+        initialOwnerRotation = ownerRb.rotation;
+        initialOwnerKinematicState = ownerRb.isKinematic;
+        initialOwnerConstraints = ownerRb.constraints;
     }
 
     private void Update()
@@ -264,6 +290,187 @@ public class FeedRailController : MonoBehaviour
         RestoreDeliveredBodyConstraints();
     }
 
+    public void CompleteFeedForDevelopment(bool instant)
+    {
+        if (!connectionEnd.IsConnected)
+            return;
+
+        if (!railActive)
+            ActivateRail();
+
+        if (!deliveredBody || !DeliveredBodyTarget)
+            return;
+
+        if (developmentFeedRoutine != null)
+            StopCoroutine(developmentFeedRoutine);
+
+        developmentFeedRoutine = StartCoroutine(
+            TranslateSubstrateToCenterForDevelopment(instant ? 0f : 0.8f));
+    }
+
+    public void CompleteWithdrawalForDevelopment(bool instant)
+    {
+        if (developmentWithdrawalRoutine != null)
+            StopCoroutine(developmentWithdrawalRoutine);
+
+        developmentWithdrawalRoutine = StartCoroutine(
+            WithdrawForDevelopment(instant ? 0f : 1.2f));
+    }
+
+    public void ResetForDevelopment()
+    {
+        if (developmentFeedRoutine != null)
+        {
+            StopCoroutine(developmentFeedRoutine);
+            developmentFeedRoutine = null;
+        }
+
+        if (developmentWithdrawalRoutine != null)
+        {
+            StopCoroutine(developmentWithdrawalRoutine);
+            developmentWithdrawalRoutine = null;
+        }
+
+        bool wasComplete = feedCompleted;
+        if (connectionEnd.IsConnected)
+            connectionEnd.Disconnect();
+
+        RestoreDeliveredBodyConstraints();
+        if (deliveredBody && hasDeliveredBodyPose)
+        {
+            deliveredBody.isKinematic = true;
+            deliveredBody.position = deliveredBodyStartPosition;
+            deliveredBody.rotation = deliveredBodyStartRotation;
+            deliveredBody.linearVelocity = Vector3.zero;
+            deliveredBody.angularVelocity = Vector3.zero;
+            deliveredBody.constraints = deliveredBodyConstraints;
+            deliveredBody.isKinematic = deliveredBodyKinematicState;
+        }
+
+        ownerRb.isKinematic = true;
+        ownerRb.position = initialOwnerPosition;
+        ownerRb.rotation = initialOwnerRotation;
+        ownerRb.linearVelocity = Vector3.zero;
+        ownerRb.angularVelocity = Vector3.zero;
+        ownerRb.constraints = initialOwnerConstraints;
+        ownerRb.isKinematic = initialOwnerKinematicState;
+
+        railActive = false;
+        wasConnected = false;
+        feedCompleted = false;
+        withdrawalUnlocked = false;
+        settlingToEnd = false;
+        deliveredBodyControlled = false;
+        deliveredBodyLocked = false;
+        constrainedDistance = 0f;
+        distanceVelocity = 0f;
+        SetProgress(0f, true);
+        SetGuideState(false);
+        SetGuideVisible(false);
+        Physics.SyncTransforms();
+
+        if (wasComplete)
+            OnFeedReset?.Invoke();
+
+        ResolveProcedureManager();
+        procedureManager?.SetSubstrateFedIntoTube(false);
+        procedureManager?.SetSubstrateWithdrawn(false);
+    }
+
+    private IEnumerator TranslateSubstrateToCenterForDevelopment(float motionDuration)
+    {
+        Vector3 startPosition = deliveredBody.position;
+        Quaternion startRotation = deliveredBody.rotation;
+        deliveredBody.isKinematic = true;
+        deliveredBody.linearVelocity = Vector3.zero;
+        deliveredBody.angularVelocity = Vector3.zero;
+
+        float elapsed = 0f;
+        while (elapsed < motionDuration)
+        {
+            elapsed += Time.unscaledDeltaTime * Mathf.Max(0.01f, GlobalSimSpeed.Multiplier);
+            float t = motionDuration <= 0f
+                ? 1f
+                : Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / motionDuration));
+            deliveredBody.position = Vector3.Lerp(
+                startPosition,
+                DeliveredBodyTarget.position,
+                t);
+            deliveredBody.rotation = startRotation;
+            yield return null;
+        }
+
+        deliveredBody.position = DeliveredBodyTarget.position;
+        deliveredBody.rotation = startRotation;
+        deliveredBody.linearVelocity = Vector3.zero;
+        deliveredBody.angularVelocity = Vector3.zero;
+        developmentFeedRoutine = null;
+        Physics.SyncTransforms();
+        CompleteFeed();
+    }
+
+    private IEnumerator WithdrawForDevelopment(float motionDuration)
+    {
+        UnlockForWithdrawal();
+        Vector3 rodStartPosition = ownerRb.position;
+        Quaternion rodStartRotation = ownerRb.rotation;
+
+        Rigidbody substrateBody = deliveredBody;
+        Vector3 substrateStartPosition = substrateBody
+            ? substrateBody.position
+            : Vector3.zero;
+        Quaternion substrateStartRotation = substrateBody
+            ? substrateBody.rotation
+            : Quaternion.identity;
+
+        ownerRb.isKinematic = true;
+        if (substrateBody)
+            substrateBody.isKinematic = true;
+
+        float elapsed = 0f;
+        while (elapsed < motionDuration)
+        {
+            elapsed += Time.unscaledDeltaTime * Mathf.Max(0.01f, GlobalSimSpeed.Multiplier);
+            float t = motionDuration <= 0f
+                ? 1f
+                : Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / motionDuration));
+
+            ownerRb.position = Vector3.Lerp(rodStartPosition, ownerStartPosition, t);
+            ownerRb.rotation = Quaternion.Slerp(rodStartRotation, ownerStartRotation, t);
+            if (substrateBody && hasDeliveredBodyPose)
+            {
+                substrateBody.position =
+                    Vector3.Lerp(substrateStartPosition, deliveredBodyStartPosition, t);
+                substrateBody.rotation =
+                    Quaternion.Slerp(substrateStartRotation, deliveredBodyStartRotation, t);
+            }
+
+            if (motionDuration > 0f)
+                yield return null;
+        }
+
+        ownerRb.position = ownerStartPosition;
+        ownerRb.rotation = ownerStartRotation;
+        ownerRb.linearVelocity = Vector3.zero;
+        ownerRb.angularVelocity = Vector3.zero;
+        ownerRb.isKinematic = initialOwnerKinematicState;
+
+        if (substrateBody && hasDeliveredBodyPose)
+        {
+            substrateBody.position = deliveredBodyStartPosition;
+            substrateBody.rotation = deliveredBodyStartRotation;
+            substrateBody.linearVelocity = Vector3.zero;
+            substrateBody.angularVelocity = Vector3.zero;
+            substrateBody.constraints = deliveredBodyConstraints;
+            substrateBody.isKinematic = deliveredBodyKinematicState;
+        }
+
+        developmentWithdrawalRoutine = null;
+        Physics.SyncTransforms();
+        ResolveProcedureManager();
+        procedureManager?.MarkSubstrateWithdrawn();
+    }
+
     private void SetProgress(float value, bool forceEvent = false)
     {
         value = Mathf.Clamp01(value);
@@ -322,7 +529,14 @@ public class FeedRailController : MonoBehaviour
 
         if (deliveredBody && connectionEnd.IsConnected)
         {
-            deliveredBody.position = deliveredBodyStartPosition + railAxis * distance;
+            float railLength = Vector3.Distance(railStart.position, railEnd.position);
+            float normalizedDistance = railLength > 0.0001f
+                ? Mathf.Clamp01(distance / railLength)
+                : 1f;
+            deliveredBody.position = Vector3.Lerp(
+                deliveredBodyStartPosition,
+                DeliveredBodyTarget.position,
+                normalizedDistance);
             deliveredBody.rotation = deliveredBodyStartRotation;
             deliveredBody.linearVelocity = Vector3.zero;
             deliveredBody.angularVelocity = Vector3.zero;
@@ -338,6 +552,7 @@ public class FeedRailController : MonoBehaviour
 
         feedCompleted = true;
         settlingToEnd = false;
+        SnapDeliveredBodyToEndpoint();
         SetProgress(1f, true);
         SetGuideState(true);
         FurnaceInteractionFeedback.PlayActionConfirmed();
@@ -349,6 +564,18 @@ public class FeedRailController : MonoBehaviour
         {
             DetachDeliveredBody();
         }
+    }
+
+    private void SnapDeliveredBodyToEndpoint()
+    {
+        if (!deliveredBody || !DeliveredBodyTarget)
+            return;
+
+        deliveredBody.position = DeliveredBodyTarget.position;
+        deliveredBody.rotation = deliveredBodyStartRotation;
+        deliveredBody.linearVelocity = Vector3.zero;
+        deliveredBody.angularVelocity = Vector3.zero;
+        Physics.SyncTransforms();
     }
 
     private void CaptureDeliveredBody()
@@ -366,6 +593,7 @@ public class FeedRailController : MonoBehaviour
         deliveredBodyKinematicState = deliveredBody.isKinematic;
         deliveredBodyStartPosition = deliveredBody.position;
         deliveredBodyStartRotation = deliveredBody.rotation;
+        hasDeliveredBodyPose = true;
         deliveredBody.linearVelocity = Vector3.zero;
         deliveredBody.angularVelocity = Vector3.zero;
         deliveredBody.isKinematic = true;

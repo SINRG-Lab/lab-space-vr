@@ -84,4 +84,34 @@ public class AngleTrigger : MonoBehaviour
 
     [ContextMenu("Set Current As Neutral")]
     void CalibrateNeutral() => _neutralDeg = GetAxisInspectorDeg();
+
+    public void SetStateForDevelopment(bool positive)
+    {
+        float processedAngle = positive ? target : -target;
+        float relativeAngle = flipSign ? -processedAngle : processedAngle;
+        Vector3 localEuler = transform.localEulerAngles;
+
+        switch (axis)
+        {
+            case Axis.X:
+                localEuler.x = _neutralDeg + relativeAngle;
+                break;
+            case Axis.Y:
+                localEuler.y = _neutralDeg + relativeAngle;
+                break;
+            default:
+                localEuler.z = _neutralDeg + relativeAngle;
+                break;
+        }
+
+        transform.localEulerAngles = localEuler;
+        Physics.SyncTransforms();
+
+        _posLatched = positive;
+        _negLatched = !positive;
+        if (positive)
+            OnPositiveHit?.Invoke();
+        else
+            OnNegativeHit?.Invoke();
+    }
 }

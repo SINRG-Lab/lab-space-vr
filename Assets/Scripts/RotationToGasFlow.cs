@@ -185,6 +185,34 @@ public sealed class RotationToGasFlow : MonoBehaviour
         }
     }
 
+    public void SetValueForDevelopment(float value)
+    {
+        if (!target)
+        {
+            target = transform;
+        }
+
+        float normalized = Mathf.InverseLerp(minValue, maxValue, value);
+        float rotationRange = Mathf.Abs(maxAngle - minAngle);
+        Vector3 rotationAxis = axis switch
+        {
+            Axis.X => Vector3.right,
+            Axis.Y => Vector3.up,
+            _ => Vector3.forward
+        };
+
+        target.localRotation =
+            minimumLocalRotation *
+            Quaternion.AngleAxis(rotationRange * normalized, rotationAxis);
+        Physics.SyncTransforms();
+        RefreshFromRotation(playFeedback: false);
+    }
+
+    public void ResetForDevelopment()
+    {
+        SetValueForDevelopment(minValue);
+    }
+
     private void OnValidate()
     {
         maxValue = Mathf.Max(maxValue, minValue);
