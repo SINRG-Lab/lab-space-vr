@@ -25,6 +25,7 @@ public class FeedRailController : MonoBehaviour
     [SerializeField, Min(0f)] private float movementSmoothTime = 0.045f;
     [SerializeField, Min(0f)] private float endpointTolerance = 0.0015f;
     [SerializeField, Range(0f, 1f)] private float completionThreshold = 0.96f;
+    [SerializeField, Range(0f, 1f)] private float withdrawalCompletionThreshold = 0.04f;
     [SerializeField, Range(0f, 1f)] private float resetThreshold = 0.9f;
     [SerializeField] private bool resetCompletionWhenRetracted = true;
     [SerializeField] private bool lockAtCompletion = true;
@@ -43,6 +44,8 @@ public class FeedRailController : MonoBehaviour
     [SerializeField] private FurnaceProcedureManager procedureManager;
     [SerializeField] private FurnaceProcedureManager.Gate procedureGate =
         FurnaceProcedureManager.Gate.SubstrateFedIntoTube;
+    [SerializeField] private FurnaceProcedureManager.Gate withdrawalGate =
+        FurnaceProcedureManager.Gate.SubstrateWithdrawn;
     [SerializeField] private bool restrictInteractionToCurrentStep = true;
 
     [Header("Events")]
@@ -50,6 +53,8 @@ public class FeedRailController : MonoBehaviour
     public UnityEvent<float> OnProgressChanged;
     public UnityEvent OnFeedCompleted;
     public UnityEvent OnFeedReset;
+    public UnityEvent OnWithdrawalStarted;
+    public UnityEvent OnWithdrawalCompleted;
 
     private GameObject guideRoot;
     private GameObject endMarker;
@@ -63,7 +68,9 @@ public class FeedRailController : MonoBehaviour
     private bool wasConnected;
     private bool feedCompleted;
     private bool withdrawalUnlocked;
+    private bool withdrawalActive;
     private bool settlingToEnd;
+    private bool settlingToStart;
     private bool deliveredBodyControlled;
     private bool deliveredBodyLocked;
     private float progress;
@@ -79,11 +86,14 @@ public class FeedRailController : MonoBehaviour
     private bool initialOwnerKinematicState;
     private RigidbodyConstraints initialOwnerConstraints;
     private bool hasDeliveredBodyPose;
+    private Vector3 withdrawalInnerOwnerPosition;
+    private Quaternion withdrawalInnerOwnerRotation;
     private Coroutine developmentFeedRoutine;
     private Coroutine developmentWithdrawalRoutine;
 
     public float Progress => progress;
     public bool FeedCompleted => feedCompleted;
+    public bool WithdrawalActive => withdrawalActive;
     public float DeliveredBodyEndpointError =>
         deliveredBody && DeliveredBodyTarget
             ? Vector3.Distance(deliveredBody.position, DeliveredBodyTarget.position)
@@ -151,11 +161,17 @@ public class FeedRailController : MonoBehaviour
 
         if (isConnected && !wasConnected)
         {
-            ActivateRail();
+            if (IsWithdrawalStep())
+                ActivateWithdrawalRail();
+            else
+                ActivateRail();
         }
         else if (!isConnected && wasConnected)
         {
-            DeactivateRail(true);
+            if (withdrawalActive)
+                CancelWithdrawal();
+            else
+                DeactivateRail(true);
         }
 
         bool isGrabbed = grabbable.SelectingPointsCount > 0;
@@ -178,6 +194,17 @@ public class FeedRailController : MonoBehaviour
             return;
         }
 
+        if (withdrawalActive)
+        {
+            UpdateWithdrawalRail();
+            return;
+        }
+
+        UpdateFeedRail();
+    }
+
+    private void UpdateFeedRail()
+    {
         bool isGrabbed = grabbable.SelectingPointsCount > 0;
         if ((!IsProcedureAvailable() && !settlingToEnd) || (!isGrabbed && !settlingToEnd))
         {
@@ -226,6 +253,53 @@ public class FeedRailController : MonoBehaviour
         }
     }
 
+    private void UpdateWithdrawalRail()
+    {
+        bool isGrabbed = grabbable.SelectingPointsCount > 0;
+        if ((!IsProcedureAvailable() && !settlingToStart) ||
+            (!isGrabbed && !settlingToStart))
+        {
+            return;
+        }
+
+        if (!TryGetRail(out Vector3 railAxis, out float railLength))
+            return;
+
+        float targetDistance = settlingToStart
+            ? 0f
+            : railLength +
+              Vector3.Dot(ownerRb.position - withdrawalInnerOwnerPosition, railAxis);
+        targetDistance = Mathf.Clamp(targetDistance, 0f, railLength);
+
+        constrainedDistance = movementSmoothTime > 0f
+            ? Mathf.SmoothDamp(
+                constrainedDistance,
+                targetDistance,
+                ref distanceVelocity,
+                movementSmoothTime,
+                Mathf.Infinity,
+                Time.unscaledDeltaTime)
+            : targetDistance;
+
+        ApplyWithdrawalPose(constrainedDistance, railLength);
+        float normalizedProgress = constrainedDistance / railLength;
+        SetProgress(normalizedProgress);
+
+        if (!settlingToStart &&
+            normalizedProgress <= withdrawalCompletionThreshold)
+        {
+            settlingToStart = true;
+        }
+
+        if (settlingToStart && constrainedDistance <= endpointTolerance)
+        {
+            constrainedDistance = 0f;
+            distanceVelocity = 0f;
+            ApplyWithdrawalPose(0f, railLength);
+            CompleteWithdrawal();
+        }
+    }
+
     public void ActivateRail()
     {
         if (!connectionEnd.IsConnected)
@@ -240,11 +314,46 @@ public class FeedRailController : MonoBehaviour
         railActive = true;
         feedCompleted = false;
         withdrawalUnlocked = false;
+        withdrawalActive = false;
         settlingToEnd = false;
+        settlingToStart = false;
         CaptureDeliveredBody();
         SetProgress(0f, true);
         SetGuideState(false);
         OnRailActivated?.Invoke();
+    }
+
+    private void ActivateWithdrawalRail()
+    {
+        if (!connectionEnd.IsConnected ||
+            !feedCompleted ||
+            !deliveredBody ||
+            !DeliveredBodyTarget ||
+            !hasDeliveredBodyPose ||
+            !TryGetRail(out _, out float railLength))
+        {
+            return;
+        }
+
+        withdrawalInnerOwnerPosition = ownerRb.position;
+        withdrawalInnerOwnerRotation = ownerRb.rotation;
+        constrainedDistance = railLength;
+        distanceVelocity = 0f;
+        railActive = true;
+        withdrawalUnlocked = true;
+        withdrawalActive = true;
+        settlingToEnd = false;
+        settlingToStart = false;
+
+        RestoreDeliveredBodyConstraints();
+        deliveredBody.isKinematic = true;
+        deliveredBody.linearVelocity = Vector3.zero;
+        deliveredBody.angularVelocity = Vector3.zero;
+        deliveredBodyControlled = true;
+
+        SetProgress(1f, true);
+        SetGuideState(false);
+        OnWithdrawalStarted?.Invoke();
     }
 
     public void ResetRail()
@@ -256,7 +365,9 @@ public class FeedRailController : MonoBehaviour
         distanceVelocity = 0f;
         feedCompleted = false;
         withdrawalUnlocked = false;
+        withdrawalActive = false;
         settlingToEnd = false;
+        settlingToStart = false;
         RestoreDeliveredBodyConstraints();
         SetProgress(0f, true);
         SetGuideState(false);
@@ -270,7 +381,9 @@ public class FeedRailController : MonoBehaviour
     private void DeactivateRail(bool resetCompletion)
     {
         railActive = false;
+        withdrawalActive = false;
         settlingToEnd = false;
+        settlingToStart = false;
         distanceVelocity = 0f;
         SetGuideVisible(false);
         RestoreDeliveredBodyConstraints();
@@ -359,7 +472,9 @@ public class FeedRailController : MonoBehaviour
         wasConnected = false;
         feedCompleted = false;
         withdrawalUnlocked = false;
+        withdrawalActive = false;
         settlingToEnd = false;
+        settlingToStart = false;
         deliveredBodyControlled = false;
         deliveredBodyLocked = false;
         constrainedDistance = 0f;
@@ -453,6 +568,7 @@ public class FeedRailController : MonoBehaviour
         ownerRb.rotation = ownerStartRotation;
         ownerRb.linearVelocity = Vector3.zero;
         ownerRb.angularVelocity = Vector3.zero;
+        ownerRb.constraints = initialOwnerConstraints;
         ownerRb.isKinematic = initialOwnerKinematicState;
 
         if (substrateBody && hasDeliveredBodyPose)
@@ -465,10 +581,19 @@ public class FeedRailController : MonoBehaviour
             substrateBody.isKinematic = deliveredBodyKinematicState;
         }
 
+        LockDeliveredBodyAtCurrentPose();
         developmentWithdrawalRoutine = null;
+        feedCompleted = false;
+        withdrawalUnlocked = false;
+        withdrawalActive = false;
+        settlingToStart = false;
+        railActive = false;
         Physics.SyncTransforms();
         ResolveProcedureManager();
+        procedureManager?.SetSubstrateFedIntoTube(false);
         procedureManager?.MarkSubstrateWithdrawn();
+        OnWithdrawalCompleted?.Invoke();
+        FurnaceInteractionFeedback.PlayActionConfirmed();
     }
 
     private void SetProgress(float value, bool forceEvent = false)
@@ -482,7 +607,10 @@ public class FeedRailController : MonoBehaviour
         progress = value;
         OnProgressChanged?.Invoke(progress);
 
-        if (feedCompleted && resetCompletionWhenRetracted && progress < resetThreshold)
+        if (!withdrawalActive &&
+            feedCompleted &&
+            resetCompletionWhenRetracted &&
+            progress < resetThreshold)
         {
             feedCompleted = false;
             SetGuideState(false);
@@ -541,6 +669,80 @@ public class FeedRailController : MonoBehaviour
             deliveredBody.linearVelocity = Vector3.zero;
             deliveredBody.angularVelocity = Vector3.zero;
         }
+    }
+
+    private void ApplyWithdrawalPose(float distance, float railLength)
+    {
+        float normalizedDistance = railLength > 0.0001f
+            ? Mathf.Clamp01(distance / railLength)
+            : 0f;
+
+        ownerRb.position = Vector3.Lerp(
+            ownerStartPosition,
+            withdrawalInnerOwnerPosition,
+            normalizedDistance);
+        if (lockRotation)
+        {
+            ownerRb.rotation = Quaternion.Slerp(
+                ownerStartRotation,
+                withdrawalInnerOwnerRotation,
+                normalizedDistance);
+        }
+
+        if (!deliveredBody)
+            return;
+
+        deliveredBody.position = Vector3.Lerp(
+            deliveredBodyStartPosition,
+            DeliveredBodyTarget.position,
+            normalizedDistance);
+        deliveredBody.rotation = deliveredBodyStartRotation;
+        deliveredBody.linearVelocity = Vector3.zero;
+        deliveredBody.angularVelocity = Vector3.zero;
+    }
+
+    private void CompleteWithdrawal()
+    {
+        if (!withdrawalActive)
+            return;
+
+        SetProgress(0f, true);
+        SetGuideState(true);
+
+        connectionEnd.Disconnect();
+        wasConnected = false;
+        railActive = false;
+        feedCompleted = false;
+        withdrawalUnlocked = false;
+        withdrawalActive = false;
+        settlingToStart = false;
+        LockDeliveredBodyAtCurrentPose();
+        SetGuideVisible(false);
+
+        ResolveProcedureManager();
+        procedureManager?.SetSubstrateFedIntoTube(false);
+        procedureManager?.MarkSubstrateWithdrawn();
+        OnWithdrawalCompleted?.Invoke();
+        FurnaceInteractionFeedback.PlayActionConfirmed();
+    }
+
+    private void CancelWithdrawal()
+    {
+        SnapDeliveredBodyToEndpoint();
+        if (TryGetRail(out _, out float railLength))
+        {
+            constrainedDistance = railLength;
+            SetProgress(1f, true);
+        }
+
+        railActive = false;
+        withdrawalUnlocked = false;
+        withdrawalActive = false;
+        settlingToStart = false;
+        distanceVelocity = 0f;
+        LockDeliveredBodyAtCurrentPose();
+        SetGuideState(false);
+        SetGuideVisible(false);
     }
 
     private void CompleteFeed()
@@ -611,6 +813,14 @@ public class FeedRailController : MonoBehaviour
         {
             return;
         }
+
+        LockDeliveredBodyAtCurrentPose();
+    }
+
+    private void LockDeliveredBodyAtCurrentPose()
+    {
+        if (!deliveredBody)
+            return;
 
         deliveredBody.linearVelocity = Vector3.zero;
         deliveredBody.angularVelocity = Vector3.zero;
@@ -693,7 +903,9 @@ public class FeedRailController : MonoBehaviour
     {
         guideLine.SetPosition(0, railStart.position);
         guideLine.SetPosition(1, railEnd.position);
-        endMarker.transform.position = railEnd.position;
+        endMarker.transform.position = withdrawalActive
+            ? railStart.position
+            : railEnd.position;
     }
 
     private void SetGuideState(bool complete)
@@ -726,7 +938,14 @@ public class FeedRailController : MonoBehaviour
     {
         return !restrictInteractionToCurrentStep ||
                !procedureManager ||
-               procedureManager.IsGateRequiredByCurrentStep(procedureGate);
+               procedureManager.IsGateRequiredByCurrentStep(procedureGate) ||
+               procedureManager.IsGateRequiredByCurrentStep(withdrawalGate);
+    }
+
+    private bool IsWithdrawalStep()
+    {
+        return procedureManager &&
+               procedureManager.IsGateRequiredByCurrentStep(withdrawalGate);
     }
 
     private static Material CreateTransparentMaterial(Material source, Color color)
@@ -773,9 +992,17 @@ public class FeedRailController : MonoBehaviour
 
     private void OnDisable()
     {
+        if (withdrawalActive)
+        {
+            CancelWithdrawal();
+            wasConnected = false;
+            return;
+        }
+
         railActive = false;
         wasConnected = false;
         settlingToEnd = false;
+        settlingToStart = false;
         RestoreDeliveredBodyConstraints();
         SetGuideVisible(false);
     }

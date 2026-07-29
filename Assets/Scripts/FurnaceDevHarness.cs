@@ -25,6 +25,7 @@ public sealed class FurnaceDevHarness : MonoBehaviour
     [SerializeField] private RotationToGasFlow gasFlow;
     [SerializeField] private IncreaseTemperature heater;
     [SerializeField] private Setting_Parameter growthSettings;
+    [SerializeField] private GrowthManager growthController;
     [SerializeField] private GlobalSimSpeed simulationSpeed;
 
     private Rect windowRect = new(16f, 48f, 410f, 720f);
@@ -127,6 +128,11 @@ public sealed class FurnaceDevHarness : MonoBehaviour
                 : $"Current: {procedureManager.CurrentStepIndex + 1}. {procedureManager.CurrentStepTitle}");
         GUILayout.Label($"Status: {status}");
         GUILayout.Label($"Simulation speed: {CurrentSimulationSpeed:0.0}x");
+        if (growthController)
+        {
+            GUILayout.Label(
+                $"Growth: {growthController.State} ({growthController.Progress01:P0})");
+        }
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Reset"))
@@ -193,7 +199,7 @@ public sealed class FurnaceDevHarness : MonoBehaviour
         }
 
         GUILayout.Space(8f);
-        GUILayout.Label("Temporary drivers: growth start and withdrawal.");
+        GUILayout.Label("Cooldown, lid opening, and withdrawal use the Phase 8 flow.");
         GUILayout.Label("Shortcuts: ` panel, Shift+R reset, Shift+Enter simulate, Shift+N instant");
         GUILayout.Label("Shift+J jump, Shift+A auto, Shift+P pause, Shift+[ / ] speed");
 
@@ -221,6 +227,8 @@ public sealed class FurnaceDevHarness : MonoBehaviour
             heater = FindFirstObjectByType<IncreaseTemperature>(FindObjectsInactive.Include);
         if (!growthSettings)
             growthSettings = FindFirstObjectByType<Setting_Parameter>(FindObjectsInactive.Include);
+        if (!growthController)
+            growthController = FindFirstObjectByType<GrowthManager>(FindObjectsInactive.Include);
         if (!simulationSpeed)
             simulationSpeed = FindFirstObjectByType<GlobalSimSpeed>(FindObjectsInactive.Include);
 
@@ -318,6 +326,20 @@ public sealed class FurnaceDevHarness : MonoBehaviour
     {
         switch (gate)
         {
+            case FurnaceProcedureManager.Gate.GrowthParametersSet:
+                if (!growthSettings)
+                {
+                    status = "Growth parameter settings reference is missing.";
+                    yield break;
+                }
+                if (!growthSettings.ConfirmParametersForDevelopment())
+                {
+                    status = "Growth parameters could not be confirmed.";
+                    yield break;
+                }
+                status = "Growth parameters confirmed.";
+                break;
+
             case FurnaceProcedureManager.Gate.PowerOn:
                 if (!powerControl)
                 {
@@ -394,10 +416,33 @@ public sealed class FurnaceDevHarness : MonoBehaviour
                 break;
 
             case FurnaceProcedureManager.Gate.GrowthStarted:
-                if (growthSettings)
-                    growthSettings.SetGrowthEnabled(true);
-                procedureManager.MarkGrowthStarted();
-                status = "Growth started with the temporary Phase 7 driver.";
+                if (!growthController)
+                {
+                    status = "Growth controller reference is missing.";
+                    yield break;
+                }
+                if (!growthController.TryStartGrowth())
+                {
+                    status = "Growth prerequisites are not satisfied.";
+                    yield break;
+                }
+                status = "Nanowire growth started.";
+                break;
+
+            case FurnaceProcedureManager.Gate.GrowthComplete:
+                if (!growthController)
+                {
+                    status = "Growth controller reference is missing.";
+                    yield break;
+                }
+                if (instant && !growthController.CompleteGrowthForDevelopment())
+                {
+                    status = "Growth could not be completed.";
+                    yield break;
+                }
+                status = instant
+                    ? "Nanowire growth completed instantly."
+                    : "Waiting for nanowires to reach the target height.";
                 break;
 
             case FurnaceProcedureManager.Gate.CooldownComplete:
@@ -407,6 +452,19 @@ public sealed class FurnaceDevHarness : MonoBehaviour
                     yield break;
                 }
                 heater.StartCooldownForDevelopment(instant);
+                status = instant
+                    ? "Furnace cooled to the safe withdrawal state."
+                    : "Waiting for all zones to reach the safe withdrawal temperature.";
+                break;
+
+            case FurnaceProcedureManager.Gate.FurnaceOpen:
+                if (!lidState)
+                {
+                    status = "Furnace lid reference is missing.";
+                    yield break;
+                }
+                lidState.SetClosedForDevelopment(false);
+                status = "Furnace lid opened.";
                 break;
 
             case FurnaceProcedureManager.Gate.SubstrateWithdrawn:
@@ -418,7 +476,9 @@ public sealed class FurnaceDevHarness : MonoBehaviour
                 {
                     procedureManager.MarkSubstrateWithdrawn();
                 }
-                status = "Withdrawal is using the temporary Phase 8 driver.";
+                status = instant
+                    ? "Substrate withdrawn instantly."
+                    : "Withdrawing substrate along the return path.";
                 break;
 
             case FurnaceProcedureManager.Gate.FurnaceClosed:
@@ -528,7 +588,8 @@ public sealed class FurnaceDevHarness : MonoBehaviour
     private void ResetState()
     {
         ResolveReferences();
-        growthSettings?.SetGrowthEnabled(false);
+        growthController?.ResetForDevelopment();
+        growthSettings?.ResetParameterConfirmationForDevelopment();
         heater?.ResetForDevelopment();
         feedRail?.ResetForDevelopment();
         rodConnector?.ResetForDevelopment();
@@ -625,8 +686,9 @@ public sealed class FurnaceDevHarness : MonoBehaviour
     private static float GateTimeout(FurnaceProcedureManager.Gate gate)
     {
         return gate == FurnaceProcedureManager.Gate.HeatSoakComplete ||
+               gate == FurnaceProcedureManager.Gate.GrowthComplete ||
                gate == FurnaceProcedureManager.Gate.CooldownComplete
-            ? 90f
+            ? 120f
             : 10f;
     }
 

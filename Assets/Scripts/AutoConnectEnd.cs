@@ -42,6 +42,9 @@ public class AutoConnectEnd : MonoBehaviour
     [SerializeField] private FurnaceProcedureManager procedureManager;
     [SerializeField] private FurnaceProcedureManager.Gate procedureGate =
         FurnaceProcedureManager.Gate.RodConnected;
+    [SerializeField] private bool allowAlternateProcedureGate;
+    [SerializeField] private FurnaceProcedureManager.Gate alternateProcedureGate =
+        FurnaceProcedureManager.Gate.SubstrateWithdrawn;
     [SerializeField] private bool restrictInteractionToCurrentStep = true;
 
     [Header("Snap Motion")]
@@ -720,7 +723,9 @@ public class AutoConnectEnd : MonoBehaviour
     {
         return !restrictInteractionToCurrentStep ||
                !procedureManager ||
-               procedureManager.IsGateRequiredByCurrentStep(procedureGate);
+               procedureManager.IsGateRequiredByCurrentStep(procedureGate) ||
+               (allowAlternateProcedureGate &&
+                procedureManager.IsGateRequiredByCurrentStep(alternateProcedureGate));
     }
 
     private void OnDestroy()

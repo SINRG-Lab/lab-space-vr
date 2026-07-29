@@ -21,7 +21,10 @@ public class FurnaceProcedureManager : MonoBehaviour
         GrowthStarted,
         CooldownComplete,
         SubstrateWithdrawn,
-        FurnaceClosed
+        FurnaceClosed,
+        GrowthComplete,
+        GrowthParametersSet,
+        FurnaceOpen
     }
 
     [Serializable]
@@ -37,6 +40,8 @@ public class FurnaceProcedureManager : MonoBehaviour
         public GameObject[] activeObjects;
         [Tooltip("Components enabled only while this is the current procedure step.")]
         public Behaviour[] activeBehaviours;
+        [Tooltip("Components disabled only while this is the current procedure step.")]
+        public Behaviour[] disabledBehaviours;
         [Tooltip("UI controls made interactable only while this is the current procedure step.")]
         public Selectable[] activeSelectables;
         [Tooltip("Optional scene component highlighted by the world-space step indicator.")]
@@ -70,6 +75,12 @@ public class FurnaceProcedureManager : MonoBehaviour
     [Header("Configurable Procedure")]
     [SerializeField] private List<ProcedureStep> steps = new List<ProcedureStep>
     {
+        new ProcedureStep(
+            "configure_growth_parameters",
+            "Configure Growth",
+            "Set radius, target height, and catalyst count, then confirm the parameters.",
+            Gate.GrowthParametersSet
+        ),
         new ProcedureStep(
             "power_on",
             "Power On",
@@ -112,7 +123,13 @@ public class FurnaceProcedureManager : MonoBehaviour
             "Set Temperature Zones",
             "Set the three furnace temperature zones.",
             Gate.TemperatureZonesSet
-        ),
+        )
+        {
+            prerequisiteGates = new[]
+            {
+                Gate.PowerOn
+            }
+        },
         new ProcedureStep(
             "heat_and_soak",
             "Heat and Soak",
@@ -122,6 +139,7 @@ public class FurnaceProcedureManager : MonoBehaviour
         {
             prerequisiteGates = new[]
             {
+                Gate.PowerOn,
                 Gate.FurnaceClosed,
                 Gate.GasFlowReady,
                 Gate.TemperatureZonesSet
@@ -130,21 +148,58 @@ public class FurnaceProcedureManager : MonoBehaviour
         new ProcedureStep(
             "start_growth",
             "Start Growth",
-            "Start the nanowire growth sequence.",
-            Gate.GrowthStarted
-        ),
+            "Start the nanowire growth sequence and wait for the target height.",
+            Gate.GrowthStarted,
+            Gate.GrowthComplete
+        )
+        {
+            prerequisiteGates = new[]
+            {
+                Gate.PowerOn,
+                Gate.SubstrateFedIntoTube,
+                Gate.GasFlowReady,
+                Gate.HeatSoakComplete,
+                Gate.FurnaceClosed,
+                Gate.GrowthParametersSet
+            }
+        },
         new ProcedureStep(
             "cool_down",
             "Cool Down",
-            "Cool the furnace to the safe withdrawal state.",
+            "Press HEATING OFF and wait until the furnace reaches a safe temperature.",
             Gate.CooldownComplete
-        ),
+        )
+        {
+            prerequisiteGates = new[]
+            {
+                Gate.GrowthComplete
+            }
+        },
+        new ProcedureStep(
+            "open_furnace",
+            "Open Furnace",
+            "Raise the furnace lid fully before withdrawing the substrate.",
+            Gate.FurnaceOpen
+        )
+        {
+            prerequisiteGates = new[]
+            {
+                Gate.CooldownComplete
+            }
+        },
         new ProcedureStep(
             "withdraw_substrate",
             "Withdraw Substrate",
-            "Withdraw the substrate from the quartz tube.",
+            "Reconnect the feed rod and pull the substrate out along the guide.",
             Gate.SubstrateWithdrawn
         )
+        {
+            prerequisiteGates = new[]
+            {
+                Gate.CooldownComplete,
+                Gate.FurnaceOpen
+            }
+        }
     };
 
     [Header("Gas Flow")]
@@ -164,6 +219,9 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private bool cooldownComplete;
     [SerializeField] private bool substrateWithdrawn;
     [SerializeField] private bool furnaceClosed;
+    [SerializeField] private bool growthComplete;
+    [SerializeField] private bool growthParametersSet;
+    [SerializeField] private bool furnaceOpen;
 
     public int CurrentStepIndex => currentStepIndex;
     public int StepCount => steps != null ? steps.Count : 0;
@@ -217,6 +275,9 @@ public class FurnaceProcedureManager : MonoBehaviour
         cooldownComplete = false;
         substrateWithdrawn = false;
         furnaceClosed = false;
+        growthComplete = false;
+        growthParametersSet = false;
+        furnaceOpen = false;
 
         currentStepIndex = 0;
         RefreshUi();
@@ -269,6 +330,9 @@ public class FurnaceProcedureManager : MonoBehaviour
     public void MarkCooldownComplete() => SetCooldownComplete(true);
     public void MarkSubstrateWithdrawn() => SetSubstrateWithdrawn(true);
     public void MarkFurnaceClosed() => SetFurnaceClosed(true);
+    public void MarkGrowthComplete() => SetGrowthComplete(true);
+    public void MarkGrowthParametersSet() => SetGrowthParametersSet(true);
+    public void MarkFurnaceOpen() => SetFurnaceOpen(true);
 
     public void SetPowerOn(bool value) => SetGate(Gate.PowerOn, value);
     public void SetSubstrateLoaded(bool value) => SetGate(Gate.SubstrateLoaded, value);
@@ -281,6 +345,9 @@ public class FurnaceProcedureManager : MonoBehaviour
     public void SetCooldownComplete(bool value) => SetGate(Gate.CooldownComplete, value);
     public void SetSubstrateWithdrawn(bool value) => SetGate(Gate.SubstrateWithdrawn, value);
     public void SetFurnaceClosed(bool value) => SetGate(Gate.FurnaceClosed, value);
+    public void SetGrowthComplete(bool value) => SetGate(Gate.GrowthComplete, value);
+    public void SetGrowthParametersSet(bool value) => SetGate(Gate.GrowthParametersSet, value);
+    public void SetFurnaceOpen(bool value) => SetGate(Gate.FurnaceOpen, value);
 
     public void SetGasFlowValue(float value)
     {
@@ -331,6 +398,15 @@ public class FurnaceProcedureManager : MonoBehaviour
             case Gate.FurnaceClosed:
                 furnaceClosed = value;
                 break;
+            case Gate.GrowthComplete:
+                growthComplete = value;
+                break;
+            case Gate.GrowthParametersSet:
+                growthParametersSet = value;
+                break;
+            case Gate.FurnaceOpen:
+                furnaceOpen = value;
+                break;
         }
 
         EvaluateCurrentStep();
@@ -362,6 +438,12 @@ public class FurnaceProcedureManager : MonoBehaviour
                 return substrateWithdrawn;
             case Gate.FurnaceClosed:
                 return furnaceClosed;
+            case Gate.GrowthComplete:
+                return growthComplete;
+            case Gate.GrowthParametersSet:
+                return growthParametersSet;
+            case Gate.FurnaceOpen:
+                return furnaceOpen;
             default:
                 return false;
         }
@@ -516,6 +598,7 @@ public class FurnaceProcedureManager : MonoBehaviour
                                       AreGatesSatisfied(currentStep.prerequisiteGates);
         HashSet<GameObject> configuredObjects = new();
         HashSet<Behaviour> configuredBehaviours = new();
+        HashSet<Behaviour> configuredDisabledBehaviours = new();
         HashSet<Selectable> configuredSelectables = new();
 
         for (int i = 0; i < steps.Count; i++)
@@ -526,6 +609,7 @@ public class FurnaceProcedureManager : MonoBehaviour
 
             AddConfiguredItems(step.activeObjects, configuredObjects);
             AddConfiguredItems(step.activeBehaviours, configuredBehaviours);
+            AddConfiguredItems(step.disabledBehaviours, configuredDisabledBehaviours);
             AddConfiguredItems(step.activeSelectables, configuredSelectables);
         }
 
@@ -538,18 +622,24 @@ public class FurnaceProcedureManager : MonoBehaviour
 
         foreach (Behaviour configuredBehaviour in configuredBehaviours)
         {
-            bool shouldBeEnabled = powerOn &&
-                                   prerequisitesSatisfied &&
+            bool shouldBeEnabled = prerequisitesSatisfied &&
                                    currentStep != null &&
                                    Contains(currentStep.activeBehaviours, configuredBehaviour);
             if (configuredBehaviour.enabled != shouldBeEnabled)
                 configuredBehaviour.enabled = shouldBeEnabled;
         }
 
+        foreach (Behaviour configuredBehaviour in configuredDisabledBehaviours)
+        {
+            bool shouldBeEnabled = currentStep == null ||
+                                   !Contains(currentStep.disabledBehaviours, configuredBehaviour);
+            if (configuredBehaviour.enabled != shouldBeEnabled)
+                configuredBehaviour.enabled = shouldBeEnabled;
+        }
+
         foreach (Selectable configuredSelectable in configuredSelectables)
         {
-            bool shouldBeInteractable = powerOn &&
-                                        prerequisitesSatisfied &&
+            bool shouldBeInteractable = prerequisitesSatisfied &&
                                         currentStep != null &&
                                         Contains(currentStep.activeSelectables, configuredSelectable);
             if (configuredSelectable.interactable != shouldBeInteractable)

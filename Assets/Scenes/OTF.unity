@@ -8825,7 +8825,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1953597913}
         m_TargetAssemblyTypeName: Setting_Parameter, Assembly-CSharp
-        m_MethodName: ToggleGrowthEnabled
+        m_MethodName: HandlePrimaryAction
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -14339,6 +14339,8 @@ MonoBehaviour:
   procedureManager: {fileID: 1071694018}
   minimumSetpoint: 500
   soakDuration: 5
+  safeWithdrawalTemperature: 50
+  cooldownDuration: 20
   pauseWhenSafetyGateDrops: 1
   state: 0
   isIncreasingTemperature: 0
@@ -23016,12 +23018,13 @@ MonoBehaviour:
   powerControl: {fileID: 1093210768}
   substrateSnap: {fileID: 1164920836}
   rodConnector: {fileID: 1114375436}
-  substrateConnector: {fileID: 808996160}
+  substrateConnector: {fileID: 808996161}
   feedRail: {fileID: 991000000000000003}
   lidState: {fileID: 930415827604193865}
   gasFlow: {fileID: 8670761336569193911}
   heater: {fileID: 664395146}
   growthSettings: {fileID: 1953597913}
+  growthController: {fileID: 1814961264}
   simulationSpeed: {fileID: 1464285239}
 --- !u!1 &940568061
 GameObject:
@@ -24396,6 +24399,27 @@ MonoBehaviour:
   completeColor: {r: 0.28, g: 0.95, b: 0.5, a: 1}
   showStepNumber: 1
   steps:
+  - id: configure_growth_parameters
+    title: Configure Growth
+    instruction: Set radius, target height, and catalyst count, then confirm the parameters.
+    prerequisiteGates:
+    requiredGates: 0c000000
+    activeObjects:
+    - {fileID: 857554562}
+    - {fileID: 1141389436}
+    activeBehaviours: []
+    disabledBehaviours:
+    - {fileID: 1093210764}
+    activeSelectables:
+    - {fileID: 250962942}
+    indicatorTarget: {fileID: 1141389437}
+    indicatorOffset: {x: 0, y: 0.08, z: 0}
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onComplete:
+      m_PersistentCalls:
+        m_Calls: []
   - id: power_on
     title: Power On
     instruction: Turn on the main furnace power.
@@ -24460,6 +24484,22 @@ MonoBehaviour:
     onComplete:
       m_PersistentCalls:
         m_Calls: []
+  - id: close_furnace
+    title: Close Furnace
+    instruction: Lower the furnace lid fully before continuing.
+    prerequisiteGates:
+    requiredGates: 0a000000
+    activeObjects: []
+    activeBehaviours: []
+    activeSelectables: []
+    indicatorTarget: {fileID: 7100324511552852820}
+    indicatorOffset: {x: 0, y: 0.14, z: 0}
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onComplete:
+      m_PersistentCalls:
+        m_Calls: []
   - id: set_gas_flow
     title: Set Gas Flow
     instruction: Open the gas-flow valve to the required flow.
@@ -24479,7 +24519,7 @@ MonoBehaviour:
   - id: set_temperature_zones
     title: Set Temperature Zones
     instruction: Set all three furnace zones to at least 500 C.
-    prerequisiteGates: 
+    prerequisiteGates: 00000000
     requiredGates: 05000000
     activeObjects: []
     activeBehaviours: []
@@ -24501,7 +24541,7 @@ MonoBehaviour:
   - id: heat_and_soak
     title: Heat and Soak
     instruction: Press HEATING READY, then wait for the ramp and soak to complete.
-    prerequisiteGates: 0a0000000400000005000000
+    prerequisiteGates: 000000000a0000000400000005000000
     requiredGates: 06000000
     activeObjects: []
     activeBehaviours:
@@ -24517,14 +24557,17 @@ MonoBehaviour:
         m_Calls: []
   - id: start_growth
     title: Start Growth
-    instruction: Start the nanowire growth sequence.
-    prerequisiteGates: 
-    requiredGates: 07000000
-    activeObjects: []
+    instruction: Start the nanowire growth sequence and wait for the target height.
+    prerequisiteGates: 000000000300000004000000060000000a0000000c000000
+    requiredGates: 070000000b000000
+    activeObjects:
+    - {fileID: 857554562}
+    - {fileID: 1141389436}
     activeBehaviours: []
-    activeSelectables: []
-    indicatorTarget: {fileID: 0}
-    indicatorOffset: {x: 0, y: 0.16, z: 0}
+    activeSelectables:
+    - {fileID: 250962942}
+    indicatorTarget: {fileID: 1141389437}
+    indicatorOffset: {x: 0, y: 0.08, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24533,14 +24576,31 @@ MonoBehaviour:
         m_Calls: []
   - id: cool_down
     title: Cool Down
-    instruction: Cool the furnace to the safe withdrawal state.
-    prerequisiteGates: 
+    instruction: Press HEATING OFF and wait until all zones are at or below 50 C.
+    prerequisiteGates: 0b000000
     requiredGates: 08000000
+    activeObjects: []
+    activeBehaviours:
+    - {fileID: 611025920}
+    activeSelectables: []
+    indicatorTarget: {fileID: 611025919}
+    indicatorOffset: {x: 0, y: 0.1, z: 0}
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onComplete:
+      m_PersistentCalls:
+        m_Calls: []
+  - id: open_furnace
+    title: Open Furnace
+    instruction: Raise the furnace lid fully before withdrawing the substrate.
+    prerequisiteGates: 08000000
+    requiredGates: 0d000000
     activeObjects: []
     activeBehaviours: []
     activeSelectables: []
-    indicatorTarget: {fileID: 0}
-    indicatorOffset: {x: 0, y: 0.16, z: 0}
+    indicatorTarget: {fileID: 7100324511552852820}
+    indicatorOffset: {x: 0, y: 0.14, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24549,30 +24609,14 @@ MonoBehaviour:
         m_Calls: []
   - id: withdraw_substrate
     title: Withdraw Substrate
-    instruction: Withdraw the substrate from the quartz tube.
-    prerequisiteGates: 
+    instruction: Reconnect the feed rod and pull the substrate out along the guide.
+    prerequisiteGates: 080000000d000000
     requiredGates: 09000000
     activeObjects: []
     activeBehaviours: []
     activeSelectables: []
-    indicatorTarget: {fileID: 0}
+    indicatorTarget: {fileID: 808996159}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
-    onEnter:
-      m_PersistentCalls:
-        m_Calls: []
-    onComplete:
-      m_PersistentCalls:
-        m_Calls: []
-  - id: close_furnace
-    title: Close Furnace
-    instruction: Lower the furnace lid fully before continuing.
-    prerequisiteGates: 
-    requiredGates: 0a000000
-    activeObjects: []
-    activeBehaviours: []
-    activeSelectables: []
-    indicatorTarget: {fileID: 7100324511552852820}
-    indicatorOffset: {x: 0, y: 0.14, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24593,6 +24637,9 @@ MonoBehaviour:
   cooldownComplete: 0
   substrateWithdrawn: 0
   furnaceClosed: 0
+  growthComplete: 0
+  growthParametersSet: 0
+  furnaceOpen: 0
 --- !u!4 &1071694019
 Transform:
   m_ObjectHideFlags: 0
@@ -25618,6 +25665,8 @@ MonoBehaviour:
   guideSize: 0.035
   procedureManager: {fileID: 1071694018}
   procedureGate: 2
+  allowAlternateProcedureGate: 1
+  alternateProcedureGate: 9
   restrictInteractionToCurrentStep: 1
   snapDuration: 0.18
   snapCurve:
@@ -27371,7 +27420,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Start
+  m_text: Confirm
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -31001,7 +31050,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.007, y: 1.599}
+  m_AnchoredPosition: {x: -0.007, y: 1.612}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1433328260
@@ -31051,8 +31100,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -31724,7 +31773,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GlobalSimSpeed
   inspectorMultiplier: 1.5
-  inspectorGrowthMultiplier: 10000000
+  inspectorGrowthMultiplier: 100000000
 --- !u!1 &1481231859
 GameObject:
   m_ObjectHideFlags: 0
@@ -36194,7 +36243,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.006, y: 1.097}
+  m_AnchoredPosition: {x: -0.006, y: 1.11}
   m_SizeDelta: {x: 310.5216, y: 116.9363}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1780751291
@@ -36244,8 +36293,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -36455,7 +36504,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GrowthManager
   heater: {fileID: 664395146}
-  settingParameter: {fileID: 0}
+  settingParameter: {fileID: 1953597913}
+  procedureManager: {fileID: 1071694018}
+  state: 0
 --- !u!1 &1820542939
 GameObject:
   m_ObjectHideFlags: 0
@@ -37803,9 +37854,16 @@ MonoBehaviour:
   growth_rate: {fileID: 383973558}
   Substrate: {fileID: 911424325}
   catalyst_count: {fileID: 7714724828800279098}
+  defaultCatalystCount: 24
+  maxCatalystCount: 32
   catalyst_size_randomness: 5.24
   catalyst_holder: {fileID: 382891282}
   NanoWire: {fileID: 6480676327543331522, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
+  procedureManager: {fileID: 1071694018}
+  growthManager: {fileID: 1814961264}
+  parameterPanelRoot: {fileID: 857554562}
+  primaryActionButton: {fileID: 250962942}
+  primaryActionLabel: {fileID: 1290216515}
   growth_enabled: 0
   simSpeedMultiplier: 2
   simSpeed: 1000000
@@ -41285,6 +41343,8 @@ MonoBehaviour:
   closedLocalEuler: {x: -90, y: 90, z: -90}
   closeToleranceDegrees: 3
   reopenToleranceDegrees: 7
+  openToleranceDegrees: 3
+  leaveOpenToleranceDegrees: 7
   onClosed:
     m_PersistentCalls:
       m_Calls: []
@@ -41474,6 +41534,7 @@ MonoBehaviour:
   movementSmoothTime: 0.045
   endpointTolerance: 0.0015
   completionThreshold: 0.96
+  withdrawalCompletionThreshold: 0.04
   resetThreshold: 0.9
   resetCompletionWhenRetracted: 1
   lockAtCompletion: 1
@@ -41487,6 +41548,7 @@ MonoBehaviour:
   endMarkerSize: 0.04
   procedureManager: {fileID: 1071694018}
   procedureGate: 3
+  withdrawalGate: 9
   restrictInteractionToCurrentStep: 1
   OnRailActivated:
     m_PersistentCalls:
@@ -41524,6 +41586,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnWithdrawalStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWithdrawalCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1009950459954907574
 GameObject:
   m_ObjectHideFlags: 0
@@ -51661,9 +51729,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7672278567810856917}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 400
-  m_WholeNumbers: 0
-  m_Value: 100
+  m_MaxValue: 32
+  m_WholeNumbers: 1
+  m_Value: 24
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

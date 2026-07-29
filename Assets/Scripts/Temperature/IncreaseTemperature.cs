@@ -43,6 +43,8 @@ public class IncreaseTemperature : MonoBehaviour
     [SerializeField] private FurnaceProcedureManager procedureManager;
     [SerializeField, Min(0f)] private float minimumSetpoint = 500f;
     [SerializeField, Min(0f)] private float soakDuration = 5f;
+    [SerializeField, Min(0f)] private float safeWithdrawalTemperature = 50f;
+    [SerializeField, Min(0.01f)] private float cooldownDuration = 20f;
     [SerializeField] private bool pauseWhenSafetyGateDrops = true;
     [SerializeField] private HeatingState state = HeatingState.Idle;
 
@@ -53,10 +55,18 @@ public class IncreaseTemperature : MonoBehaviour
     public HeatingState State => state;
     public bool AllZonesReached => Zone1Reached && Zone2Reached && Zone3Reached;
     public float SoakProgress01 { get; private set; }
+    public float CooldownProgress01 { get; private set; }
+    public float SafeWithdrawalTemperature => safeWithdrawalTemperature;
+    public float MaxCurrentTemperature =>
+        Mathf.Max(currentValue_zone1, currentValue_zone2, currentValue_zone3);
+    public bool IsSafeForWithdrawal =>
+        MaxCurrentTemperature <= safeWithdrawalTemperature + reachedTolerance;
 
     [SerializeField] private float reachedTolerance = 0.5f;
 
     private Coroutine routineAll;
+    private float cooldownStartTemperature;
+    private bool cooldownCompletionPublished;
 
     private void Start()
     {
@@ -135,6 +145,14 @@ public class IncreaseTemperature : MonoBehaviour
     public void ResetAllZones()
     {
         ResolveProcedureManager();
+        if (procedureManager &&
+            procedureManager.IsGateRequiredByCurrentStep(
+                FurnaceProcedureManager.Gate.CooldownComplete))
+        {
+            StartCooldown();
+            return;
+        }
+
         procedureManager?.SetHeatSoakComplete(false);
 
         Zone1Reached = Zone2Reached = Zone3Reached = false;
@@ -146,6 +164,37 @@ public class IncreaseTemperature : MonoBehaviour
             currentValue_zone2,
             currentValue_zone3,
             false));
+    }
+
+    public void StartCooldown()
+    {
+        if (state == HeatingState.Cooling)
+            return;
+
+        ResolveProcedureManager();
+        if (procedureManager &&
+            !procedureManager.IsGateRequiredByCurrentStep(
+                FurnaceProcedureManager.Gate.CooldownComplete))
+        {
+            Debug.LogWarning(
+                "Cooldown can only be started during the Cool Down procedure step.",
+                this);
+            return;
+        }
+
+        procedureManager?.SetHeatSoakComplete(false);
+        procedureManager?.SetCooldownComplete(false);
+        Zone1Reached = Zone2Reached = Zone3Reached = false;
+        SoakProgress01 = 0f;
+        CooldownProgress01 = 0f;
+        cooldownCompletionPublished = false;
+        isIncreasingTemperature = false;
+
+        RestartAll(CoolAllZones(
+            currentValue_zone1,
+            currentValue_zone2,
+            currentValue_zone3,
+            true));
     }
 
     public void SetAllSetpointsForDevelopment(float value)
@@ -197,12 +246,11 @@ public class IncreaseTemperature : MonoBehaviour
 
     public void StartCooldownForDevelopment(bool instant)
     {
-        ResolveProcedureManager();
-        procedureManager?.SetHeatSoakComplete(false);
-        procedureManager?.SetCooldownComplete(false);
-
         if (instant)
         {
+            ResolveProcedureManager();
+            procedureManager?.SetHeatSoakComplete(false);
+            procedureManager?.SetCooldownComplete(false);
             if (routineAll != null)
             {
                 StopCoroutine(routineAll);
@@ -212,17 +260,15 @@ public class IncreaseTemperature : MonoBehaviour
             ApplyAll(0f, 0f, 0f, 0f, 0f, 0f, false);
             Zone1Reached = Zone2Reached = Zone3Reached = false;
             SoakProgress01 = 0f;
+            CooldownProgress01 = 1f;
             isIncreasingTemperature = false;
             state = HeatingState.Idle;
+            cooldownCompletionPublished = true;
             procedureManager?.MarkCooldownComplete();
             return;
         }
 
-        RestartAll(CoolAllZones(
-            currentValue_zone1,
-            currentValue_zone2,
-            currentValue_zone3,
-            true));
+        StartCooldown();
     }
 
     public void ResetForDevelopment()
@@ -237,6 +283,9 @@ public class IncreaseTemperature : MonoBehaviour
         ApplyAll(0f, 0f, 0f, 0f, 0f, 0f, false);
         Zone1Reached = Zone2Reached = Zone3Reached = false;
         SoakProgress01 = 0f;
+        CooldownProgress01 = 0f;
+        cooldownStartTemperature = 0f;
+        cooldownCompletionPublished = false;
         isIncreasingTemperature = false;
         state = HeatingState.Idle;
 
@@ -326,30 +375,57 @@ public class IncreaseTemperature : MonoBehaviour
     {
         state = HeatingState.Cooling;
         float elapsed = 0f;
-        float cooldownDuration = Mathf.Max(0.01f, duration);
+        float coolingTime = Mathf.Max(0.01f, cooldownDuration);
+        cooldownStartTemperature = Mathf.Max(from1, from2, from3);
+        CooldownProgress01 = IsSafeForWithdrawal ? 1f : 0f;
+        cooldownCompletionPublished = false;
 
-        while (elapsed < cooldownDuration)
+        if (publishCooldownCompletion && IsSafeForWithdrawal)
+            PublishCooldownCompletion();
+
+        while (elapsed < coolingTime)
         {
             elapsed += GetSimulationDeltaTime();
-            float t = Mathf.Clamp01(elapsed / cooldownDuration);
+            float t = Mathf.Clamp01(elapsed / coolingTime);
             ApplyAll(
                 Mathf.Lerp(from1, 0f, t),
                 Mathf.Lerp(from2, 0f, t),
                 Mathf.Lerp(from3, 0f, t),
                 0f, 0f, 0f,
                 false);
+
+            CooldownProgress01 = cooldownStartTemperature <= safeWithdrawalTemperature
+                ? 1f
+                : 1f - Mathf.InverseLerp(
+                    safeWithdrawalTemperature,
+                    cooldownStartTemperature,
+                    MaxCurrentTemperature);
+
+            if (publishCooldownCompletion &&
+                !cooldownCompletionPublished &&
+                IsSafeForWithdrawal)
+            {
+                PublishCooldownCompletion();
+            }
+
             yield return null;
         }
 
         ApplyAll(0f, 0f, 0f, 0f, 0f, 0f, false);
+        CooldownProgress01 = 1f;
         state = HeatingState.Idle;
         routineAll = null;
 
-        if (publishCooldownCompletion)
-        {
-            ResolveProcedureManager();
-            procedureManager?.MarkCooldownComplete();
-        }
+        if (publishCooldownCompletion && !cooldownCompletionPublished)
+            PublishCooldownCompletion();
+    }
+
+    private void PublishCooldownCompletion()
+    {
+        cooldownCompletionPublished = true;
+        FurnaceInteractionFeedback.PlayActionConfirmed();
+        ResolveProcedureManager();
+        procedureManager?.MarkCooldownComplete();
     }
 
     private void ApplyAll(

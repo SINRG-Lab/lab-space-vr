@@ -1,98 +1,186 @@
-using UnityEngine;
-using Random = UnityEngine.Random;
 using System;
-using TMPro;
+using UnityEngine;
 
 public class GrowthRate : MonoBehaviour
 {
-    [Header("Radius (nm)")]
-    string radius;
-    // public TextMeshProUGUI radius;
-
-    [Header("Temperature (C)")]
-    string temperature;
-
-    [Header("Required Height (nm)")]
-    string requied_height;
-
     public GameObject nanoWire;
-    Vector3 nanoWireHeight;
-
-    // float simSpeed;
-
-    private Parameters p;
-
     public GameObject catalyst;
     public GameObject catalyst_pivot;
-
-    double total_time;
-
-    string nanoWire_radius;
-
     public Setting_Parameter setting_parameter;
-
     public bool curr_nano_growth_enabled = true;
 
-    [SerializeField] bool logDebug = false;
-    [SerializeField] float logInterval = 1f;
-    float nextLogTime;
+    [SerializeField, Min(0.0001f)] private float visualUnitsPerNanometer = 0.1f;
+    [SerializeField] private bool logDebug;
+    [SerializeField] private float logInterval = 1f;
 
+    private Parameters parameters;
+    private Vector3 initialNanoWireScale;
+    private Vector3 nanoWireScale;
+    private bool initialized;
+    private float nextLogTime;
 
-    void Start()
+    public bool IsComplete { get; private set; }
+    public bool HasFinishedGrowth { get; private set; }
+    public float Progress01 { get; private set; }
+
+    private void Awake()
     {
-        p = new Parameters();
-        nanoWireHeight = nanoWire.transform.localScale;
-
-        setting_parameter = FindFirstObjectByType<Setting_Parameter>();
+        parameters = new Parameters();
+        InitializeVisual();
     }
 
-    void Update()
+    private void Start()
     {
         if (!setting_parameter)
-            return;
-
-        radius = setting_parameter.radius.text;
-        requied_height = setting_parameter.requied_height.text;
-        // simSpeed = Random.Range(setting_parameter.simSpeed, setting_parameter.simSpeed * setting_parameter.simSpeedMultiplier);
-
-        // Debug.Log(curr_nano_growth_enabled);
-
-        if (radius != null && double.TryParse(radius, out double rNm) && setting_parameter.growth_enabled && curr_nano_growth_enabled)
-        {
-            double mPerSec = ComputeGrowthRate(p, rNm);
-
-            nanoWireHeight.y += (float)mPerSec * Time.unscaledDeltaTime * GlobalSimSpeed.GrowthMultiplier;
-
-            nanoWire.transform.localScale = nanoWireHeight;
-            double.TryParse(requied_height, out double height);
-            total_time = height / (mPerSec * 3600);
-
-            if (logDebug && Time.unscaledTime >= nextLogTime)
-            {
-                double nmPerSec = mPerSec * 1e9;
-                Debug.Log($"Growth rate: {mPerSec:E6} m/s ({nmPerSec:F4} nm/s), total_time={total_time:F3}");
-                nextLogTime = Time.unscaledTime + logInterval;
-            }
-        }
-
-        if (requied_height != null && double.TryParse(requied_height, out double targetNm))
-        {
-            if (nanoWireHeight.y >= targetNm * 1e-1)
-            {
-                setting_parameter.growth_enabled = false;
-                curr_nano_growth_enabled = false;
-            }
-        }
-
-        catalyst.transform.position = catalyst_pivot.transform.position;
+            setting_parameter = FindFirstObjectByType<Setting_Parameter>();
     }
 
-    public static double GetPrefactor(double N0, double v, double omega, double C0, double QD, double k, double T, double C_C0)
+    private void Update()
+    {
+        if (!setting_parameter ||
+            !setting_parameter.growth_enabled ||
+            !curr_nano_growth_enabled ||
+            IsComplete)
+        {
+            return;
+        }
+
+        if (!setting_parameter.TryGetGrowthParameters(
+                out double radiusNm,
+                out double targetHeightNm))
+        {
+            return;
+        }
+
+        double metersPerSecond = ComputeGrowthRate(parameters, radiusNm);
+        if (double.IsNaN(metersPerSecond) ||
+            double.IsInfinity(metersPerSecond) ||
+            metersPerSecond <= 0d)
+        {
+            return;
+        }
+
+        float targetScaleY =
+            initialNanoWireScale.y +
+            (float)targetHeightNm * visualUnitsPerNanometer;
+        float growthDelta =
+            (float)metersPerSecond *
+            Time.unscaledDeltaTime *
+            Mathf.Max(0f, GlobalSimSpeed.GrowthMultiplier) *
+            Mathf.Max(0f, GlobalSimSpeed.Multiplier);
+
+        nanoWireScale.y = Mathf.Min(targetScaleY, nanoWireScale.y + growthDelta);
+        nanoWire.transform.localScale = nanoWireScale;
+        Progress01 = Mathf.InverseLerp(
+            initialNanoWireScale.y,
+            targetScaleY,
+            nanoWireScale.y);
+
+        UpdateCatalystPosition();
+
+        if (logDebug && Time.unscaledTime >= nextLogTime)
+        {
+            double nanometersPerSecond = metersPerSecond * 1e9;
+            Debug.Log(
+                $"Growth rate: {metersPerSecond:E6} m/s ({nanometersPerSecond:F4} nm/s), progress={Progress01:P0}",
+                this);
+            nextLogTime = Time.unscaledTime + logInterval;
+        }
+
+        if (nanoWireScale.y >= targetScaleY)
+        {
+            IsComplete = true;
+            HasFinishedGrowth = true;
+            Progress01 = 1f;
+            curr_nano_growth_enabled = false;
+        }
+    }
+
+    public void Configure(Setting_Parameter settings)
+    {
+        setting_parameter = settings;
+    }
+
+    public void ResetGrowth()
+    {
+        InitializeVisual();
+        if (!nanoWire)
+            return;
+
+        nanoWireScale = initialNanoWireScale;
+        nanoWire.transform.localScale = nanoWireScale;
+        curr_nano_growth_enabled = true;
+        IsComplete = false;
+        HasFinishedGrowth = false;
+        Progress01 = 0f;
+        enabled = true;
+        UpdateCatalystPosition();
+    }
+
+    public void CompleteGrowthForDevelopment()
+    {
+        InitializeVisual();
+        if (!nanoWire ||
+            !setting_parameter ||
+            !setting_parameter.TryGetGrowthParameters(
+                out _,
+                out double targetHeightNm))
+        {
+            return;
+        }
+
+        nanoWireScale.y =
+            initialNanoWireScale.y +
+            (float)targetHeightNm * visualUnitsPerNanometer;
+        nanoWire.transform.localScale = nanoWireScale;
+        curr_nano_growth_enabled = false;
+        IsComplete = true;
+        HasFinishedGrowth = true;
+        Progress01 = 1f;
+        UpdateCatalystPosition();
+    }
+
+    public void StopGrowth()
+    {
+        curr_nano_growth_enabled = false;
+        HasFinishedGrowth = true;
+    }
+
+    private void InitializeVisual()
+    {
+        if (initialized || !nanoWire)
+            return;
+
+        initialNanoWireScale = nanoWire.transform.localScale;
+        nanoWireScale = initialNanoWireScale;
+        initialized = true;
+    }
+
+    private void UpdateCatalystPosition()
+    {
+        if (catalyst && catalyst_pivot)
+            catalyst.transform.position = catalyst_pivot.transform.position;
+    }
+
+    public static double GetPrefactor(
+        double N0,
+        double v,
+        double omega,
+        double C0,
+        double QD,
+        double k,
+        double T,
+        double C_C0)
     {
         return N0 * v * omega * C0 * Math.Exp(-QD) * C_C0 * Math.Sqrt(Math.Log(C_C0));
     }
 
-    public static double GetNucleationBarrier(double x, double a, double k, double T, double C_C0)
+    public static double GetNucleationBarrier(
+        double x,
+        double a,
+        double k,
+        double T,
+        double C_C0)
     {
         double numerator = -Math.PI * Math.Pow((x * a) / (k * T), 2.0);
         double denominator = Math.Log(C_C0);
@@ -109,40 +197,40 @@ public class GrowthRate : MonoBehaviour
             p.QD_activation_energy,
             p.k_boltzmann_constant,
             p.T_temperature,
-            p.C_C0_supersaturation
-        );
+            p.C_C0_supersaturation);
 
         double barrier = GetNucleationBarrier(
             p.x_edge_energy,
             p.a_automic_size,
             p.k_boltzmann_constant,
             p.T_temperature,
-            p.C_C0_supersaturation
-        );
+            p.C_C0_supersaturation);
 
         return prefactor * barrier;
     }
 
     public static double ComputeGrowthRate(Parameters p, double radius)
     {
-        double J = GetNucleationFrequencyPerUnitArea(p);
-        double r = radius * 1e-9;
-        return J * Math.PI * Math.Pow(r, 2) * p.a_automic_size;
+        double nucleationFrequency = GetNucleationFrequencyPerUnitArea(p);
+        double radiusMeters = radius * 1e-9;
+        return nucleationFrequency *
+               Math.PI *
+               Math.Pow(radiusMeters, 2) *
+               p.a_automic_size;
     }
 }
 
 public class Parameters
 {
-    // Default values — replace with yours
-    public double N0_number_of_atomic_sites = 1e19;     // m^-2
-    public double v_vibrational_frequency = 1e13;       // s^-1
-    public double omega_atomic_volume = 2e-29;          // m^3/atom
-    public double QD_activation_energy = 10.0;           // dimensionless "in kT" if that's what you intend
-    public double T_temperature = 900.0 + 273.15;                // Kelvin if that's what you intend
-    public double C_C0_supersaturation = 1.4;           // C/C0 (must be > 1)
-    public double x_edge_energy = 1e-10;                // J m^-1
-    public double a_automic_size = 2.7e-10;             // m
-    public double k_boltzmann_constant = 1.380649e-23;  // J/K
-    public double r_radius = 100 * 1e-8;                      // m 
-    public double C0 = 1.0/2e-29;                             // baseline concentration 
+    public double N0_number_of_atomic_sites = 1e19;
+    public double v_vibrational_frequency = 1e13;
+    public double omega_atomic_volume = 2e-29;
+    public double QD_activation_energy = 10.0;
+    public double T_temperature = 900.0 + 273.15;
+    public double C_C0_supersaturation = 1.4;
+    public double x_edge_energy = 1e-10;
+    public double a_automic_size = 2.7e-10;
+    public double k_boltzmann_constant = 1.380649e-23;
+    public double r_radius = 100 * 1e-8;
+    public double C0 = 1.0 / 2e-29;
 }

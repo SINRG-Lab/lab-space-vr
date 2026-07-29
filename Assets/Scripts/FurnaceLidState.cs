@@ -13,6 +13,8 @@ public sealed class FurnaceLidState : MonoBehaviour
     [SerializeField] private Vector3 closedLocalEuler = new(-90f, 90f, -90f);
     [SerializeField, Min(0.1f)] private float closeToleranceDegrees = 3f;
     [SerializeField, Min(0.1f)] private float reopenToleranceDegrees = 7f;
+    [SerializeField, Min(0.1f)] private float openToleranceDegrees = 3f;
+    [SerializeField, Min(0.1f)] private float leaveOpenToleranceDegrees = 7f;
 
     [Header("Events")]
     [SerializeField] private UnityEvent onClosed = new();
@@ -20,8 +22,10 @@ public sealed class FurnaceLidState : MonoBehaviour
 
     private bool initialized;
     private bool isClosed;
+    private bool isOpen;
 
     public bool IsClosed => isClosed;
+    public bool IsOpen => isOpen;
 
     private void Awake()
     {
@@ -50,19 +54,26 @@ public sealed class FurnaceLidState : MonoBehaviour
     private void RefreshState(bool playFeedback)
     {
         Quaternion closedRotation = Quaternion.Euler(closedLocalEuler);
+        Quaternion openRotation = Quaternion.Euler(openLocalEuler);
         float angleFromClosed = Quaternion.Angle(lidTransform.localRotation, closedRotation);
-        float threshold = isClosed ? reopenToleranceDegrees : closeToleranceDegrees;
-        bool nextClosed = angleFromClosed <= threshold;
+        float angleFromOpen = Quaternion.Angle(lidTransform.localRotation, openRotation);
+        float closedThreshold = isClosed ? reopenToleranceDegrees : closeToleranceDegrees;
+        float openThreshold = isOpen ? leaveOpenToleranceDegrees : openToleranceDegrees;
+        bool nextClosed = angleFromClosed <= closedThreshold;
+        bool nextOpen = angleFromOpen <= openThreshold;
 
-        if (initialized && nextClosed == isClosed)
+        if (initialized && nextClosed == isClosed && nextOpen == isOpen)
         {
             RepublishAfterProcedureReset();
             return;
         }
 
         bool wasInitialized = initialized;
+        bool wasClosed = isClosed;
+        bool wasOpen = isOpen;
         initialized = true;
         isClosed = nextClosed;
+        isOpen = nextOpen;
         PublishState();
 
         if (!wasInitialized)
@@ -70,7 +81,7 @@ public sealed class FurnaceLidState : MonoBehaviour
             return;
         }
 
-        if (isClosed)
+        if (!wasClosed && isClosed)
         {
             onClosed.Invoke();
             if (playFeedback)
@@ -78,9 +89,13 @@ public sealed class FurnaceLidState : MonoBehaviour
                 FurnaceInteractionFeedback.PlayActionConfirmed();
             }
         }
-        else
+        if (!wasOpen && isOpen)
         {
             onOpened.Invoke();
+            if (playFeedback)
+            {
+                FurnaceInteractionFeedback.PlayActionConfirmed();
+            }
         }
     }
 
@@ -89,6 +104,7 @@ public sealed class FurnaceLidState : MonoBehaviour
         if (procedureManager)
         {
             procedureManager.SetFurnaceClosed(isClosed);
+            procedureManager.SetFurnaceOpen(isOpen);
         }
     }
 
@@ -113,12 +129,19 @@ public sealed class FurnaceLidState : MonoBehaviour
         if (procedureManager &&
             procedureManager.GetGate(FurnaceProcedureManager.Gate.FurnaceClosed) != isClosed)
         {
-            PublishState();
+            procedureManager.SetFurnaceClosed(isClosed);
+        }
+
+        if (procedureManager &&
+            procedureManager.GetGate(FurnaceProcedureManager.Gate.FurnaceOpen) != isOpen)
+        {
+            procedureManager.SetFurnaceOpen(isOpen);
         }
     }
 
     private void OnValidate()
     {
         reopenToleranceDegrees = Mathf.Max(reopenToleranceDegrees, closeToleranceDegrees);
+        leaveOpenToleranceDegrees = Mathf.Max(leaveOpenToleranceDegrees, openToleranceDegrees);
     }
 }

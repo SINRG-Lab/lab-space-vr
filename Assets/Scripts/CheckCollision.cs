@@ -6,12 +6,13 @@ public class CheckCollision : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // if (other.transform.root == transform.root) return;
+        if (!growthRate ||
+            other.GetComponentInParent<GrowthRate>() == growthRate)
+        {
+            return;
+        }
 
         if (other.CompareTag("NanoWire") || other.CompareTag("NanoWireTip"))
-        {
-            growthRate.curr_nano_growth_enabled = false;
-            Debug.Log("Collided");
-        }
+            growthRate.StopGrowth();
     }
 }
