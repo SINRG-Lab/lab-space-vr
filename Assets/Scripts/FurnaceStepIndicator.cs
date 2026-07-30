@@ -54,7 +54,7 @@ public sealed class FurnaceStepIndicator : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!currentTarget || (procedureManager && procedureManager.IsComplete))
+        if (!currentTarget)
         {
             SetVisible(false);
             return;
@@ -97,7 +97,9 @@ public sealed class FurnaceStepIndicator : MonoBehaviour
 
     private void HandleProcedureCompleted()
     {
-        SetTarget(null, Vector3.zero);
+        SetTarget(
+            procedureManager ? procedureManager.CurrentIndicatorTarget : null,
+            procedureManager ? procedureManager.CurrentIndicatorOffset : Vector3.zero);
     }
 
     private void SetTarget(Transform target, Vector3 offset)

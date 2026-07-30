@@ -72,6 +72,11 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private Color completeColor = new(0.28f, 0.95f, 0.5f, 1f);
     [SerializeField] private bool showStepNumber = true;
 
+    [Header("Completion")]
+    [SerializeField] private string completionInstruction = "Turn the main power off to reset the station.";
+    [SerializeField] private Transform completionIndicatorTarget;
+    [SerializeField] private Vector3 completionIndicatorOffset = new(0.05f, 0.08f, -0.05f);
+
     [Header("Configurable Procedure")]
     [SerializeField] private List<ProcedureStep> steps = new List<ProcedureStep>
     {
@@ -230,9 +235,9 @@ public class FurnaceProcedureManager : MonoBehaviour
 
     public string CurrentStepId => GetCurrentStep()?.id ?? string.Empty;
     public string CurrentStepTitle => IsComplete ? "Procedure Complete" : GetStepTitle(GetCurrentStep());
-    public string CurrentStepInstruction => IsComplete ? "Reset the station or prepare for the next run." : GetStepInstruction(GetCurrentStep());
-    public Transform CurrentIndicatorTarget => GetCurrentStep()?.indicatorTarget;
-    public Vector3 CurrentIndicatorOffset => GetCurrentStep()?.indicatorOffset ?? Vector3.zero;
+    public string CurrentStepInstruction => IsComplete ? completionInstruction : GetStepInstruction(GetCurrentStep());
+    public Transform CurrentIndicatorTarget => IsComplete ? completionIndicatorTarget : GetCurrentStep()?.indicatorTarget;
+    public Vector3 CurrentIndicatorOffset => IsComplete ? completionIndicatorOffset : GetCurrentStep()?.indicatorOffset ?? Vector3.zero;
     public ProcedureStep CurrentStep => GetCurrentStep();
 
     public event Action<int, ProcedureStep> StepEntered;

@@ -23011,6 +23011,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::FurnaceDevHarness
   procedureManager: {fileID: 1071694018}
+  stationReset: {fileID: 930000030}
   temperatureSetpoint: 500
   gasFlowSetpoint: 1000
   stepDelay: 0.25
@@ -23026,6 +23027,28 @@ MonoBehaviour:
   growthSettings: {fileID: 1953597913}
   growthController: {fileID: 1814961264}
   simulationSpeed: {fileID: 1464285239}
+--- !u!114 &930000030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071694017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4c8f0932be24af5a319482dbfc0176e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::FurnaceStationReset
+  procedureManager: {fileID: 1071694018}
+  powerControl: {fileID: 1093210768}
+  substrateSnap: {fileID: 1164920836}
+  rodConnector: {fileID: 1114375436}
+  feedRail: {fileID: 991000000000000003}
+  lidState: {fileID: 930415827604193865}
+  gasFlow: {fileID: 8670761336569193911}
+  heater: {fileID: 664395146}
+  growthSettings: {fileID: 1953597913}
+  growthController: {fileID: 1814961264}
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24373,6 +24396,7 @@ GameObject:
   - component: {fileID: 1071694018}
   - component: {fileID: 910000010}
   - component: {fileID: 920000020}
+  - component: {fileID: 930000030}
   m_Layer: 0
   m_Name: FurnaceProcedureManager
   m_TagString: Untagged
@@ -24398,6 +24422,9 @@ MonoBehaviour:
   activeColor: {r: 0.2, g: 0.78, b: 1, a: 1}
   completeColor: {r: 0.28, g: 0.95, b: 0.5, a: 1}
   showStepNumber: 1
+  completionInstruction: Turn the main power off to reset the station.
+  completionIndicatorTarget: {fileID: 1093210762}
+  completionIndicatorOffset: {x: 0.05, y: 0.08, z: -0.05}
   steps:
   - id: configure_growth_parameters
     title: Configure Growth
@@ -25297,6 +25324,18 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 930000030}
+        m_TargetAssemblyTypeName: FurnaceStationReset, Assembly-CSharp
+        m_MethodName: ResetIfProcedureComplete
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument:
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!4 &1094283118 stripped

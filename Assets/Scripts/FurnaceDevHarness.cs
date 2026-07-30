@@ -8,6 +8,7 @@ public sealed class FurnaceDevHarness : MonoBehaviour
 {
     [Header("Core")]
     [SerializeField] private FurnaceProcedureManager procedureManager;
+    [SerializeField] private FurnaceStationReset stationReset;
 
     [Header("Development Values")]
     [SerializeField, Min(0f)] private float temperatureSetpoint = 500f;
@@ -213,6 +214,8 @@ public sealed class FurnaceDevHarness : MonoBehaviour
             procedureManager = GetComponent<FurnaceProcedureManager>();
         if (!procedureManager)
             procedureManager = FindFirstObjectByType<FurnaceProcedureManager>(FindObjectsInactive.Include);
+        if (!stationReset)
+            stationReset = FindFirstObjectByType<FurnaceStationReset>(FindObjectsInactive.Include);
         if (!powerControl)
             powerControl = FindFirstObjectByType<AngleTrigger>(FindObjectsInactive.Include);
         if (!substrateSnap)
@@ -588,17 +591,25 @@ public sealed class FurnaceDevHarness : MonoBehaviour
     private void ResetState()
     {
         ResolveReferences();
-        growthController?.ResetForDevelopment();
-        growthSettings?.ResetParameterConfirmationForDevelopment();
-        heater?.ResetForDevelopment();
-        feedRail?.ResetForDevelopment();
-        rodConnector?.ResetForDevelopment();
-        substrateSnap?.ResetForDevelopment();
-        lidState?.ResetForDevelopment();
-        gasFlow?.ResetForDevelopment();
-        powerControl?.SetStateForDevelopment(false);
-        procedureManager?.ResetProcedure();
-        Physics.SyncTransforms();
+        if (stationReset)
+        {
+            stationReset.ResetStation();
+        }
+        else
+        {
+            growthController?.ResetForDevelopment();
+            growthSettings?.ResetParameterConfirmationForDevelopment();
+            heater?.ResetForDevelopment();
+            feedRail?.ResetForDevelopment();
+            rodConnector?.ResetForDevelopment();
+            substrateSnap?.ResetForDevelopment();
+            lidState?.ResetForDevelopment();
+            gasFlow?.ResetForDevelopment();
+            powerControl?.SetStateForDevelopment(false);
+            procedureManager?.ResetProcedure();
+            Physics.SyncTransforms();
+        }
+
         selectedStepIndex = 0;
     }
 

@@ -99,6 +99,8 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - The current-step indicator now points to the middle setpoint display during temperature setup and to the physical `HEATING READY` control during ramp start.
 - `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first six implemented interactions now include the gas-flow valve.
 - `FurnaceDevHarness` provides an Editor-only desktop driver for the complete configurable procedure. It changes the actual furnace component state for implemented phases and disables itself in Quest builds, so it does not replace or alter hand tracking.
+- When withdrawal completes, the procedure panel instructs the user to turn the physical main power switch off and the world-space arrow points to that switch.
+- `FurnaceStationReset` handles the resulting end-of-run reset in one place. It restores the substrate, feed rod, lid, gas flow, temperatures, growth state, parameter confirmation, power, and procedure gates for the next run; turning power off before procedure completion does not trigger this full reset.
 
 ## Editor Testing Without Quest
 
@@ -108,6 +110,7 @@ Open `Assets/Scenes/OTF.unity` and enter Play mode. The **Furnace Development Dr
 - `Complete Instant` moves the real component to its completed state immediately.
 - For the Development Driver only, `Feed Substrate` and `Withdraw Substrate` translate the plate directly between its exact endpoints; the Quest hand-driven forward and reverse rail behavior is unchanged.
 - `Auto Run` resets and simulates the full procedure; `Instant Run` prepares every implemented state immediately.
+- The Development Driver `Reset` action uses the same `FurnaceStationReset` path as the completed Quest procedure.
 - Select any listed step and use `Jump To Selected` to rebuild all earlier state and stop there. A step whose stable gate is already satisfied may be skipped automatically by the procedure manager.
 - The safety-fault buttons toggle main power, lid state, and gas flow so heat pause/resume behavior can be checked without a headset.
 - The gate list shows the same stable state used by the Quest procedure. A timeout indicates a missing reference or a component that did not reach its expected state.
