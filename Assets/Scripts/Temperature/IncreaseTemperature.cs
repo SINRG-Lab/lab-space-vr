@@ -337,6 +337,9 @@ public class IncreaseTemperature : MonoBehaviour
 
         ApplyAll(to1, to2, to3, to1, to2, to3, true);
 
+        ResolveProcedureManager();
+        procedureManager?.MarkHeatSoakComplete();
+
         float soakElapsed = 0f;
         while (soakElapsed < soakDuration)
         {
@@ -363,8 +366,6 @@ public class IncreaseTemperature : MonoBehaviour
         routineAll = null;
 
         FurnaceInteractionFeedback.PlayActionConfirmed();
-        ResolveProcedureManager();
-        procedureManager?.MarkHeatSoakComplete();
     }
 
     private IEnumerator CoolAllZones(

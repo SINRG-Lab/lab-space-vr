@@ -68,6 +68,7 @@ public class FurnaceProcedureManager : MonoBehaviour
     [SerializeField] private TMP_Text stepTitleText;
     [SerializeField] private TMP_Text instructionText;
     [SerializeField] private Slider progressSlider;
+    [SerializeField] private GrowthManager growthManager;
     [SerializeField] private Color activeColor = new(0.2f, 0.78f, 1f, 1f);
     [SerializeField] private Color completeColor = new(0.28f, 0.95f, 0.5f, 1f);
     [SerializeField] private bool showStepNumber = true;
@@ -262,9 +263,19 @@ public class FurnaceProcedureManager : MonoBehaviour
     private void Start()
     {
         EnsureValidStepIndex();
+        ResolveGrowthManager();
         RefreshUi();
         InvokeEnterEvent(GetCurrentStep());
         EvaluateCurrentStep();
+    }
+
+    private void Update()
+    {
+        if (!IsGrowthProgressStep())
+            return;
+
+        ResolveGrowthManager();
+        RefreshProgressPresentation();
     }
 
     public void ResetProcedure()
@@ -557,15 +568,7 @@ public class FurnaceProcedureManager : MonoBehaviour
             instructionText.text = CurrentStepInstruction;
         }
 
-        if (progressSlider)
-        {
-            progressSlider.value = GetProgress01();
-            if (progressSlider.fillRect &&
-                progressSlider.fillRect.TryGetComponent(out Image fillImage))
-            {
-                fillImage.color = IsComplete ? completeColor : activeColor;
-            }
-        }
+        RefreshProgressPresentation();
 
         ApplyStepPresentation();
     }
@@ -579,6 +582,19 @@ public class FurnaceProcedureManager : MonoBehaviour
         progressSlider.maxValue = 1f;
         progressSlider.wholeNumbers = false;
         progressSlider.interactable = false;
+    }
+
+    private void RefreshProgressPresentation()
+    {
+        if (!progressSlider)
+            return;
+
+        progressSlider.SetValueWithoutNotify(GetProgress01());
+        if (progressSlider.fillRect &&
+            progressSlider.fillRect.TryGetComponent(out Image fillImage))
+        {
+            fillImage.color = IsComplete ? completeColor : activeColor;
+        }
     }
 
     private string GetPresentedStepTitle()
@@ -680,11 +696,29 @@ public class FurnaceProcedureManager : MonoBehaviour
 
     private float GetProgress01()
     {
+        if (IsGrowthProgressStep())
+            return growthManager ? growthManager.Progress01 : 0f;
+
         int stepCount = StepCount;
         if (stepCount <= 0)
             return 1f;
 
         return Mathf.Clamp01((float)currentStepIndex / stepCount);
+    }
+
+    private bool IsGrowthProgressStep()
+    {
+        return !IsComplete &&
+               IsGateRequiredByCurrentStep(Gate.GrowthComplete);
+    }
+
+    private void ResolveGrowthManager()
+    {
+        if (!growthManager)
+        {
+            growthManager = FindFirstObjectByType<GrowthManager>(
+                FindObjectsInactive.Include);
+        }
     }
 
     private string GetStepTitle(ProcedureStep step)

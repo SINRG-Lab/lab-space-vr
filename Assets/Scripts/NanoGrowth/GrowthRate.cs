@@ -23,6 +23,40 @@ public class GrowthRate : MonoBehaviour
     public bool HasFinishedGrowth { get; private set; }
     public float Progress01 { get; private set; }
 
+    public bool TryEstimateGrowthDuration(
+        double radiusNm,
+        double targetHeightNm,
+        out double processSeconds,
+        out double demoSeconds)
+    {
+        processSeconds = 0d;
+        demoSeconds = 0d;
+        if (radiusNm <= 0d || targetHeightNm <= 0d)
+            return false;
+
+        parameters ??= new Parameters();
+        double metersPerSecond = ComputeGrowthRate(parameters, radiusNm);
+        if (double.IsNaN(metersPerSecond) ||
+            double.IsInfinity(metersPerSecond) ||
+            metersPerSecond <= 0d)
+        {
+            return false;
+        }
+
+        processSeconds = targetHeightNm * 1e-9d / metersPerSecond;
+
+        double demoRate = metersPerSecond *
+                          Mathf.Max(0f, GlobalSimSpeed.GrowthMultiplier) *
+                          Mathf.Max(0f, GlobalSimSpeed.Multiplier);
+        if (demoRate <= 0d)
+            return false;
+
+        double demoScaleDistance =
+            targetHeightNm * Mathf.Max(0.0001f, visualUnitsPerNanometer);
+        demoSeconds = demoScaleDistance / demoRate;
+        return IsFinitePositive(processSeconds) && IsFinitePositive(demoSeconds);
+    }
+
     private void Awake()
     {
         parameters = new Parameters();
@@ -217,6 +251,13 @@ public class GrowthRate : MonoBehaviour
                Math.PI *
                Math.Pow(radiusMeters, 2) *
                p.a_automic_size;
+    }
+
+    private static bool IsFinitePositive(double value)
+    {
+        return !double.IsNaN(value) &&
+               !double.IsInfinity(value) &&
+               value > 0d;
     }
 }
 

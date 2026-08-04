@@ -9428,6 +9428,7 @@ RectTransform:
   - {fileID: 1339941794}
   - {fileID: 1141389437}
   - {fileID: 682724161}
+  - {fileID: 930000041}
   m_Father: {fileID: 1032549793}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -13376,6 +13377,7 @@ GameObject:
   - component: {fileID: 633261843}
   - component: {fileID: 633261842}
   - component: {fileID: 633261841}
+  - component: {fileID: 930000050}
   m_Layer: 0
   m_Name: '[BuildingBlock] Camera Rig'
   m_TagString: Untagged
@@ -13539,6 +13541,20 @@ Transform:
   - {fileID: 379968154}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &930000050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633261840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c92bf159a4ec4c7b994e8e5fe18f0f26, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::LocomotionCollisionSetup
+  characterController: {fileID: 0}
+  walkableLayerName: Walkable
 --- !u!1 &639834987
 GameObject:
   m_ObjectHideFlags: 0
@@ -14780,7 +14796,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &682724161
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15678,7 +15694,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Radius
+  m_text: Radius (nm)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -16120,6 +16136,8 @@ MonoBehaviour:
   guideSize: 0.035
   procedureManager: {fileID: 1071694018}
   procedureGate: 2
+  allowAlternateProcedureGate: 0
+  alternateProcedureGate: 9
   restrictInteractionToCurrentStep: 1
   snapDuration: 0.18
   snapCurve:
@@ -23008,7 +23026,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7d2b6c9a4e41c4a8d17f3b2e6c9012, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FurnaceDevHarness
   procedureManager: {fileID: 1071694018}
   stationReset: {fileID: 930000030}
@@ -23037,7 +23055,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a4c8f0932be24af5a319482dbfc0176e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FurnaceStationReset
   procedureManager: {fileID: 1071694018}
   powerControl: {fileID: 1093210768}
@@ -23049,6 +23067,143 @@ MonoBehaviour:
   heater: {fileID: 664395146}
   growthSettings: {fileID: 1953597913}
   growthController: {fileID: 1814961264}
+--- !u!1 &930000040
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 930000041}
+  - component: {fileID: 930000042}
+  - component: {fileID: 930000043}
+  m_Layer: 5
+  m_Name: EstimatedGrowthTime
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &930000041
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 930000040}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 337624002}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 260, y: -241.3}
+  m_SizeDelta: {x: 310, y: 24.67}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &930000042
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 930000040}
+  m_CullTransparentMesh: 1
+--- !u!114 &930000043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 930000040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: 'Simulation: -- | Theoretical: --'
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
+  m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 3875536895
+  m_fontColor: {r: 1, g: 1, b: 1, a: 0.9019608}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 11
+  m_fontSizeBase: 11
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 8
+  m_fontSizeMax: 14
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 0
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24428,8 +24583,9 @@ MonoBehaviour:
   steps:
   - id: configure_growth_parameters
     title: Configure Growth
-    instruction: Set radius, target height, and catalyst count, then confirm the parameters.
-    prerequisiteGates:
+    instruction: Set radius, target height, and catalyst count, then confirm the
+      parameters.
+    prerequisiteGates: 
     requiredGates: 0c000000
     activeObjects:
     - {fileID: 857554562}
@@ -24454,6 +24610,7 @@ MonoBehaviour:
     requiredGates: 00000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 1093210762}
     indicatorOffset: {x: 0.05, y: 0.08, z: -0.05}
@@ -24470,6 +24627,7 @@ MonoBehaviour:
     requiredGates: 01000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 1164920835}
     indicatorOffset: {x: 0, y: 0.18, z: 0}
@@ -24486,6 +24644,7 @@ MonoBehaviour:
     requiredGates: 02000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 543450652597906247}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
@@ -24502,6 +24661,7 @@ MonoBehaviour:
     requiredGates: 0200000003000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 991000000000000002}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
@@ -24514,10 +24674,11 @@ MonoBehaviour:
   - id: close_furnace
     title: Close Furnace
     instruction: Lower the furnace lid fully before continuing.
-    prerequisiteGates:
+    prerequisiteGates: 
     requiredGates: 0a000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 7100324511552852820}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
@@ -24534,6 +24695,7 @@ MonoBehaviour:
     requiredGates: 04000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 8670761336569193909}
     indicatorOffset: {x: 0, y: 0.12, z: 0}
@@ -24550,6 +24712,7 @@ MonoBehaviour:
     requiredGates: 05000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables:
     - {fileID: 5636698823644586436}
     - {fileID: 8377270530529231732}
@@ -24573,6 +24736,7 @@ MonoBehaviour:
     activeObjects: []
     activeBehaviours:
     - {fileID: 7516989853811443993}
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 7516989854590809177}
     indicatorOffset: {x: 0, y: 0.12, z: 0}
@@ -24583,18 +24747,17 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   - id: start_growth
-    title: Start Growth
-    instruction: Start the nanowire growth sequence and wait for the target height.
+    title: Nanowire Growth
+    instruction: Growth starts automatically at the required temperature. Wait for
+      the target height.
     prerequisiteGates: 000000000300000004000000060000000a0000000c000000
     requiredGates: 070000000b000000
-    activeObjects:
-    - {fileID: 857554562}
-    - {fileID: 1141389436}
+    activeObjects: []
     activeBehaviours: []
-    activeSelectables:
-    - {fileID: 250962942}
-    indicatorTarget: {fileID: 1141389437}
-    indicatorOffset: {x: 0, y: 0.08, z: 0}
+    disabledBehaviours: []
+    activeSelectables: []
+    indicatorTarget: {fileID: 0}
+    indicatorOffset: {x: 0, y: 0, z: 0}
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24609,6 +24772,7 @@ MonoBehaviour:
     activeObjects: []
     activeBehaviours:
     - {fileID: 611025920}
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 611025919}
     indicatorOffset: {x: 0, y: 0.1, z: 0}
@@ -24625,6 +24789,7 @@ MonoBehaviour:
     requiredGates: 0d000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 7100324511552852820}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
@@ -24641,6 +24806,7 @@ MonoBehaviour:
     requiredGates: 09000000
     activeObjects: []
     activeBehaviours: []
+    disabledBehaviours: []
     activeSelectables: []
     indicatorTarget: {fileID: 808996159}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
@@ -25335,7 +25501,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument:
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!4 &1094283118 stripped
@@ -26372,7 +26538,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Required Height
+  m_text: Required Height (nm)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
@@ -31812,7 +31978,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GlobalSimSpeed
   inspectorMultiplier: 1.5
-  inspectorGrowthMultiplier: 100000000
+  inspectorGrowthMultiplier: 1000000
 --- !u!1 &1481231859
 GameObject:
   m_ObjectHideFlags: 0
@@ -37903,6 +38069,7 @@ MonoBehaviour:
   parameterPanelRoot: {fileID: 857554562}
   primaryActionButton: {fileID: 250962942}
   primaryActionLabel: {fileID: 1290216515}
+  estimatedGrowthTimeText: {fileID: 930000043}
   growth_enabled: 0
   simSpeedMultiplier: 2
   simSpeed: 1000000
@@ -38804,7 +38971,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Substrate Dimension
+  m_text: Substrate Dimension (scale)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}
   m_sharedMaterial: {fileID: 2474193144365658690, guid: 066e804c2ff1f41d08481689e8cc3d27, type: 2}

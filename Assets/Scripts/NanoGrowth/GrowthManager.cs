@@ -25,15 +25,29 @@ public class GrowthManager : MonoBehaviour
     {
         ResolveReferences();
         settingParameter?.SetGrowthEnabled(false);
+
+        if (procedureManager)
+            procedureManager.StepEntered += OnProcedureStepEntered;
+
+        TryStartForCurrentProcedureStep();
+    }
+
+    private void OnDestroy()
+    {
+        if (procedureManager)
+            procedureManager.StepEntered -= OnProcedureStepEntered;
     }
 
     private void Update()
     {
-        if (state != GrowthState.Running && state != GrowthState.Paused)
-            return;
-
         ResolveReferences();
         if (!settingParameter)
+            return;
+
+        if (TryCompleteFromVisualState())
+            return;
+
+        if (state != GrowthState.Running && state != GrowthState.Paused)
             return;
 
         if (!AreGrowthConditionsValid())
@@ -46,8 +60,7 @@ public class GrowthManager : MonoBehaviour
         settingParameter.SetGrowthEnabled(true);
         state = GrowthState.Running;
 
-        if (settingParameter.AllGrowthComplete)
-            CompleteGrowth();
+        TryCompleteFromVisualState();
     }
 
     public void StartGrowth()
@@ -109,6 +122,41 @@ public class GrowthManager : MonoBehaviour
         FurnaceInteractionFeedback.PlayActionConfirmed();
     }
 
+    private bool TryCompleteFromVisualState()
+    {
+        if (!settingParameter || !settingParameter.AllGrowthComplete)
+            return false;
+
+        bool managerStartedGrowth = state == GrowthState.Running ||
+                                    state == GrowthState.Paused;
+
+        if (procedureManager)
+        {
+            bool isGrowthStep = procedureManager.IsGateRequiredByCurrentStep(
+                FurnaceProcedureManager.Gate.GrowthComplete);
+            bool growthStarted = procedureManager.GetGate(
+                FurnaceProcedureManager.Gate.GrowthStarted);
+
+            if (!isGrowthStep ||
+                (!managerStartedGrowth &&
+                 !growthStarted &&
+                 !settingParameter.growth_enabled))
+            {
+                return false;
+            }
+
+            if (!growthStarted)
+                procedureManager.MarkGrowthStarted();
+        }
+        else if (!managerStartedGrowth && !settingParameter.growth_enabled)
+        {
+            return false;
+        }
+
+        CompleteGrowth();
+        return true;
+    }
+
     private bool CanStartGrowth()
     {
         if (!settingParameter || !settingParameter.HasGrowthVisuals)
@@ -138,6 +186,28 @@ public class GrowthManager : MonoBehaviour
                procedureManager.GetGate(FurnaceProcedureManager.Gate.GasFlowReady) &&
                procedureManager.GetGate(FurnaceProcedureManager.Gate.HeatSoakComplete) &&
                procedureManager.GetGate(FurnaceProcedureManager.Gate.FurnaceClosed);
+    }
+
+    private void OnProcedureStepEntered(
+        int _,
+        FurnaceProcedureManager.ProcedureStep __)
+    {
+        TryStartForCurrentProcedureStep();
+    }
+
+    private void TryStartForCurrentProcedureStep()
+    {
+        if (!procedureManager)
+            return;
+
+        bool isAutomaticGrowthStep =
+            procedureManager.IsGateRequiredByCurrentStep(
+                FurnaceProcedureManager.Gate.GrowthStarted) &&
+            procedureManager.IsGateRequiredByCurrentStep(
+                FurnaceProcedureManager.Gate.GrowthComplete);
+
+        if (isAutomaticGrowthStep)
+            TryStartGrowth();
     }
 
     private void ResolveReferences()

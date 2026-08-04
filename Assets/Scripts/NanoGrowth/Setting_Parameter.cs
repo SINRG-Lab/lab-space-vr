@@ -3,6 +3,7 @@ using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Math = System.Math;
 
 public class Setting_Parameter : MonoBehaviour
 {
@@ -37,6 +38,9 @@ public class Setting_Parameter : MonoBehaviour
     [SerializeField] private Button primaryActionButton;
     [SerializeField] private TMP_Text primaryActionLabel;
 
+    [Header("Growth Estimate")]
+    [SerializeField] private TMP_Text estimatedGrowthTimeText;
+
     public bool growth_enabled;
 
     [Range(1f, 10f)]
@@ -50,6 +54,10 @@ public class Setting_Parameter : MonoBehaviour
     private double confirmedRadiusNm;
     private double confirmedTargetHeightNm;
     private int confirmedCatalystCount;
+    private string lastEstimatedRadiusText;
+    private string lastEstimatedHeightText;
+    private float lastEstimatedGrowthMultiplier = float.NaN;
+    private float lastEstimatedSimulationMultiplier = float.NaN;
 
     public bool HasGrowthVisuals => growthRates.Count > 0;
     public bool ParametersConfirmed => parametersConfirmed;
@@ -116,6 +124,12 @@ public class Setting_Parameter : MonoBehaviour
         if (procedureManager)
             procedureManager.StepEntered += OnProcedureStepEntered;
         RefreshProcedureUi();
+        RefreshGrowthTimeEstimate(true);
+    }
+
+    private void Update()
+    {
+        RefreshGrowthTimeEstimate(false);
     }
 
     private void OnDestroy()
@@ -219,9 +233,11 @@ public class Setting_Parameter : MonoBehaviour
         }
 
         if (growthManager)
-            growthManager.StartGrowth();
+            growthManager.TryStartGrowth();
         else
             SetGrowthEnabled(!growth_enabled);
+
+        RefreshProcedureUi();
     }
 
     public void SetGrowthEnabled(bool enabled)
@@ -308,6 +324,7 @@ public class Setting_Parameter : MonoBehaviour
         confirmedCatalystCount = catalystCount;
         parametersConfirmed = true;
         SetParameterControlsInteractable(false);
+        RefreshGrowthTimeEstimate(true);
         procedureManager.MarkGrowthParametersSet();
         FurnaceInteractionFeedback.PlayActionConfirmed();
         return true;
@@ -340,12 +357,80 @@ public class Setting_Parameter : MonoBehaviour
     {
         ResolveProcedureReferences();
         bool isConfigurationStep = IsParameterConfigurationStep();
+        bool isGrowthStartStep = procedureManager &&
+                                 procedureManager.IsGateRequiredByCurrentStep(
+                                     FurnaceProcedureManager.Gate.GrowthStarted);
 
         if (primaryActionLabel)
             primaryActionLabel.text = isConfigurationStep ? "Confirm" : "Start";
 
+        if (primaryActionButton)
+        {
+            primaryActionButton.interactable =
+                (isConfigurationStep && !parametersConfirmed) ||
+                (isGrowthStartStep &&
+                 !procedureManager.GetGate(
+                     FurnaceProcedureManager.Gate.GrowthStarted));
+        }
+
         SetParameterControlsInteractable(
             isConfigurationStep && !parametersConfirmed);
+        RefreshGrowthTimeEstimate(true);
+    }
+
+    private void RefreshGrowthTimeEstimate(bool force)
+    {
+        ResolveGrowthEstimateText();
+        if (!estimatedGrowthTimeText)
+            return;
+
+        string radiusText = radius ? radius.text : string.Empty;
+        string heightText = requied_height ? requied_height.text : string.Empty;
+        float growthMultiplier = GlobalSimSpeed.GrowthMultiplier;
+        float simulationMultiplier = GlobalSimSpeed.Multiplier;
+
+        if (!force &&
+            radiusText == lastEstimatedRadiusText &&
+            heightText == lastEstimatedHeightText &&
+            Mathf.Approximately(growthMultiplier, lastEstimatedGrowthMultiplier) &&
+            Mathf.Approximately(simulationMultiplier, lastEstimatedSimulationMultiplier))
+        {
+            return;
+        }
+
+        lastEstimatedRadiusText = radiusText;
+        lastEstimatedHeightText = heightText;
+        lastEstimatedGrowthMultiplier = growthMultiplier;
+        lastEstimatedSimulationMultiplier = simulationMultiplier;
+
+        if (!TryReadPositiveValue(radius, out double radiusNm) ||
+            !TryReadPositiveValue(requied_height, out double targetHeightNm) ||
+            !growth_rate ||
+            !growth_rate.TryEstimateGrowthDuration(
+                radiusNm,
+                targetHeightNm,
+                out _,
+                out double demoSeconds))
+        {
+            estimatedGrowthTimeText.text = "Simulation: --";
+            return;
+        }
+
+        estimatedGrowthTimeText.text = $"Simulation: {FormatDuration(demoSeconds)}";
+    }
+
+    private static string FormatDuration(double seconds)
+    {
+        if (seconds < 1d)
+            return $"{seconds:0.0} sec";
+        if (seconds < 60d)
+            return $"{seconds:0} sec";
+        if (seconds < 3600d)
+            return $"{Math.Floor(seconds / 60d):0}m {seconds % 60d:00} sec";
+        if (seconds < 86400d)
+            return $"{Math.Floor(seconds / 3600d):0}h {Math.Floor(seconds % 3600d / 60d):00}m";
+
+        return $"{Math.Floor(seconds / 86400d):0}d {Math.Floor(seconds % 86400d / 3600d):00}h";
     }
 
     private void SetParameterControlsInteractable(bool interactable)
@@ -367,6 +452,24 @@ public class Setting_Parameter : MonoBehaviour
             procedureManager = FurnaceProcedureManager.Instance;
         if (!growthManager)
             growthManager = FindFirstObjectByType<GrowthManager>(FindObjectsInactive.Include);
+        ResolveGrowthEstimateText();
+    }
+
+    private void ResolveGrowthEstimateText()
+    {
+        if (estimatedGrowthTimeText || !parameterPanelRoot)
+            return;
+
+        TMP_Text[] panelTexts =
+            parameterPanelRoot.GetComponentsInChildren<TMP_Text>(true);
+        for (int i = 0; i < panelTexts.Length; i++)
+        {
+            if (panelTexts[i] && panelTexts[i].name == "EstimatedGrowthTime")
+            {
+                estimatedGrowthTimeText = panelTexts[i];
+                return;
+            }
+        }
     }
 
     private void RegisterGrowthRate(GrowthRate rate)
