@@ -22,7 +22,7 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 | 5. Gas flow | Done | Make the valve readout deterministic and use a minimum gas-flow gate. | Readout is stable, displays useful units, and the procedure blocks heating until flow is ready. |
 | 6. Temperature ramp and soak | Done | Tighten three-zone setpoint entry, ramp animation, material feedback, and soak completion. | Zones show target/current values clearly; heating reaches target predictably under sim speed; completion is visible. |
 | 7. Growth start and visualization | Done | Confirm growth parameters before furnace operation, then start nanowire growth only after furnace prerequisites are satisfied. | Parameters are validated and locked at the start of the procedure; growth starts later with clear feedback and sane defaults. |
-| 8. Cooldown and withdraw | In Progress | Add cooldown, furnace reopening, withdrawal, and reset behavior. | User can complete the procedure by cooling down and withdrawing the substrate without physics glitches. |
+| 8. Cooldown and withdraw | Done | Add cooldown, furnace reopening, withdrawal, and reset behavior. | User can complete the procedure by cooling down and withdrawing the substrate without physics glitches. |
 | 9. Demo polish pass | In Progress | Add audio, hand-tracking feedback, labels, reset button, lighting/performance pass, and final rehearsal checklist. | A first-time viewer can follow the demo without verbal rescue; Quest performance remains stable. |
 
 ## Visual Polish Tracker
@@ -49,8 +49,8 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 6. Close the furnace lid.
 7. Set gas flow.
 8. Set the three furnace temperature zones.
-9. Heat to target and complete the soak.
-10. Start nanowire growth.
+9. Heat to target and begin the soak.
+10. Grow the nanowires automatically while the soak continues.
 11. Cool down.
 12. Open the furnace.
 13. Reconnect the feed rod, withdraw the substrate, and reset for the next run.
@@ -87,24 +87,24 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 - `RotationToGasFlow` measures quaternion distance from the valve's configured minimum pose, quantizes the readout to `50 sccm`, and publishes `GasFlowReady` at `1000 sccm` with `100 sccm` release hysteresis. The readout and particle visualization use the same normalized source.
 - Gas-flow particles are active in OTF and were validated with the physical valve interaction.
 - The three temperature controls use `50 C` steps for demo-speed entry and publish `TemperatureZonesSet` only after every zone reaches the configurable `500 C` minimum.
-- `IncreaseTemperature` now owns one deterministic three-zone ramp and timed soak. It follows `GlobalSimSpeed`, pauses when power, lid, gas flow, or setpoint safety becomes invalid, and publishes `HeatSoakComplete` only after the soak finishes.
+- `IncreaseTemperature` now owns one deterministic three-zone ramp and timed soak. It follows `GlobalSimSpeed`, pauses when power, lid, gas flow, or setpoint safety becomes invalid, and publishes `HeatSoakComplete` when all three zones reach their setpoints so growth can run while the soak continues.
 - The existing `HEATING OFF` poke control is enabled only during `Cool Down`. It starts a deterministic material/readout cooldown and publishes `CooldownComplete` when every zone reaches the `50 C` safe-withdrawal threshold.
 - `Interior_Split` and `Interior_Split_Lower` now heat independently by zone. Every ceramic material slot preserves its cold appearance, shifts through the configured temperature gradient, and begins emissive glow above `200 C`.
 - `Heat and Soak` requires `PowerOn`, `FurnaceClosed`, `GasFlowReady`, and `TemperatureZonesSet`, so invalidating any safety condition disables its physical poke control and pauses an active heat cycle.
 - The parameter panel is now the first procedure step. Its primary button reads `Confirm`, validates and snapshots radius, target height, and catalyst count, then hides the panel before furnace operation begins. The physical power control remains locked until confirmation.
-- The same panel returns during `Start Growth` with parameter controls locked and its primary button changed to `Start`. Growth remains unavailable until the confirmed-parameter, power, substrate feed, gas flow, heat soak, and lid gates are satisfied.
 - `GrowthManager` automatically starts nanowire growth when all three temperature zones first reach their configured setpoints. The soak continues concurrently, and the procedure remains on `Nanowire Growth` until every wire reaches its requested height or becomes collision-limited.
 - The procedure progress bar displays live nanowire completion during `Nanowire Growth`. The parameter panel and action button stay hidden for that automatic step, and the indicator arrow remains hidden until `Cool Down` requires the heating-off control.
 - The Quest-oriented default is `24` growth visuals with a configurable cap of `32`, replacing the previous startup value of `100` physics-bearing nanowire objects.
 - Growth uses the existing physical rate model with a demo acceleration of `100,000,000x` and follows the global procedure simulation multiplier.
 - The parameter panel shows the accelerated VR `Simulation` time. It updates from radius and target height; catalyst count does not change it because the current visuals grow in parallel.
-- The legacy `Enable Twin` button is disabled in `OTF`; the procedure-owned button now handles `Confirm` during parameter setup and `Start` during the growth step.
+- The legacy `Enable Twin` button is disabled in `OTF`; the procedure-owned button handles `Confirm` during parameter setup, and growth starts automatically at target temperature.
 - `LocomotionCollisionSetup` adds the lab's `Walkable` layer to Meta's character collision mask before locomotion starts, so the rig grounds against the floor instead of vertically correcting against the table.
 - The current-step indicator now points to the middle setpoint display during temperature setup and to the physical `HEATING READY` control during ramp start.
 - `FurnaceStepIndicator` renders one lightweight pulsing world-space arrow for the current step. Its target and offset live on each reorderable procedure entry; the first six implemented interactions now include the gas-flow valve.
 - `FurnaceDevHarness` provides an Editor-only desktop driver for the complete configurable procedure. It changes the actual furnace component state for implemented phases and disables itself in Quest builds, so it does not replace or alter hand tracking.
 - When withdrawal completes, the procedure panel instructs the user to turn the physical main power switch off and the world-space arrow points to that switch.
 - `FurnaceStationReset` handles the resulting end-of-run reset in one place. It restores the substrate, feed rod, lid, gas flow, temperatures, growth state, parameter confirmation, power, and procedure gates for the next run; turning power off before procedure completion does not trigger this full reset.
+- Substrate snap, rod connection, reverse withdrawal, and station reset now clear Rigidbody momentum only while bodies are dynamic. Kinematic movement no longer generates Unity velocity-assignment warnings during the Phase 8 flow.
 
 ## Editor Testing Without Quest
 
@@ -133,7 +133,7 @@ Keyboard shortcuts while the Game view is focused:
 | `Shift+[` / `Shift+]` | Decrease or increase simulation speed |
 | `Shift+1` / `Shift+2` / `Shift+3` | Toggle power, lid, or gas fault |
 
-Phase 8 can be exercised end to end in the Development Driver, but Quest testing is still required for the rod reconnection reach, reverse-pull comfort, occlusion, depth perception, and final device performance.
+Phase 8 is implemented end to end and can be exercised in the Development Driver. Final Quest checks for rod reconnection reach, reverse-pull comfort, occlusion, depth perception, and sustained device performance remain tracked under Phase 9 and Visual Stage 5.
 
 ## Split Tube Furnace Model Previews
 

@@ -346,9 +346,8 @@ public class FeedRailController : MonoBehaviour
         settlingToStart = false;
 
         RestoreDeliveredBodyConstraints();
+        StopDynamicMotion(deliveredBody);
         deliveredBody.isKinematic = true;
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
         deliveredBodyControlled = true;
 
         SetProgress(1f, true);
@@ -451,22 +450,30 @@ public class FeedRailController : MonoBehaviour
         RestoreDeliveredBodyConstraints();
         if (deliveredBody && hasDeliveredBodyPose)
         {
+            StopDynamicMotion(deliveredBody);
             deliveredBody.isKinematic = true;
             deliveredBody.position = deliveredBodyStartPosition;
             deliveredBody.rotation = deliveredBodyStartRotation;
-            deliveredBody.linearVelocity = Vector3.zero;
-            deliveredBody.angularVelocity = Vector3.zero;
             deliveredBody.constraints = deliveredBodyConstraints;
             deliveredBody.isKinematic = deliveredBodyKinematicState;
+            StopDynamicMotion(deliveredBody);
+            if (!deliveredBody.isKinematic)
+            {
+                deliveredBody.WakeUp();
+            }
         }
 
+        StopDynamicMotion(ownerRb);
         ownerRb.isKinematic = true;
         ownerRb.position = initialOwnerPosition;
         ownerRb.rotation = initialOwnerRotation;
-        ownerRb.linearVelocity = Vector3.zero;
-        ownerRb.angularVelocity = Vector3.zero;
         ownerRb.constraints = initialOwnerConstraints;
         ownerRb.isKinematic = initialOwnerKinematicState;
+        StopDynamicMotion(ownerRb);
+        if (!ownerRb.isKinematic)
+        {
+            ownerRb.WakeUp();
+        }
 
         railActive = false;
         wasConnected = false;
@@ -496,9 +503,8 @@ public class FeedRailController : MonoBehaviour
     {
         Vector3 startPosition = deliveredBody.position;
         Quaternion startRotation = deliveredBody.rotation;
+        StopDynamicMotion(deliveredBody);
         deliveredBody.isKinematic = true;
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
 
         float elapsed = 0f;
         while (elapsed < motionDuration)
@@ -517,8 +523,6 @@ public class FeedRailController : MonoBehaviour
 
         deliveredBody.position = DeliveredBodyTarget.position;
         deliveredBody.rotation = startRotation;
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
         developmentFeedRoutine = null;
         Physics.SyncTransforms();
         CompleteFeed();
@@ -538,9 +542,13 @@ public class FeedRailController : MonoBehaviour
             ? substrateBody.rotation
             : Quaternion.identity;
 
+        StopDynamicMotion(ownerRb);
         ownerRb.isKinematic = true;
         if (substrateBody)
+        {
+            StopDynamicMotion(substrateBody);
             substrateBody.isKinematic = true;
+        }
 
         float elapsed = 0f;
         while (elapsed < motionDuration)
@@ -566,19 +574,25 @@ public class FeedRailController : MonoBehaviour
 
         ownerRb.position = ownerStartPosition;
         ownerRb.rotation = ownerStartRotation;
-        ownerRb.linearVelocity = Vector3.zero;
-        ownerRb.angularVelocity = Vector3.zero;
         ownerRb.constraints = initialOwnerConstraints;
         ownerRb.isKinematic = initialOwnerKinematicState;
+        StopDynamicMotion(ownerRb);
+        if (!ownerRb.isKinematic)
+        {
+            ownerRb.WakeUp();
+        }
 
         if (substrateBody && hasDeliveredBodyPose)
         {
             substrateBody.position = deliveredBodyStartPosition;
             substrateBody.rotation = deliveredBodyStartRotation;
-            substrateBody.linearVelocity = Vector3.zero;
-            substrateBody.angularVelocity = Vector3.zero;
             substrateBody.constraints = deliveredBodyConstraints;
             substrateBody.isKinematic = deliveredBodyKinematicState;
+            StopDynamicMotion(substrateBody);
+            if (!substrateBody.isKinematic)
+            {
+                substrateBody.WakeUp();
+            }
         }
 
         LockDeliveredBodyAtCurrentPose();
@@ -666,8 +680,6 @@ public class FeedRailController : MonoBehaviour
                 DeliveredBodyTarget.position,
                 normalizedDistance);
             deliveredBody.rotation = deliveredBodyStartRotation;
-            deliveredBody.linearVelocity = Vector3.zero;
-            deliveredBody.angularVelocity = Vector3.zero;
         }
     }
 
@@ -697,8 +709,6 @@ public class FeedRailController : MonoBehaviour
             DeliveredBodyTarget.position,
             normalizedDistance);
         deliveredBody.rotation = deliveredBodyStartRotation;
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
     }
 
     private void CompleteWithdrawal()
@@ -775,8 +785,6 @@ public class FeedRailController : MonoBehaviour
 
         deliveredBody.position = DeliveredBodyTarget.position;
         deliveredBody.rotation = deliveredBodyStartRotation;
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
         Physics.SyncTransforms();
     }
 
@@ -796,8 +804,7 @@ public class FeedRailController : MonoBehaviour
         deliveredBodyStartPosition = deliveredBody.position;
         deliveredBodyStartRotation = deliveredBody.rotation;
         hasDeliveredBodyPose = true;
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
+        StopDynamicMotion(deliveredBody);
         deliveredBody.isKinematic = true;
         deliveredBodyControlled = true;
     }
@@ -822,12 +829,15 @@ public class FeedRailController : MonoBehaviour
         if (!deliveredBody)
             return;
 
-        deliveredBody.linearVelocity = Vector3.zero;
-        deliveredBody.angularVelocity = Vector3.zero;
         deliveredBody.constraints = lockDeliveredBody
             ? RigidbodyConstraints.FreezeAll
             : deliveredBodyConstraints;
         deliveredBody.isKinematic = deliveredBodyKinematicState;
+        StopDynamicMotion(deliveredBody);
+        if (!deliveredBody.isKinematic)
+        {
+            deliveredBody.WakeUp();
+        }
         deliveredBodyControlled = false;
         deliveredBodyLocked = lockDeliveredBody;
     }
@@ -848,6 +858,17 @@ public class FeedRailController : MonoBehaviour
 
         deliveredBodyControlled = false;
         deliveredBodyLocked = false;
+    }
+
+    private static void StopDynamicMotion(Rigidbody body)
+    {
+        if (!body || body.isKinematic)
+        {
+            return;
+        }
+
+        body.linearVelocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
     }
 
     private bool TryGetRail(out Vector3 axis, out float length)

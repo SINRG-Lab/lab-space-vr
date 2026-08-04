@@ -226,13 +226,17 @@ public class SnapOnRelease : MonoBehaviour
         isSnapping = false;
         inside = false;
         wasGrabbed = false;
+        StopDynamicMotion(rb);
         rb.isKinematic = true;
         rb.constraints = initialConstraints;
         rb.position = initialPosition;
         rb.rotation = initialRotation;
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
         rb.isKinematic = initialKinematicState;
+        StopDynamicMotion(rb);
+        if (!rb.isKinematic)
+        {
+            rb.WakeUp();
+        }
         SetObjectHighlight(false);
         SetGuideVisible(false);
         Physics.SyncTransforms();
@@ -254,9 +258,8 @@ public class SnapOnRelease : MonoBehaviour
         Vector3 startPosition = rb.position;
         Quaternion startRotation = rb.rotation;
 
+        StopDynamicMotion(rb);
         rb.isKinematic = true;
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
 
         if (motionDuration > 0f)
         {
@@ -275,11 +278,10 @@ public class SnapOnRelease : MonoBehaviour
 
         rb.position = targetPosition;
         rb.rotation = targetRotation;
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
         rb.constraints = applyConstraintsAfterSnap ? releasedConstraints : previousConstraints;
 
         rb.isKinematic = previousKinematicState;
+        StopDynamicMotion(rb);
         if (!previousKinematicState)
         {
             rb.WakeUp();
@@ -530,6 +532,17 @@ public class SnapOnRelease : MonoBehaviour
         return !restrictInteractionToCurrentStep ||
                !procedureManager ||
                procedureManager.IsGateRequiredByCurrentStep(procedureGate);
+    }
+
+    private static void StopDynamicMotion(Rigidbody body)
+    {
+        if (!body || body.isKinematic)
+        {
+            return;
+        }
+
+        body.linearVelocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
     }
 
     private void OnDisable()

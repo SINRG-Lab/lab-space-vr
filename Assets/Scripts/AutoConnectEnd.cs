@@ -309,13 +309,17 @@ public class AutoConnectEnd : MonoBehaviour
         if (!ownerRb)
             return;
 
+        StopDynamicMotion(ownerRb);
         ownerRb.isKinematic = true;
         ownerRb.constraints = initialOwnerConstraints;
         ownerRb.position = initialOwnerPosition;
         ownerRb.rotation = initialOwnerRotation;
-        ownerRb.linearVelocity = Vector3.zero;
-        ownerRb.angularVelocity = Vector3.zero;
         ownerRb.isKinematic = initialOwnerKinematicState;
+        StopDynamicMotion(ownerRb);
+        if (!ownerRb.isKinematic)
+        {
+            ownerRb.WakeUp();
+        }
         Physics.SyncTransforms();
 
         ResolveProcedureManager();
@@ -346,9 +350,8 @@ public class AutoConnectEnd : MonoBehaviour
         Vector3 startPosition = ownerRb.position;
         Quaternion startRotation = ownerRb.rotation;
 
+        StopDynamicMotion(ownerRb);
         ownerRb.isKinematic = true;
-        ownerRb.linearVelocity = Vector3.zero;
-        ownerRb.angularVelocity = Vector3.zero;
 
         if (motionDuration > 0f)
         {
@@ -387,6 +390,7 @@ public class AutoConnectEnd : MonoBehaviour
         Physics.SyncTransforms();
 
         ownerRb.isKinematic = previousKinematicState;
+        StopDynamicMotion(ownerRb);
         if (!previousKinematicState)
         {
             ownerRb.WakeUp();
@@ -726,6 +730,17 @@ public class AutoConnectEnd : MonoBehaviour
                procedureManager.IsGateRequiredByCurrentStep(procedureGate) ||
                (allowAlternateProcedureGate &&
                 procedureManager.IsGateRequiredByCurrentStep(alternateProcedureGate));
+    }
+
+    private static void StopDynamicMotion(Rigidbody body)
+    {
+        if (!body || body.isKinematic)
+        {
+            return;
+        }
+
+        body.linearVelocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
     }
 
     private void OnDestroy()
