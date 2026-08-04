@@ -31,6 +31,9 @@ public class Setting_Parameter : MonoBehaviour
     [Header("NanoWire")]
     public GameObject NanoWire;
 
+    [Header("Hologram Capture")]
+    [SerializeField] private string hologramCaptureLayerName = "HologramCapture";
+
     [Header("Procedure")]
     [SerializeField] private FurnaceProcedureManager procedureManager;
     [SerializeField] private GrowthManager growthManager;
@@ -58,6 +61,7 @@ public class Setting_Parameter : MonoBehaviour
     private string lastEstimatedHeightText;
     private float lastEstimatedGrowthMultiplier = float.NaN;
     private float lastEstimatedSimulationMultiplier = float.NaN;
+    private int hologramCaptureLayer = -1;
 
     public bool HasGrowthVisuals => growthRates.Count > 0;
     public bool ParametersConfirmed => parametersConfirmed;
@@ -105,6 +109,7 @@ public class Setting_Parameter : MonoBehaviour
     {
         ApplySaneDefaults();
         ResolveProcedureReferences();
+        ResolveHologramCaptureLayer();
 
         if (catalyst_count)
         {
@@ -173,6 +178,7 @@ public class Setting_Parameter : MonoBehaviour
         int spawnedCount = 0;
         if (growth_rate)
         {
+            AssignToHologramCapture(growth_rate.gameObject);
             RegisterGrowthRate(growth_rate);
             spawnedCount = 1;
         }
@@ -183,10 +189,42 @@ public class Setting_Parameter : MonoBehaviour
                 NanoWire,
                 Substrate.transform,
                 catalyst_holder);
+            AssignToHologramCapture(growthVisual);
             RegisterGrowthRate(growthVisual.GetComponent<GrowthRate>());
         }
 
         growth_enabled = false;
+    }
+
+    private void ResolveHologramCaptureLayer()
+    {
+        hologramCaptureLayer = LayerMask.NameToLayer(hologramCaptureLayerName);
+        if (hologramCaptureLayer < 0)
+        {
+            Debug.LogError(
+                $"Missing Unity layer '{hologramCaptureLayerName}' for hologram capture.",
+                this);
+            return;
+        }
+
+        AssignToHologramCapture(Substrate);
+        if (catalyst_holder)
+            AssignToHologramCapture(catalyst_holder.gameObject);
+    }
+
+    private void AssignToHologramCapture(GameObject root)
+    {
+        if (!root || hologramCaptureLayer < 0)
+            return;
+
+        SetLayerRecursively(root.transform, hologramCaptureLayer);
+    }
+
+    private static void SetLayerRecursively(Transform root, int layer)
+    {
+        root.gameObject.layer = layer;
+        foreach (Transform child in root)
+            SetLayerRecursively(child, layer);
     }
 
     private GameObject SpawnOnTopAnywhere(

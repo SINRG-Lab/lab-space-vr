@@ -37,6 +37,18 @@ Each stage is validated visually and on Quest before the next stage begins.
 | 4. Interaction presentation | Done | Unify current-step guides, status colors, sound, hand-tracking feedback, and control visibility. | The procedure is understandable without visual clutter or verbal rescue. |
 | 5. Quest finalization | Pending | After the remaining furnace flow is implemented, profile the completed scene and tune resolution, LOD, batching, and remaining hotspots. | The final demo sustains its target frame rate through the full furnace procedure. |
 
+## Hologram Tracker
+
+The hologram remains disabled at startup while this pipeline is rebuilt and validated one stage at a time.
+
+| Stage | Status | Scope | Acceptance criteria |
+| --- | --- | --- | --- |
+| H1.1 Capture isolation | Done | Put the simulation substrate and all runtime nanowire visuals on a dedicated capture layer. | Hologram cameras can render the growth subject without drawing the laboratory, furnace, hands, or UI. |
+| H1.2 Camera normalization | Done | Enable and standardize all four capture views with hologram-only culling. | Four consistently framed views render against black without shadows, post-processing, or XR overhead. |
+| H1.3 Local compositor preview | Next | Produce and display the diamond-format output locally without WebRTC. | Orientation, flips, framing, and scale can be checked in the Editor without a receiver. |
+| H1.4 Lifecycle and performance | Pending | Allocate and render only while hologram mode is active. | The disabled system has no startup cost and the active preview stays within the Quest frame budget. |
+| H2 Streaming and receiver | Pending | Harden signaling, WebRTC sender, receiver, discovery, reconnect, and fullscreen calibration. | Quest streams the calibrated output to the physical hologram display reliably. |
+
 ## Target Procedure
 
 This is the starter flow, not a fixed order. Edit the `steps` list on `FurnaceProcedureManager` to reorder, split, combine, or remove steps as the real furnace procedure becomes clearer.

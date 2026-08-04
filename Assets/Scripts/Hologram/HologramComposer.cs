@@ -16,6 +16,12 @@ public class HologramComposer : MonoBehaviour
     [Range(256, 4096)] public int textureSize = 1024;
     public int depthBuffer = 24;
 
+    [Header("Capture Camera Settings")]
+    [SerializeField] private string captureLayerName = "HologramCapture";
+    [SerializeField, Range(20f, 100f)] private float captureFieldOfView = 60f;
+    [SerializeField, Min(0.01f)] private float captureNearClip = 0.05f;
+    [SerializeField, Min(0.1f)] private float captureFarClip = 10f;
+
     [Header("Layout")]
     [Range(0.1f, 0.4f)] public float diamondHalfWidth = 0.22f;
     [Range(0.1f, 0.4f)] public float diamondHalfHeight = 0.22f;
@@ -38,10 +44,23 @@ public class HologramComposer : MonoBehaviour
 
     void Start()
     {
-        ConfigureAuxCamera(topCamera);
-        ConfigureAuxCamera(leftCamera);
-        ConfigureAuxCamera(bottomCamera);
-        ConfigureAuxCamera(rightCamera);
+        int captureLayer = LayerMask.NameToLayer(captureLayerName);
+        if (captureLayer < 0)
+        {
+            Debug.LogError(
+                $"Missing Unity layer '{captureLayerName}' for hologram cameras.",
+                this);
+            enabled = false;
+            return;
+        }
+
+        SetSourceCameraObjectsActive();
+        int captureMask = 1 << captureLayer;
+
+        ConfigureAuxCamera(topCamera, captureMask);
+        ConfigureAuxCamera(leftCamera, captureMask);
+        ConfigureAuxCamera(bottomCamera, captureMask);
+        ConfigureAuxCamera(rightCamera, captureMask);
 
         topRT = CreateRT("Holo_TopRT");
         leftRT = CreateRT("Holo_LeftRT");
@@ -56,10 +75,36 @@ public class HologramComposer : MonoBehaviour
         ApplyToMaterial();
     }
 
-    void ConfigureAuxCamera(Camera camera)
+    void SetSourceCameraObjectsActive()
+    {
+        Camera[] sourceCameras = { topCamera, leftCamera, bottomCamera, rightCamera };
+        foreach (Camera sourceCamera in sourceCameras)
+        {
+            if (!sourceCamera)
+                continue;
+
+            Transform sourceParent = sourceCamera.transform.parent;
+            if (sourceParent && !sourceParent.gameObject.activeSelf)
+                sourceParent.gameObject.SetActive(true);
+
+            if (!sourceCamera.gameObject.activeSelf)
+                sourceCamera.gameObject.SetActive(true);
+        }
+    }
+
+    void ConfigureAuxCamera(Camera camera, int captureMask)
     {
         if (!camera) return;
 
+        camera.enabled = true;
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.backgroundColor = Color.black;
+        camera.cullingMask = captureMask;
+        camera.orthographic = false;
+        camera.fieldOfView = captureFieldOfView;
+        camera.nearClipPlane = captureNearClip;
+        camera.farClipPlane = Mathf.Max(captureNearClip + 0.01f, captureFarClip);
+        camera.useOcclusionCulling = false;
         camera.stereoTargetEye = StereoTargetEyeMask.None;
         camera.allowHDR = false;
         camera.allowMSAA = false;
@@ -77,6 +122,7 @@ public class HologramComposer : MonoBehaviour
 
     void OnValidate()
     {
+        captureFarClip = Mathf.Max(captureNearClip + 0.01f, captureFarClip);
         ApplyToMaterial();
     }
 
