@@ -1,0 +1,555 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/wff9ut",
+    "id": "wff9ut",
+    "slide": 1,
+    "layoutId": "9a5518ab-00a6-45de-9938-03caf38f4f36",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "747ef508-e558-456f-97f2-1eca1b65210f",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "9a5518ab-00a6-45de-9938-03caf38f4f36",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "747ef508-e558-456f-97f2-1eca1b65210f",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "747ef508-e558-456f-97f2-1eca1b65210f",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/14n2h8re",
+      "id": "1",
+      "name": "s1-eyebrow",
+      "bbox": [
+        54,
+        42,
+        560,
+        26
+      ],
+      "geometry": "rect",
+      "text": "2026 IEEE METAVERSE GRAND CHALLENGE",
+      "textPreview": "2026 IEEE METAVERSE GRAND CHALLENGE",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "Helvetica Neue",
+        "color": "#1BA7D1",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2026 IEEE METAVERSE GRAND CHALLENGE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2026 IEEE METAVERSE GRAND CHALLENGE",
+          "lineSpacingPercent": 102000,
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Helvetica Neue",
+            "color": "#1BA7D1",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1.02
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2026 IEEE METAVERSE GRAND CHALLENGE",
+              "fontSize": 18,
+              "typeface": "Helvetica Neue",
+              "color": "#1BA7D1",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1.02
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1c36t83",
+      "id": "2",
+      "name": "s1-title",
+      "bbox": [
+        54,
+        110,
+        560,
+        238
+      ],
+      "geometry": "rect",
+      "text": "Practice nanowire growth before touching the furnace",
+      "textPreview": "Practice nanowire growth before touching the furnace",
+      "resolvedFontSize": 56.58,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 70,
+        "typeface": "Helvetica Neue",
+        "color": "#050505",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.81,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Practice nanowire"
+          },
+          {
+            "index": 2,
+            "text": "growth before"
+          },
+          {
+            "index": 3,
+            "text": "touching the"
+          },
+          {
+            "index": 4,
+            "text": "furnace"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Practice nanowire growth before touching the furnace",
+          "lineSpacingPercent": 88000,
+          "resolvedTextStyle": {
+            "fontSize": 70,
+            "typeface": "Helvetica Neue",
+            "color": "#050505",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 0.88
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Practice nanowire growth before touching the furnace",
+              "fontSize": 70,
+              "typeface": "Helvetica Neue",
+              "color": "#050505",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 0.88
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/f2lkfy9o",
+      "id": "3",
+      "name": "s1-subtitle",
+      "bbox": [
+        54,
+        386,
+        530,
+        116
+      ],
+      "geometry": "rect",
+      "text": "LabSpace VR transforms a complex split-tube furnace protocol into guided, hand-tracked practice.",
+      "textPreview": "LabSpace VR transforms a complex split-tube furnace protocol into guided, hand-tracked practice.",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Helvetica Neue",
+        "color": "#5D6670",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LabSpace VR transforms a complex"
+          },
+          {
+            "index": 2,
+            "text": "split-tube furnace protocol into guided,"
+          },
+          {
+            "index": 3,
+            "text": "hand-tracked practice."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LabSpace VR transforms a complex split-tube furnace protocol into guided, hand-tracked practice.",
+          "lineSpacingPercent": 105000,
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Helvetica Neue",
+            "color": "#5D6670",
+            "alignment": "left",
+            "lineSpacing": 1.05
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LabSpace VR transforms a complex split-tube furnace protocol into guided, hand-tracked practice.",
+              "fontSize": 28,
+              "typeface": "Helvetica Neue",
+              "color": "#5D6670",
+              "alignment": "left",
+              "lineSpacing": 1.05
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/orelc3q5",
+      "id": "4",
+      "name": "s1-theme-rule",
+      "bbox": [
+        54,
+        540,
+        84,
+        5
+      ],
+      "geometry": "rect",
+      "fillColor": "#1BA7D1",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/psn2587q",
+      "id": "5",
+      "name": "s1-theme",
+      "bbox": [
+        54,
+        560,
+        530,
+        72
+      ],
+      "geometry": "rect",
+      "text": "THEME 3\nAdvanced Learning in Educational or Classroom Environments",
+      "textPreview": "THEME 3 | Advanced Learning in Educational or Classroom Environments",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 20,
+        "typeface": "Helvetica Neue",
+        "color": "#050505",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "THEME 3"
+          },
+          {
+            "index": 2,
+            "text": "Advanced Learning in Educational or Classroom"
+          },
+          {
+            "index": 3,
+            "text": "Environments"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "THEME 3",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Helvetica Neue",
+            "color": "#050505",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "THEME 3",
+              "fontSize": 20,
+              "typeface": "Helvetica Neue",
+              "color": "#050505",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "Advanced Learning in Educational or Classroom Environments",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Helvetica Neue",
+            "color": "#050505",
+            "bold": true,
+            "alignment": "left",
+            "lineSpacing": 1
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Advanced Learning in Educational or Classroom Environments",
+              "fontSize": 20,
+              "typeface": "Helvetica Neue",
+              "color": "#050505",
+              "bold": true,
+              "alignment": "left",
+              "lineSpacing": 1
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25w3ad8z",
+      "id": "6",
+      "name": "s1-author",
+      "bbox": [
+        54,
+        654,
+        530,
+        24
+      ],
+      "geometry": "rect",
+      "text": "LabSpace VR Team  •  Northeastern University",
+      "textPreview": "LabSpace VR Team  •  Northeastern University",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 16,
+        "typeface": "Helvetica Neue",
+        "color": "#5D6670",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LabSpace VR Team  •  Northeastern University"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LabSpace VR Team  •  Northeastern University",
+          "lineSpacingPercent": 102000,
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Helvetica Neue",
+            "color": "#5D6670",
+            "alignment": "left",
+            "lineSpacing": 1.02
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LabSpace VR Team  •  Northeastern University",
+              "fontSize": 16,
+              "typeface": "Helvetica Neue",
+              "color": "#5D6670",
+              "alignment": "left",
+              "lineSpacing": 1.02
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nq5kjypk",
+      "id": "7",
+      "name": "s1-image-backing",
+      "bbox": [
+        642,
+        38,
+        584,
+        604
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#101417",
+      "lineColor": "#B8BCC4",
+      "lineWidth": 1
+    },
+    {
+      "order": 8,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/t0bmp03u",
+      "id": "8",
+      "bbox": [
+        642,
+        38,
+        584,
+        604
+      ],
+      "geometry": "roundRect",
+      "alt": "Isometric render of the split-tube furnace",
+      "contentType": "image/jpeg",
+      "imageCrop": {
+        "left": 0.02,
+        "top": 0,
+        "right": 0.03,
+        "bottom": 0
+      },
+      "imageFit": "cover",
+      "imageMask": {
+        "geometry": "roundRect",
+        "adjustmentList": [
+          {
+            "name": "adj",
+            "formula": "val 2397"
+          }
+        ]
+      },
+      "asset": {
+        "assetId": "511d5102-3b20-4c42-a4ed-1d28302a7401",
+        "contentType": "image/jpeg",
+        "byteLength": 122581
+      }
+    }
+  ],
+  "composeRuns": []
+}

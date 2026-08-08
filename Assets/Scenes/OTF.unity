@@ -9381,7 +9381,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2002706228}
   toggleTransition: 1
   graphic: {fileID: 0}
-  m_Group: {fileID: 230699529}
+  m_Group: {fileID: 1977872070400435641}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -9979,7 +9979,7 @@ Transform:
   m_GameObject: {fileID: 401622515}
   serializedVersion: 2
   m_LocalRotation: {x: 0.18301274, y: 0.6830127, z: -0.18301274, w: 0.6830127}
-  m_LocalPosition: {x: -0.7600002, y: 0.775, z: 0}
+  m_LocalPosition: {x: -0.876, y: 0.775, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10734,7 +10734,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 236820021}
   toggleTransition: 1
   graphic: {fileID: 0}
-  m_Group: {fileID: 230699529}
+  m_Group: {fileID: 1977872070400435641}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -12795,7 +12795,7 @@ Transform:
   m_GameObject: {fileID: 593436787}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.95371705, z: -0.30070576, w: 0}
-  m_LocalPosition: {x: -0.00000011920929, y: 0.775, z: 0.8670003}
+  m_LocalPosition: {x: 0, y: 0.775, z: 0.876}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15150,7 +15150,7 @@ Transform:
   m_GameObject: {fileID: 709273617}
   serializedVersion: 2
   m_LocalRotation: {x: 0.30070576, y: 0, z: 0, w: 0.953717}
-  m_LocalPosition: {x: 0, y: 0.775, z: -0.861}
+  m_LocalPosition: {x: 0, y: 0.775, z: -0.876}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23231,7 +23231,6 @@ MonoBehaviour:
   sender: {fileID: 1431190172}
   streamFromFirstStep: 1
   framingRefreshInterval: 0.1
-  closeUpStepId: start_growth
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24629,7 +24628,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.08, z: 0}
     hologramFocusTargets:
     - {fileID: 520960032}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.5
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24649,7 +24656,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0.05, y: 0.08, z: -0.05}
     hologramFocusTargets:
     - {fileID: 1093210762}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.75
+    hologramDistanceMultiplier: 1.2
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0.45
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24669,7 +24684,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.18, z: 0}
     hologramFocusTargets:
     - {fileID: 1164920835}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.6
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24690,7 +24713,15 @@ MonoBehaviour:
     hologramFocusTargets:
     - {fileID: 543450652597906247}
     - {fileID: 1164920835}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.75
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24710,7 +24741,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.14, z: 0}
     hologramFocusTargets:
     - {fileID: 543450652597906247}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.8
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24730,7 +24769,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.14, z: 0}
     hologramFocusTargets:
     - {fileID: 7100324511552852820}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.85
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24750,7 +24797,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.12, z: 0}
     hologramFocusTargets:
     - {fileID: 8670761336569193909}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.7
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24776,7 +24831,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.12, z: 0}
     hologramFocusTargets:
     - {fileID: 5944579382802649856}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.75
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24798,7 +24861,15 @@ MonoBehaviour:
     hologramFocusTargets:
     - {fileID: 491629908}
     - {fileID: 1687375561}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.9
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24819,7 +24890,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0, z: 0}
     hologramFocusTargets:
     - {fileID: 1164920835}
-    hologramContextRadius: 0.6
+    hologramUseCaptureLayerBounds: 1
+    hologramHideApparatus: 1
+    hologramContextRadius: 0.7
+    hologramDistanceMultiplier: 0.1
+    hologramFieldOfView: 20
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 1
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24842,7 +24921,15 @@ MonoBehaviour:
     - {fileID: 611025919}
     - {fileID: 491629908}
     - {fileID: 1687375561}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.9
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24862,7 +24949,15 @@ MonoBehaviour:
     indicatorOffset: {x: 0, y: 0.14, z: 0}
     hologramFocusTargets:
     - {fileID: 7100324511552852820}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.85
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24883,7 +24978,15 @@ MonoBehaviour:
     hologramFocusTargets:
     - {fileID: 543450652597906247}
     - {fileID: 1164920835}
+    hologramUseCaptureLayerBounds: 0
+    hologramHideApparatus: 0
     hologramContextRadius: 0.8
+    hologramDistanceMultiplier: 1
+    hologramFieldOfView: 0
+    hologramCameraYOffset: 0
+    hologramCameraRotationOffset: {x: 0, y: 0, z: 0}
+    hologramCenterCamerasOnFocus: 0
+    hologramUseAuthoredCameraSpacing: 0
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -31160,7 +31263,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1441856879}
   toggleTransition: 1
   graphic: {fileID: 0}
-  m_Group: {fileID: 230699529}
+  m_Group: {fileID: 1977872070400435641}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -37574,7 +37677,7 @@ Transform:
   m_GameObject: {fileID: 1928014495}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.872}
+  m_LocalPosition: {x: 0, y: 0, z: -1.086}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

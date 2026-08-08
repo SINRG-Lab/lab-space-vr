@@ -71,6 +71,9 @@ public class HologramComposer : MonoBehaviour
     float activeContextRadius = 0.65f;
     float activeDistanceMultiplier = 1f;
     float activeFieldOfView;
+    float activeCameraYOffset;
+    Vector3 activeCameraRotationOffset;
+    bool activeCenterCamerasOnFocus;
     bool activeIncludeApparatus = true;
     bool activeUseAuthoredCameraSpacing;
     readonly List<Transform> focusTargets = new();
@@ -81,6 +84,7 @@ public class HologramComposer : MonoBehaviour
     bool captureLayerOverridesActive;
     Transform cameraRig;
     Vector3 cameraRigInitialLocalPosition;
+    Quaternion cameraRigInitialLocalRotation;
     Vector3 referenceFocusLocal;
     SourceCameraPose topCameraPose;
     SourceCameraPose leftCameraPose;
@@ -147,7 +151,10 @@ public class HologramComposer : MonoBehaviour
         float distanceMultiplier = 1f,
         bool includeApparatus = true,
         bool useAuthoredCameraSpacing = false,
-        float fieldOfViewOverride = 0f)
+        float fieldOfViewOverride = 0f,
+        float cameraYOffset = 0f,
+        Vector3 cameraRotationOffset = default,
+        bool centerCamerasOnFocus = false)
     {
         focusTargets.Clear();
         if (targets != null)
@@ -166,6 +173,9 @@ public class HologramComposer : MonoBehaviour
         activeFieldOfView = fieldOfViewOverride > 0f
             ? Mathf.Clamp(fieldOfViewOverride, 1f, 179f)
             : captureFieldOfView;
+        activeCameraYOffset = cameraYOffset;
+        activeCameraRotationOffset = cameraRotationOffset;
+        activeCenterCamerasOnFocus = centerCamerasOnFocus;
         activeIncludeApparatus = includeApparatus;
         activeUseAuthoredCameraSpacing = useAuthoredCameraSpacing;
         RebuildCaptureObjectCache();
@@ -570,9 +580,38 @@ public class HologramComposer : MonoBehaviour
         RestoreCameraPose(bottomCamera, bottomCameraPose, zoomScale);
         RestoreCameraPose(rightCamera, rightCameraPose, zoomScale);
 
+        cameraRig.localRotation =
+            cameraRigInitialLocalRotation *
+            Quaternion.Euler(activeCameraRotationOffset);
         Vector3 referenceFocusOffset =
             cameraRig.TransformVector(referenceFocusLocal);
-        cameraRig.position = focusBounds.center - referenceFocusOffset;
+        cameraRig.position =
+            focusBounds.center - referenceFocusOffset +
+            Vector3.up * activeCameraYOffset;
+
+        if (activeCenterCamerasOnFocus)
+        {
+            CenterCameraOnFocus(topCamera, focusBounds.center);
+            CenterCameraOnFocus(leftCamera, focusBounds.center);
+            CenterCameraOnFocus(bottomCamera, focusBounds.center);
+            CenterCameraOnFocus(rightCamera, focusBounds.center);
+        }
+    }
+
+    static void CenterCameraOnFocus(Camera sourceCamera, Vector3 focusPoint)
+    {
+        if (!sourceCamera)
+            return;
+
+        Vector3 focusDirection = focusPoint - sourceCamera.transform.position;
+        if (focusDirection.sqrMagnitude < 0.000001f)
+            return;
+
+        Quaternion correction = Quaternion.FromToRotation(
+            sourceCamera.transform.forward,
+            focusDirection.normalized);
+        sourceCamera.transform.rotation =
+            correction * sourceCamera.transform.rotation;
     }
 
     void CacheSourceCameraLayout()
@@ -582,6 +621,7 @@ public class HologramComposer : MonoBehaviour
             return;
 
         cameraRigInitialLocalPosition = cameraRig.localPosition;
+        cameraRigInitialLocalRotation = cameraRig.localRotation;
         topCameraPose = new SourceCameraPose(topCamera);
         leftCameraPose = new SourceCameraPose(leftCamera);
         bottomCameraPose = new SourceCameraPose(bottomCamera);
@@ -641,6 +681,7 @@ public class HologramComposer : MonoBehaviour
             return;
 
         cameraRig.localPosition = cameraRigInitialLocalPosition;
+        cameraRig.localRotation = cameraRigInitialLocalRotation;
         RestoreCameraPose(topCamera, topCameraPose, 1f);
         RestoreCameraPose(leftCamera, leftCameraPose, 1f);
         RestoreCameraPose(bottomCamera, bottomCameraPose, 1f);

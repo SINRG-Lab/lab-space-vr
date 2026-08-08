@@ -60,6 +60,12 @@ public class FurnaceProcedureManager : MonoBehaviour
         [Min(0.1f)] public float hologramDistanceMultiplier = 1f;
         [Tooltip("Perspective field-of-view override in degrees. Set to 0 to use the composer's normal FOV.")]
         [Min(0f)] public float hologramFieldOfView;
+        [Tooltip("World-space vertical offset applied to the shared hologram camera rig. Positive values raise the cameras; negative values lower them.")]
+        public float hologramCameraYOffset;
+        [Tooltip("Per-step Euler rotation offset in degrees applied to the shared four-camera rig around the current hologram focus.")]
+        public Vector3 hologramCameraRotationOffset;
+        [Tooltip("Aim each source camera directly at the current hologram bounds center while retaining its position and view roll.")]
+        public bool hologramCenterCamerasOnFocus;
         [Tooltip("Use the four cameras' original local spacing instead of context-radius distance framing.")]
         public bool hologramUseAuthoredCameraSpacing;
         public UnityEvent onEnter = new UnityEvent();
@@ -176,6 +182,7 @@ public class FurnaceProcedureManager : MonoBehaviour
             hologramUseCaptureLayerBounds = true,
             hologramHideApparatus = true,
             hologramFieldOfView = 20f,
+            hologramCenterCamerasOnFocus = true,
             hologramUseAuthoredCameraSpacing = true,
             prerequisiteGates = new[]
             {

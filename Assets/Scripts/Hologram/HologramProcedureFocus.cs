@@ -14,6 +14,7 @@ public sealed class HologramProcedureFocus : MonoBehaviour
 
     private Coroutine focusRoutine;
     private float nextFramingRefresh;
+    private int appliedSettingsHash;
     private bool subscribed;
     private bool started;
 
@@ -62,6 +63,14 @@ public sealed class HologramProcedureFocus : MonoBehaviour
             return;
 
         nextFramingRefresh = Time.unscaledTime + framingRefreshInterval;
+        int currentSettingsHash = CalculateCurrentSettingsHash();
+        if (currentSettingsHash != appliedSettingsHash)
+        {
+            ApplyCurrentFocus();
+            nextFramingRefresh = Time.unscaledTime + framingRefreshInterval;
+            return;
+        }
+
         composer.RefreshFocusFraming();
     }
 
@@ -105,6 +114,7 @@ public sealed class HologramProcedureFocus : MonoBehaviour
             composer.ShowContextFocus(
                 completionTarget ? new[] { completionTarget } : null,
                 0.75f);
+            appliedSettingsHash = CalculateCurrentSettingsHash();
             return;
         }
 
@@ -121,8 +131,52 @@ public sealed class HologramProcedureFocus : MonoBehaviour
             distanceMultiplier,
             includeApparatus: !step.hologramHideApparatus,
             useAuthoredCameraSpacing: step.hologramUseAuthoredCameraSpacing,
-            fieldOfViewOverride: step.hologramFieldOfView);
+            fieldOfViewOverride: step.hologramFieldOfView,
+            cameraYOffset: step.hologramCameraYOffset,
+            cameraRotationOffset: step.hologramCameraRotationOffset,
+            centerCamerasOnFocus: step.hologramCenterCamerasOnFocus);
+        appliedSettingsHash = CalculateCurrentSettingsHash();
         nextFramingRefresh = 0f;
+    }
+
+    private int CalculateCurrentSettingsHash()
+    {
+        if (!procedureManager)
+            return 0;
+
+        FurnaceProcedureManager.ProcedureStep step = procedureManager.CurrentStep;
+        unchecked
+        {
+            int hash = 17;
+            hash = hash * 31 + procedureManager.CurrentStepIndex;
+            if (step == null)
+            {
+                Transform completionTarget = procedureManager.CurrentIndicatorTarget;
+                return hash * 31 + (completionTarget ? completionTarget.GetInstanceID() : 0);
+            }
+
+            hash = hash * 31 + (step.hologramUseCaptureLayerBounds ? 1 : 0);
+            hash = hash * 31 + (step.hologramHideApparatus ? 1 : 0);
+            hash = hash * 31 + step.hologramContextRadius.GetHashCode();
+            hash = hash * 31 + step.hologramDistanceMultiplier.GetHashCode();
+            hash = hash * 31 + step.hologramFieldOfView.GetHashCode();
+            hash = hash * 31 + step.hologramCameraYOffset.GetHashCode();
+            hash = hash * 31 + step.hologramCameraRotationOffset.GetHashCode();
+            hash = hash * 31 + (step.hologramCenterCamerasOnFocus ? 1 : 0);
+            hash = hash * 31 + (step.hologramUseAuthoredCameraSpacing ? 1 : 0);
+
+            if (step.hologramFocusTargets != null)
+            {
+                hash = hash * 31 + step.hologramFocusTargets.Length;
+                for (int i = 0; i < step.hologramFocusTargets.Length; i++)
+                {
+                    Transform target = step.hologramFocusTargets[i];
+                    hash = hash * 31 + (target ? target.GetInstanceID() : 0);
+                }
+            }
+
+            return hash;
+        }
     }
 
     private static Transform GetPrimaryFocusTarget(

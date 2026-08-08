@@ -1,0 +1,10 @@
+Communication job: By the end, IEEE judges should believe LabSpace VR is a credible, engaging simulation-based learning prototype because it turns a complex furnace protocol into guided, safety-gated, hands-on practice.
+
+Narrative arc:
+1. Promise: practice nanowire growth before touching the furnace.
+2. Learning problem: a protocol alone does not teach coordination and consequences.
+3. Experience: a 13-step hands-on procedure.
+4. Implementation: learner actions drive a state-aware simulation and multimodal guidance.
+5. Impact: safe, repeatable, scalable practice with concrete prototype proof points.
+
+Visual route: Codex Grid, adapted from layouts 08 (cover/half image), 10 (two-column), 17 (timeline), and 19 (metric-led). White canvas, black type, pale gray structural regions, cyan evidence accent. User-provided project renders and extracted prototype frames are the dominant evidence.

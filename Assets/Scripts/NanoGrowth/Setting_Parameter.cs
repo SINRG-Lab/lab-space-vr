@@ -176,7 +176,7 @@ public class Setting_Parameter : MonoBehaviour
             Destroy(catalyst_holder.GetChild(i).gameObject);
 
         int spawnedCount = 0;
-        if (growth_rate)
+        if (growth_rate && growth_rate.gameObject.activeInHierarchy)
         {
             AssignToHologramCapture(growth_rate.gameObject);
             RegisterGrowthRate(growth_rate);

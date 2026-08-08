@@ -1,0 +1,8 @@
+IEEE competition page: https://metaversereality.ieee.org/competition/
+Official rules PDF: https://metaversereality.ieee.org/wp-content/uploads/2026/04/IEEE-FD-and-YP-2026-Metaverse-Grand-Challenge-for-Simulation-Based-Learning-Final-R2.pdf
+2026 kick-off webinar slides: https://metaversereality.ieee.org/wp-content/uploads/2026/06/ieee-metaverse-grand-challenge-general-overview-webinar-2026.pdf
+Project source: https://github.com/SINRG-Lab/lab-space-vr
+Local project summary: /Users/barath/BarathMac/XERT/lab-space-vr/README.md
+Local implementation evidence: /Users/barath/BarathMac/XERT/lab-space-vr/Assets/Scripts/FurnaceProcedureManager.cs
+Local visual assets: /Users/barath/BarathMac/XERT/lab-space-vr/Images and /Users/barath/BarathMac/XERT/lab-space-vr/Artifacts/Blender
+Video frame sources: /Users/barath/BarathMac/XERT/lab-space-vr/Videos
