@@ -23041,6 +23041,7 @@ MonoBehaviour:
   growthSettings: {fileID: 1953597913}
   growthController: {fileID: 1814961264}
   simulationSpeed: {fileID: 1464285239}
+  hologramStreamView: {fileID: 940000040}
 --- !u!114 &930000030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23231,6 +23232,44 @@ MonoBehaviour:
   sender: {fileID: 1431190172}
   streamFromFirstStep: 1
   framingRefreshInterval: 0.1
+  streamMode: 0
+  centerEye: {fileID: 666069551}
+  leftHandAnchor: {fileID: 154074245}
+  rightHandAnchor: {fileID: 996517814}
+  leftHandCaptureRoot: {fileID: 322590683}
+  rightHandCaptureRoot: {fileID: 639834988}
+  leftHandTracking: {fileID: 322590689}
+  rightHandTracking: {fileID: 639834994}
+  operatorHeadOffset: {x: 0, y: -0.25, z: 0}
+  operatorHandWeight: 0.65
+  operatorLookSmoothing: 8
+  handMovementThreshold: 0.1
+  handPositionSmoothing: 7
+  headPositionSmoothing: 8
+  headRotationSmoothing: 8
+--- !u!114 &950000050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071694017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d5c43ba19a14d60a4f0900cb7b2c7e8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HologramStreamModeSelector
+  controller: {fileID: 940000040}
+  hostCanvas: {fileID: 656178815}
+  anchoredPosition: {x: 0, y: 0.72}
+  panelDepth: 0.43
+  panelSize: {x: 400, y: 52}
+  worldScale: 0.005
+  panelColor: {r: 0.015, g: 0.025, b: 0.035, a: 0.96}
+  inactiveColor: {r: 0.08, g: 0.105, b: 0.125, a: 1}
+  activeColor: {r: 0.16, g: 0.76, b: 0.95, a: 1}
+  inactiveTextColor: {r: 1, g: 1, b: 1, a: 1}
+  activeTextColor: {r: 0.015, g: 0.025, b: 0.035, a: 1}
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24580,6 +24619,7 @@ GameObject:
   - component: {fileID: 920000020}
   - component: {fileID: 930000030}
   - component: {fileID: 940000040}
+  - component: {fileID: 950000050}
   m_Layer: 0
   m_Name: FurnaceProcedureManager
   m_TagString: Untagged

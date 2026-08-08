@@ -92,6 +92,12 @@ public class HologramComposer : MonoBehaviour
     SourceCameraPose rightCameraPose;
 
     public bool IsCaptureActive { get; private set; }
+    public Vector3 SourceCameraFocusCenter => cameraRig
+        ? cameraRig.TransformPoint(referenceFocusLocal)
+        : Vector3.zero;
+    public Quaternion SourceCameraRigRotation => cameraRig
+        ? cameraRig.rotation
+        : Quaternion.identity;
 
     void Awake()
     {
@@ -182,6 +188,72 @@ public class HologramComposer : MonoBehaviour
         ApplyActiveCaptureMask();
         ApplyActiveFieldOfView();
         RefreshFocusFraming();
+    }
+
+    public void ShowTrackingSubjects(
+        IReadOnlyList<Transform> subjects,
+        bool includeApparatus = true,
+        float fieldOfViewOverride = 0f)
+    {
+        focusTargets.Clear();
+        if (subjects != null)
+        {
+            for (int i = 0; i < subjects.Count; i++)
+            {
+                Transform subject = subjects[i];
+                if (subject)
+                    focusTargets.Add(subject);
+            }
+        }
+
+        activeCaptureMask = GetCaptureMask();
+        activeFieldOfView = fieldOfViewOverride > 0f
+            ? Mathf.Clamp(fieldOfViewOverride, 1f, 179f)
+            : captureFieldOfView;
+        activeIncludeApparatus = includeApparatus;
+        RebuildCaptureObjectCache();
+        ApplyActiveCaptureMask();
+        ApplyActiveFieldOfView();
+        RestoreSourceCameraLayout();
+    }
+
+    public void AimSourceCamerasAt(
+        Vector3 focusPoint,
+        float rotationSmoothing,
+        float deltaTime)
+    {
+        float interpolation = DampFactor(rotationSmoothing, deltaTime);
+        AimCameraAt(topCamera, focusPoint, interpolation);
+        AimCameraAt(leftCamera, focusPoint, interpolation);
+        AimCameraAt(bottomCamera, focusPoint, interpolation);
+        AimCameraAt(rightCamera, focusPoint, interpolation);
+    }
+
+    public void MoveSourceCameraRig(
+        Vector3 focusCenter,
+        Quaternion rigRotation,
+        float positionSmoothing,
+        float rotationSmoothing,
+        float deltaTime)
+    {
+        if (!cameraRig)
+            return;
+
+        cameraRig.rotation = Quaternion.Slerp(
+            cameraRig.rotation,
+            rigRotation,
+            DampFactor(rotationSmoothing, deltaTime));
+        Vector3 desiredRigPosition =
+            focusCenter - cameraRig.TransformVector(referenceFocusLocal);
+        cameraRig.position = Vector3.Lerp(
+            cameraRig.position,
+            desiredRigPosition,
+            DampFactor(positionSmoothing, deltaTime));
+    }
+
+    public void RestoreAuthoredTrackingLayout()
+    {
+        RestoreSourceCameraLayout();
     }
 
     int GetCaptureMask()
@@ -410,6 +482,9 @@ public class HologramComposer : MonoBehaviour
         Transform[] hierarchy = captureRoot.GetComponentsInChildren<Transform>(true);
         for (int i = 0; i < hierarchy.Length; i++)
         {
+            if (hierarchy[i].GetComponentInParent<HologramCaptureExclude>(true))
+                continue;
+
             GameObject captureObject = hierarchy[i].gameObject;
             if (seenObjects.Add(captureObject))
                 captureObjects.Add(captureObject);
@@ -612,6 +687,37 @@ public class HologramComposer : MonoBehaviour
             focusDirection.normalized);
         sourceCamera.transform.rotation =
             correction * sourceCamera.transform.rotation;
+    }
+
+    static void AimCameraAt(
+        Camera sourceCamera,
+        Vector3 focusPoint,
+        float interpolation)
+    {
+        if (!sourceCamera)
+            return;
+
+        Vector3 focusDirection = focusPoint - sourceCamera.transform.position;
+        if (focusDirection.sqrMagnitude < 0.000001f)
+            return;
+
+        Quaternion correction = Quaternion.FromToRotation(
+            sourceCamera.transform.forward,
+            focusDirection.normalized);
+        Quaternion targetRotation =
+            correction * sourceCamera.transform.rotation;
+        sourceCamera.transform.rotation = Quaternion.Slerp(
+            sourceCamera.transform.rotation,
+            targetRotation,
+            interpolation);
+    }
+
+    static float DampFactor(float smoothing, float deltaTime)
+    {
+        if (smoothing <= 0f)
+            return 1f;
+
+        return 1f - Mathf.Exp(-smoothing * Mathf.Max(0f, deltaTime));
     }
 
     void CacheSourceCameraLayout()

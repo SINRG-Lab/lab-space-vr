@@ -28,6 +28,7 @@ public sealed class FurnaceDevHarness : MonoBehaviour
     [SerializeField] private Setting_Parameter growthSettings;
     [SerializeField] private GrowthManager growthController;
     [SerializeField] private GlobalSimSpeed simulationSpeed;
+    [SerializeField] private HologramProcedureFocus hologramStreamView;
 
     private Rect windowRect = new(16f, 48f, 410f, 720f);
     private Vector2 scrollPosition;
@@ -135,6 +136,9 @@ public sealed class FurnaceDevHarness : MonoBehaviour
                 $"Growth: {growthController.State} ({growthController.Progress01:P0})");
         }
 
+        if (hologramStreamView)
+            GUILayout.Label($"Hologram view: {hologramStreamView.CurrentStreamMode}");
+
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Reset"))
             ResetFromUi();
@@ -158,6 +162,25 @@ public sealed class FurnaceDevHarness : MonoBehaviour
             AdjustSimulationSpeed(-0.5f);
         if (GUILayout.Button("Speed +"))
             AdjustSimulationSpeed(0.5f);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(8f);
+        GUILayout.Label("Hologram Stream View");
+        GUILayout.BeginHorizontal();
+        DrawStreamModeButton(
+            "Procedure",
+            HologramProcedureFocus.StreamMode.ProcedureFocus);
+        DrawStreamModeButton(
+            "Operator",
+            HologramProcedureFocus.StreamMode.OperatorView);
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        DrawStreamModeButton(
+            "Hands",
+            HologramProcedureFocus.StreamMode.HandFollow);
+        DrawStreamModeButton(
+            "Head",
+            HologramProcedureFocus.StreamMode.HeadFollow);
         GUILayout.EndHorizontal();
 
         GUILayout.Space(8f);
@@ -234,6 +257,8 @@ public sealed class FurnaceDevHarness : MonoBehaviour
             growthController = FindFirstObjectByType<GrowthManager>(FindObjectsInactive.Include);
         if (!simulationSpeed)
             simulationSpeed = FindFirstObjectByType<GlobalSimSpeed>(FindObjectsInactive.Include);
+        if (!hologramStreamView)
+            hologramStreamView = FindFirstObjectByType<HologramProcedureFocus>(FindObjectsInactive.Include);
 
         if (!rodConnector || !substrateConnector)
         {
@@ -248,6 +273,22 @@ public sealed class FurnaceDevHarness : MonoBehaviour
                     substrateConnector = connectors[i];
             }
         }
+    }
+
+    private void DrawStreamModeButton(
+        string label,
+        HologramProcedureFocus.StreamMode mode)
+    {
+        bool selected = hologramStreamView &&
+            hologramStreamView.CurrentStreamMode == mode;
+        Color oldBackgroundColor = GUI.backgroundColor;
+        if (selected)
+            GUI.backgroundColor = new Color(0.2f, 0.78f, 1f);
+
+        if (GUILayout.Button(label) && hologramStreamView)
+            hologramStreamView.SetStreamMode(mode);
+
+        GUI.backgroundColor = oldBackgroundColor;
     }
 
     private void BeginAction(IEnumerator routine, bool isAutoRun)
