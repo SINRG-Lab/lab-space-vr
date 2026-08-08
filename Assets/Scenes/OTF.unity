@@ -7186,7 +7186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &141127997
 Transform:
   m_ObjectHideFlags: 0
@@ -9934,7 +9934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96fca69be4a6b4506a262e3b6f7bed23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WebRTCSignalingClient
-  signalingUrl: ws://10.79.251.104:8080
+  signalingUrl: ws://10.0.0.228:8080
   role: sender
 --- !u!4 &401381199
 Transform:
@@ -12921,7 +12921,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &593954356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12939,11 +12939,23 @@ MonoBehaviour:
   bottomCamera: {fileID: 1901222759}
   rightCamera: {fileID: 593436791}
   hologramMaterial: {fileID: 2100000, guid: f995d88b92eda448a8faeb25d061dcdb, type: 2}
+  activateOnStart: 0
+  finalOutput: {fileID: 593954358}
   textureSize: 512
   depthBuffer: 24
+  captureLayerName: HologramCapture
+  captureFieldOfView: 60
+  captureNearClip: 0.05
+  captureFarClip: 10
+  contextCullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967039
+  compositorLayerName: Holo_UI_Stream
+  referenceContextRadius: 0.65
+  contextZoomRange: {x: 0.75, y: 1.5}
   diamondHalfWidth: 0.25
   diamondHalfHeight: 0.25
-  contentScale: 0.5
+  contentScale: 1
   flipTopX: 0
   flipTopY: 1
   flipLeftX: 0
@@ -13541,20 +13553,6 @@ Transform:
   - {fileID: 379968154}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &930000050
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633261840}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c92bf159a4ec4c7b994e8e5fe18f0f26, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::LocomotionCollisionSetup
-  characterController: {fileID: 0}
-  walkableLayerName: Walkable
 --- !u!1 &639834987
 GameObject:
   m_ObjectHideFlags: 0
@@ -23204,6 +23202,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &930000050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633261840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c92bf159a4ec4c7b994e8e5fe18f0f26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocomotionCollisionSetup
+  characterController: {fileID: 0}
+  walkableLayerName: Walkable
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24552,6 +24564,7 @@ GameObject:
   - component: {fileID: 910000010}
   - component: {fileID: 920000020}
   - component: {fileID: 930000030}
+  - component: {fileID: 940000040}
   m_Layer: 0
   m_Name: FurnaceProcedureManager
   m_TagString: Untagged
@@ -24574,6 +24587,7 @@ MonoBehaviour:
   stepTitleText: {fileID: 1433328260}
   instructionText: {fileID: 1780751291}
   progressSlider: {fileID: 1611024994}
+  growthManager: {fileID: 0}
   activeColor: {r: 0.2, g: 0.78, b: 1, a: 1}
   completeColor: {r: 0.28, g: 0.95, b: 0.5, a: 1}
   showStepNumber: 1
@@ -24597,6 +24611,9 @@ MonoBehaviour:
     - {fileID: 250962942}
     indicatorTarget: {fileID: 1141389437}
     indicatorOffset: {x: 0, y: 0.08, z: 0}
+    hologramFocusTargets:
+    - {fileID: 520960032}
+    hologramContextRadius: 0.5
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24614,6 +24631,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 1093210762}
     indicatorOffset: {x: 0.05, y: 0.08, z: -0.05}
+    hologramFocusTargets:
+    - {fileID: 1093210762}
+    hologramContextRadius: 0.75
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24631,6 +24651,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 1164920835}
     indicatorOffset: {x: 0, y: 0.18, z: 0}
+    hologramFocusTargets:
+    - {fileID: 1164920835}
+    hologramContextRadius: 0.6
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24648,6 +24671,10 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 543450652597906247}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
+    hologramFocusTargets:
+    - {fileID: 543450652597906247}
+    - {fileID: 1164920835}
+    hologramContextRadius: 0.75
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24665,6 +24692,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 991000000000000002}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
+    hologramFocusTargets:
+    - {fileID: 543450652597906247}
+    hologramContextRadius: 0.8
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24682,6 +24712,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 7100324511552852820}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
+    hologramFocusTargets:
+    - {fileID: 7100324511552852820}
+    hologramContextRadius: 0.85
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24699,6 +24732,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 8670761336569193909}
     indicatorOffset: {x: 0, y: 0.12, z: 0}
+    hologramFocusTargets:
+    - {fileID: 8670761336569193909}
+    hologramContextRadius: 0.7
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24722,6 +24758,9 @@ MonoBehaviour:
     - {fileID: 8065077609588274666}
     indicatorTarget: {fileID: 6561995450135514289}
     indicatorOffset: {x: 0, y: 0.12, z: 0}
+    hologramFocusTargets:
+    - {fileID: 5944579382802649856}
+    hologramContextRadius: 0.75
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24740,6 +24779,10 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 7516989854590809177}
     indicatorOffset: {x: 0, y: 0.12, z: 0}
+    hologramFocusTargets:
+    - {fileID: 491629908}
+    - {fileID: 1687375561}
+    hologramContextRadius: 0.9
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24758,6 +24801,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 0}
     indicatorOffset: {x: 0, y: 0, z: 0}
+    hologramFocusTargets:
+    - {fileID: 1164920835}
+    hologramContextRadius: 0.6
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24776,6 +24822,11 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 611025919}
     indicatorOffset: {x: 0, y: 0.1, z: 0}
+    hologramFocusTargets:
+    - {fileID: 611025919}
+    - {fileID: 491629908}
+    - {fileID: 1687375561}
+    hologramContextRadius: 0.9
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24793,6 +24844,9 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 7100324511552852820}
     indicatorOffset: {x: 0, y: 0.14, z: 0}
+    hologramFocusTargets:
+    - {fileID: 7100324511552852820}
+    hologramContextRadius: 0.85
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24810,6 +24864,10 @@ MonoBehaviour:
     activeSelectables: []
     indicatorTarget: {fileID: 808996159}
     indicatorOffset: {x: 0, y: 0.16, z: 0}
+    hologramFocusTargets:
+    - {fileID: 543450652597906247}
+    - {fileID: 1164920835}
+    hologramContextRadius: 0.8
     onEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -24833,6 +24891,23 @@ MonoBehaviour:
   growthComplete: 0
   growthParametersSet: 0
   furnaceOpen: 0
+--- !u!114 &940000040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071694017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6b9119f381f4c0e9bed5736f8de4f6a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HologramProcedureFocus
+  procedureManager: {fileID: 1071694018}
+  composer: {fileID: 593954356}
+  sender: {fileID: 1431190172}
+  streamFromFirstStep: 1
+  framingRefreshInterval: 0.1
 --- !u!4 &1071694019
 Transform:
   m_ObjectHideFlags: 0
@@ -36799,7 +36874,7 @@ GameObject:
   - component: {fileID: 1820588280}
   - component: {fileID: 1820588279}
   - component: {fileID: 1820588278}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37289,7 +37364,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1901222756
 Transform:
   m_ObjectHideFlags: 0
@@ -38064,6 +38139,7 @@ MonoBehaviour:
   catalyst_size_randomness: 5.24
   catalyst_holder: {fileID: 382891282}
   NanoWire: {fileID: 6480676327543331522, guid: f0ec31646fa9341f1a2a356d9fb7a568, type: 3}
+  hologramCaptureLayerName: HologramCapture
   procedureManager: {fileID: 1071694018}
   growthManager: {fileID: 1814961264}
   parameterPanelRoot: {fileID: 857554562}

@@ -10,30 +10,68 @@ public class HologramFinalOutput : MonoBehaviour
     public int depth = 24;
 
     public RenderTexture OutputTexture { get; private set; }
+    public bool IsOutputActive => compositorCamera && compositorCamera.enabled && OutputTexture;
+
+    private bool formatSupported;
 
     private void Awake()
     {
         const GraphicsFormat streamableFormat = GraphicsFormat.B8G8R8A8_SRGB;
 
-        if (!SystemInfo.IsFormatSupported(streamableFormat, GraphicsFormatUsage.Render))
+        formatSupported = SystemInfo.IsFormatSupported(
+            streamableFormat,
+            GraphicsFormatUsage.Render);
+        if (!formatSupported)
         {
             Debug.LogError("HologramFinalOutput requires B8G8R8A8_SRGB render support for Unity WebRTC streaming.");
             return;
         }
 
-        var descriptor = new RenderTextureDescriptor(width, height, streamableFormat, depth);
-
-        OutputTexture = new RenderTexture(descriptor);
-        OutputTexture.name = "HologramFinalOutput";
-        OutputTexture.Create();
-
-        Debug.Log("HologramFinalOutput format: " + OutputTexture.graphicsFormat);
-
         if (compositorCamera != null)
         {
             ConfigureCompositorCamera(compositorCamera);
-            compositorCamera.targetTexture = OutputTexture;
+            compositorCamera.enabled = false;
+            compositorCamera.targetTexture = null;
         }
+    }
+
+    public bool ActivateOutput()
+    {
+        if (!formatSupported || !compositorCamera)
+            return false;
+
+        const GraphicsFormat streamableFormat = GraphicsFormat.B8G8R8A8_SRGB;
+        if (!OutputTexture)
+        {
+            var descriptor = new RenderTextureDescriptor(
+                width,
+                height,
+                streamableFormat,
+                depth);
+
+            OutputTexture = new RenderTexture(descriptor);
+            OutputTexture.name = "HologramFinalOutput";
+            OutputTexture.Create();
+
+            Debug.Log("HologramFinalOutput format: " + OutputTexture.graphicsFormat);
+        }
+
+        ConfigureCompositorCamera(compositorCamera);
+        compositorCamera.targetTexture = OutputTexture;
+        compositorCamera.enabled = true;
+        return true;
+    }
+
+    public void DeactivateOutput()
+    {
+        if (compositorCamera)
+        {
+            compositorCamera.enabled = false;
+            if (compositorCamera.targetTexture == OutputTexture)
+                compositorCamera.targetTexture = null;
+        }
+
+        ReleaseOutputTexture();
     }
 
     private void ConfigureCompositorCamera(Camera camera)
@@ -55,10 +93,16 @@ public class HologramFinalOutput : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (OutputTexture != null)
+        ReleaseOutputTexture();
+    }
+
+    private void ReleaseOutputTexture()
+    {
+        if (OutputTexture)
         {
             OutputTexture.Release();
             Destroy(OutputTexture);
+            OutputTexture = null;
         }
     }
 }

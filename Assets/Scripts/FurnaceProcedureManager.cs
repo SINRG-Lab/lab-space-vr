@@ -48,6 +48,10 @@ public class FurnaceProcedureManager : MonoBehaviour
         public Transform indicatorTarget;
         [Tooltip("World-space offset from the indicator target.")]
         public Vector3 indicatorOffset = new(0f, 0.16f, 0f);
+        [Tooltip("Scene roots available to the hologram for this step. The first assigned root is the primary camera focus; the surrounding scene remains visible.")]
+        public Transform[] hologramFocusTargets;
+        [Tooltip("Minimum world-space framing radius around the focus point. Increase it to show more surrounding context.")]
+        [Min(0.1f)] public float hologramContextRadius = 0.65f;
         public UnityEvent onEnter = new UnityEvent();
         public UnityEvent onComplete = new UnityEvent();
 

@@ -30,11 +30,23 @@ public class HologramSender : MonoBehaviour
 
     public void BeginStreaming()
     {
+        if (finalOutput == null)
+        {
+            Debug.LogError("HologramSender requires a HologramFinalOutput.");
+            return;
+        }
+
         if (signaling == null)
         {
             Debug.LogError("HologramSender requires a WebRTCSignalingClient.");
             return;
         }
+
+        HologramComposer composer = finalOutput.GetComponent<HologramComposer>();
+        if (composer)
+            composer.ActivateCapture();
+        else
+            finalOutput.ActivateOutput();
 
         if (!initialized)
         {

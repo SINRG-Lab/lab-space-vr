@@ -6,7 +6,7 @@ Unity/Meta Quest VR project focused on a guided split tube furnace workflow. The
 
 The priority is the furnace procedure itself: interacting with the split tube furnace, preparing and feeding the substrate into the quartz tube, setting gas flow and heating zones, running the nanowire growth process, and withdrawing the substrate cleanly.
 
-Hologram/WebRTC streaming is intentionally deferred until the furnace flow is stable.
+The furnace procedure remains the source of truth. The hologram mirrors the current procedure step instead of running as a separate nanowire-only experience.
 
 ## Furnace Demo Polish Tracker
 
@@ -14,7 +14,7 @@ Status legend: `Done`, `In Progress`, `Next`, `Pending`.
 
 | Phase | Status | Scope | Acceptance criteria |
 | --- | --- | --- | --- |
-| 0. OTF as primary demo | Done | Make `OTF` the active build scene and keep deferred hologram systems inactive at startup. | Build settings launch `OTF`; hologram capture cameras, composition, output, and streaming stay inactive. |
+| 0. OTF as primary demo | Done | Make `OTF` the active build scene and keep archived hologram experiments out of the runtime path. | Build settings launch `OTF`; only the maintained procedure-driven hologram path can activate. |
 | 1. Configurable procedure manager | Done | Add a central manager with reorderable procedure steps and stable completion gates. | Flow order, titles, instructions, required gates, and per-step events can be edited on the manager without code changes. |
 | 2. Wire first OTF gates and UI | Done | Add/assign procedure UI and connect main power plus first substrate snap gate. | User sees current instruction, power-on advances the flow, and substrate placement advances only after a valid snap. |
 | 3. Load and feed substrate | Done | Polish substrate plate snapping, rod connection, and quartz tube feeding. | User sees ghost target/highlight, substrate snaps reliably, and the procedure advances only after the substrate is correctly positioned. |
@@ -39,15 +39,21 @@ Each stage is validated visually and on Quest before the next stage begins.
 
 ## Hologram Tracker
 
-The hologram remains disabled at startup while this pipeline is rebuilt and validated one stage at a time.
+The hologram follows the same reorderable steps as the furnace guide. Each step changes the shared camera focus and zoom while retaining the furnace apparatus context without the surrounding laboratory background.
 
 | Stage | Status | Scope | Acceptance criteria |
 | --- | --- | --- | --- |
-| H1.1 Capture isolation | Done | Put the simulation substrate and all runtime nanowire visuals on a dedicated capture layer. | Hologram cameras can render the growth subject without drawing the laboratory, furnace, hands, or UI. |
-| H1.2 Camera normalization | Done | Enable and standardize all four capture views with hologram-only culling. | Four consistently framed views render against black without shadows, post-processing, or XR overhead. |
-| H1.3 Local compositor preview | Next | Produce and display the diamond-format output locally without WebRTC. | Orientation, flips, framing, and scale can be checked in the Editor without a receiver. |
-| H1.4 Lifecycle and performance | Pending | Allocate and render only while hologram mode is active. | The disabled system has no startup cost and the active preview stays within the Quest frame budget. |
+| H1.1 Apparatus isolation | In validation | Render the furnace, quartz tube, substrate, feed rod, gas/growth effects, relevant controls, and procedure indicator against black. | The hologram excludes the table, floor, walls, and unrelated laboratory equipment without changing the normal Quest view. |
+| H1.2 Context camera focus | In validation | Preserve the established four-camera poses while moving their shared rig to the current procedure target and scaling the original offsets for zoom. | Four consistently oriented views follow the same target without changing the authored compositor alignment. |
+| H1.3 Compositor validation | Done | Validate the existing `CompositerCamera` diamond output locally without WebRTC. | Orientation, flips, framing, and scale can be checked in the Editor without a receiver. |
+| H1.4 Lifecycle and performance | In validation | Allocate and render only while the procedure hologram component is enabled. | Disabling procedure hologram mode releases its render textures; the active preview stays within the Quest frame budget. |
+| H1.5 Procedure focus | In validation | Drive hologram content from each procedure step's configured focus roots. | All 13 steps frame their relevant panel, control, moving assembly, furnace interior, or growth subject and remain correct when reordered. |
 | H2 Streaming and receiver | Pending | Harden signaling, WebRTC sender, receiver, discovery, reconnect, and fullscreen calibration. | Quest streams the calibrated output to the physical hologram display reliably. |
+
+The OTF compositor uses the existing `CompositerCamera`, quad, material, and shader path. `Content Scale` remains an independent Inspector setting (currently targeted at `0.75`), while camera framing controls distance and surrounding context.
+The four source cameras retain their existing front/right/back/left assignments, local positions, and local rotations. Runtime framing translates their shared rig to the current focus and scales the original camera offsets for zoom; it does not regenerate camera angles or remap the compositor views.
+The composer applies a `0.8` global camera-distance multiplier, making every procedure view 20% closer. `HologramProcedureFocus` applies an additional `0.45` multiplier to the stable `start_growth` step ID, placing the cameras inside the furnace for a substrate and nanowire close-up without depending on the step's list order.
+The authoritative receiver and signaling projects are `/Users/barath/BarathMac/HologramReceiver` and `/Users/barath/BarathMac/HologramSignaling`. OTF starts its existing `HologramSender` with the first procedure step; connect the receiver to the signaling server before starting OTF because the current server does not replay an offer that was sent before the receiver registered.
 
 ## Target Procedure
 
@@ -70,7 +76,8 @@ This is the starter flow, not a fixed order. Edit the `steps` list on `FurnacePr
 ## Current Implementation Notes
 
 - `ProjectSettings/EditorBuildSettings.asset` now enables `Assets/Scenes/OTF.unity` as the primary scene.
-- `Assets/Scenes/OTF.unity` starts both the hologram `Cameras` group and the `HologramComposer` group inactive, preventing capture cameras, render-texture allocation, composition, and WebRTC work during the furnace demo.
+- `HologramProcedureFocus` starts the maintained composer/sender path and follows `FurnaceProcedureManager.StepEntered`. Each step owns `hologramFocusTargets` and `hologramContextRadius`, so focus and zoom remain attached when steps are reordered.
+- Procedure focus temporarily places only the OTF apparatus, feed rod, substrate, current focus hierarchy, and step indicator on the capture layer while each hologram camera renders. Original layers are restored immediately afterward so normal Quest rendering, collisions, and hand interactions are unchanged.
 - The laboratory environment is active and has been validated without reintroducing the previous startup lag.
 - OTF now uses six shadowless point lights for room illumination, removing the previous over-capacity punctual-light shadow workload.
 - The remaining ceiling-light ranges are `5.5 m`, preserving floor coverage while preventing every light from flooding the entire laboratory.
