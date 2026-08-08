@@ -50,8 +50,18 @@ public class FurnaceProcedureManager : MonoBehaviour
         public Vector3 indicatorOffset = new(0f, 0.16f, 0f);
         [Tooltip("Scene roots available to the hologram for this step. The first assigned root is the primary camera focus; the surrounding scene remains visible.")]
         public Transform[] hologramFocusTargets;
+        [Tooltip("Frame all active HologramCapture-layer renderers instead of the assigned focus target. Use this for generated nanowires.")]
+        public bool hologramUseCaptureLayerBounds;
+        [Tooltip("Hide the furnace apparatus, feed rod, substrate plate, controls, and procedure indicator from this step's hologram.")]
+        public bool hologramHideApparatus;
         [Tooltip("Minimum world-space framing radius around the focus point. Increase it to show more surrounding context.")]
         [Min(0.1f)] public float hologramContextRadius = 0.65f;
+        [Tooltip("Physical camera-distance multiplier. Values below 1 move the cameras closer; values above 1 move them farther away.")]
+        [Min(0.1f)] public float hologramDistanceMultiplier = 1f;
+        [Tooltip("Perspective field-of-view override in degrees. Set to 0 to use the composer's normal FOV.")]
+        [Min(0f)] public float hologramFieldOfView;
+        [Tooltip("Use the four cameras' original local spacing instead of context-radius distance framing.")]
+        public bool hologramUseAuthoredCameraSpacing;
         public UnityEvent onEnter = new UnityEvent();
         public UnityEvent onComplete = new UnityEvent();
 
@@ -163,6 +173,10 @@ public class FurnaceProcedureManager : MonoBehaviour
             Gate.GrowthComplete
         )
         {
+            hologramUseCaptureLayerBounds = true,
+            hologramHideApparatus = true,
+            hologramFieldOfView = 20f,
+            hologramUseAuthoredCameraSpacing = true,
             prerequisiteGates = new[]
             {
                 Gate.PowerOn,

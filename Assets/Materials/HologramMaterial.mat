@@ -106,7 +106,7 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ContentScale: 1
+    - _ContentScale: 0.75
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
@@ -116,11 +116,11 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
-    - _FlipBottomX: 0
+    - _FlipBottomX: 1
     - _FlipBottomY: 1
-    - _FlipLeftX: 0
+    - _FlipLeftX: 1
     - _FlipLeftY: 0
-    - _FlipRightX: 0
+    - _FlipRightX: 1
     - _FlipRightY: 0
     - _FlipTopX: 0
     - _FlipTopY: 1

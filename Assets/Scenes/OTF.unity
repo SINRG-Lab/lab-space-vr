@@ -9934,7 +9934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96fca69be4a6b4506a262e3b6f7bed23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WebRTCSignalingClient
-  signalingUrl: ws://10.0.0.228:8080
+  signalingUrl: ws://10.89.195.167:8080
   role: sender
 --- !u!4 &401381199
 Transform:
@@ -12935,9 +12935,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HologramComposer
   topCamera: {fileID: 401622519}
-  leftCamera: {fileID: 709273621}
+  leftCamera: {fileID: 593436791}
   bottomCamera: {fileID: 1901222759}
-  rightCamera: {fileID: 593436791}
+  rightCamera: {fileID: 709273621}
   hologramMaterial: {fileID: 2100000, guid: f995d88b92eda448a8faeb25d061dcdb, type: 2}
   activateOnStart: 0
   finalOutput: {fileID: 593954358}
@@ -12947,22 +12947,20 @@ MonoBehaviour:
   captureFieldOfView: 60
   captureNearClip: 0.05
   captureFarClip: 10
-  contextCullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967039
   compositorLayerName: Holo_UI_Stream
   referenceContextRadius: 0.65
   contextZoomRange: {x: 0.75, y: 1.5}
+  globalDistanceMultiplier: 0.8
   diamondHalfWidth: 0.25
   diamondHalfHeight: 0.25
-  contentScale: 1
+  contentScale: 0.75
   flipTopX: 0
   flipTopY: 1
-  flipLeftX: 0
+  flipLeftX: 1
   flipLeftY: 0
-  flipBottomX: 0
+  flipBottomX: 1
   flipBottomY: 1
-  flipRightX: 0
+  flipRightX: 1
   flipRightY: 0
 --- !u!4 &593954357
 Transform:
@@ -23216,6 +23214,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LocomotionCollisionSetup
   characterController: {fileID: 0}
   walkableLayerName: Walkable
+--- !u!114 &940000040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071694017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6b9119f381f4c0e9bed5736f8de4f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HologramProcedureFocus
+  procedureManager: {fileID: 1071694018}
+  composer: {fileID: 593954356}
+  sender: {fileID: 1431190172}
+  streamFromFirstStep: 1
+  framingRefreshInterval: 0.1
+  closeUpStepId: start_growth
 --- !u!1 &940568061
 GameObject:
   m_ObjectHideFlags: 0
@@ -24891,23 +24907,6 @@ MonoBehaviour:
   growthComplete: 0
   growthParametersSet: 0
   furnaceOpen: 0
---- !u!114 &940000040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1071694017}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6b9119f381f4c0e9bed5736f8de4f6a, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::HologramProcedureFocus
-  procedureManager: {fileID: 1071694018}
-  composer: {fileID: 593954356}
-  sender: {fileID: 1431190172}
-  streamFromFirstStep: 1
-  framingRefreshInterval: 0.1
 --- !u!4 &1071694019
 Transform:
   m_ObjectHideFlags: 0
@@ -31291,7 +31290,7 @@ MonoBehaviour:
   finalOutput: {fileID: 593954358}
   signaling: {fileID: 401381198}
   stunServer: stun:stun.l.google.com:19302
-  waitForManualStart: 1
+  waitForManualStart: 0
   streamWidth: 920
   streamHeight: 920
   maxBitrate: 5000000

@@ -70,6 +70,9 @@ public class HologramComposer : MonoBehaviour
     int activeCaptureMask = ~0;
     float activeContextRadius = 0.65f;
     float activeDistanceMultiplier = 1f;
+    float activeFieldOfView;
+    bool activeIncludeApparatus = true;
+    bool activeUseAuthoredCameraSpacing;
     readonly List<Transform> focusTargets = new();
     readonly List<Transform> captureRoots = new();
     readonly List<GameObject> captureObjects = new();
@@ -102,6 +105,7 @@ public class HologramComposer : MonoBehaviour
         CacheSourceCameraLayout();
         CacheCaptureRoots();
         activeCaptureMask = GetCaptureMask();
+        activeFieldOfView = captureFieldOfView;
 
         if (!finalOutput)
             finalOutput = GetComponent<HologramFinalOutput>();
@@ -140,7 +144,10 @@ public class HologramComposer : MonoBehaviour
     public void ShowContextFocus(
         IReadOnlyList<Transform> targets,
         float contextRadius,
-        float distanceMultiplier = 1f)
+        float distanceMultiplier = 1f,
+        bool includeApparatus = true,
+        bool useAuthoredCameraSpacing = false,
+        float fieldOfViewOverride = 0f)
     {
         focusTargets.Clear();
         if (targets != null)
@@ -156,8 +163,14 @@ public class HologramComposer : MonoBehaviour
         activeCaptureMask = GetCaptureMask();
         activeContextRadius = Mathf.Max(0.1f, contextRadius);
         activeDistanceMultiplier = Mathf.Max(0.1f, distanceMultiplier);
+        activeFieldOfView = fieldOfViewOverride > 0f
+            ? Mathf.Clamp(fieldOfViewOverride, 1f, 179f)
+            : captureFieldOfView;
+        activeIncludeApparatus = includeApparatus;
+        activeUseAuthoredCameraSpacing = useAuthoredCameraSpacing;
         RebuildCaptureObjectCache();
         ApplyActiveCaptureMask();
+        ApplyActiveFieldOfView();
         RefreshFocusFraming();
     }
 
@@ -250,6 +263,14 @@ public class HologramComposer : MonoBehaviour
         if (leftCamera) leftCamera.cullingMask = activeCaptureMask;
         if (bottomCamera) bottomCamera.cullingMask = activeCaptureMask;
         if (rightCamera) rightCamera.cullingMask = activeCaptureMask;
+    }
+
+    void ApplyActiveFieldOfView()
+    {
+        if (topCamera) topCamera.fieldOfView = activeFieldOfView;
+        if (leftCamera) leftCamera.fieldOfView = activeFieldOfView;
+        if (bottomCamera) bottomCamera.fieldOfView = activeFieldOfView;
+        if (rightCamera) rightCamera.fieldOfView = activeFieldOfView;
     }
 
     void BeginCameraRendering(
@@ -359,8 +380,11 @@ public class HologramComposer : MonoBehaviour
         captureObjects.Clear();
         HashSet<GameObject> seenObjects = new();
 
-        for (int i = 0; i < captureRoots.Count; i++)
-            AddCaptureHierarchy(captureRoots[i], seenObjects);
+        if (activeIncludeApparatus)
+        {
+            for (int i = 0; i < captureRoots.Count; i++)
+                AddCaptureHierarchy(captureRoots[i], seenObjects);
+        }
 
         for (int i = 0; i < focusTargets.Count; i++)
             AddCaptureHierarchy(focusTargets[i], seenObjects);
@@ -408,7 +432,7 @@ public class HologramComposer : MonoBehaviour
         camera.backgroundColor = Color.black;
         camera.cullingMask = captureMask;
         camera.orthographic = false;
-        camera.fieldOfView = captureFieldOfView;
+        camera.fieldOfView = activeFieldOfView;
         camera.nearClipPlane = captureNearClip;
         camera.farClipPlane = Mathf.Max(captureNearClip + 0.01f, captureFarClip);
         camera.useOcclusionCulling = false;
@@ -533,11 +557,13 @@ public class HologramComposer : MonoBehaviour
         float requiredRadius = Mathf.Max(
             focusBounds.extents.magnitude,
             Mathf.Max(0.1f, contextRadius));
-        float zoomScale = Mathf.Clamp(
-            requiredRadius / Mathf.Max(0.1f, referenceContextRadius),
-            Mathf.Min(contextZoomRange.x, contextZoomRange.y),
-            Mathf.Max(contextZoomRange.x, contextZoomRange.y));
-        zoomScale *= globalDistanceMultiplier * activeDistanceMultiplier;
+        float zoomScale = activeUseAuthoredCameraSpacing
+            ? 1f
+            : Mathf.Clamp(
+                requiredRadius / Mathf.Max(0.1f, referenceContextRadius),
+                Mathf.Min(contextZoomRange.x, contextZoomRange.y),
+                Mathf.Max(contextZoomRange.x, contextZoomRange.y)) *
+              globalDistanceMultiplier * activeDistanceMultiplier;
 
         RestoreCameraPose(topCamera, topCameraPose, zoomScale);
         RestoreCameraPose(leftCamera, leftCameraPose, zoomScale);

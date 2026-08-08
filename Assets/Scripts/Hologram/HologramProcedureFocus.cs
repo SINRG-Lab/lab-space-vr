@@ -12,11 +12,6 @@ public sealed class HologramProcedureFocus : MonoBehaviour
     [SerializeField] private bool streamFromFirstStep = true;
     [SerializeField, Min(0.05f)] private float framingRefreshInterval = 0.1f;
 
-    [Header("Step Framing")]
-    [SerializeField] private string closeUpStepId = "start_growth";
-    [SerializeField, Range(0.2f, 1f)]
-    private float closeUpDistanceMultiplier = 0.45f;
-
     private Coroutine focusRoutine;
     private float nextFramingRefresh;
     private bool subscribed;
@@ -113,20 +108,21 @@ public sealed class HologramProcedureFocus : MonoBehaviour
             return;
         }
 
-        Transform focusTarget = GetPrimaryFocusTarget(step);
+        bool useCaptureLayerBounds = step.hologramUseCaptureLayerBounds;
+        Transform focusTarget = useCaptureLayerBounds
+            ? null
+            : GetPrimaryFocusTarget(step);
+        float distanceMultiplier = step.hologramDistanceMultiplier > 0f
+            ? step.hologramDistanceMultiplier
+            : 1f;
         composer.ShowContextFocus(
             focusTarget ? new[] { focusTarget } : null,
             step.hologramContextRadius,
-            GetDistanceMultiplier(step));
+            distanceMultiplier,
+            includeApparatus: !step.hologramHideApparatus,
+            useAuthoredCameraSpacing: step.hologramUseAuthoredCameraSpacing,
+            fieldOfViewOverride: step.hologramFieldOfView);
         nextFramingRefresh = 0f;
-    }
-
-    private float GetDistanceMultiplier(
-        FurnaceProcedureManager.ProcedureStep step)
-    {
-        return step != null && step.id == closeUpStepId
-            ? closeUpDistanceMultiplier
-            : 1f;
     }
 
     private static Transform GetPrimaryFocusTarget(
